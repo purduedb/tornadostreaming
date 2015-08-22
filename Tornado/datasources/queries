@@ -1,0 +1,34 @@
+
+schema id, loc, text,time 
+
+
+
+REGISTER QUERY q1 AS
+SELECT * FROM OSM_Data AS O, Tweets AS T
+WHERE WITHIN_DISTANCE(O.loc,T.loc,100)
+and INSIDE(T.loc,currentView)
+and OVERLAPS(O.text, T.text);
+
+
+REGISTER QUERY q2 AS
+SELECT * FROM Tweets AS T
+WHERE CONTAINS(T.text,"Aquarium")
+and INSIDE(T.loc,currentView);
+
+REGISTER QUERY q1 AS
+SELECT * FROM OSM_Data AS O, Tweets AS T
+WHERE WITHIN_DISTANCE(O.loc,T.loc,100)
+and INSIDE(T.loc,@r0)
+and OVERLAPS(O.text, T.text)
+and OVERLAPS(O.text, "love park coffee house shedd")
+and CONTAINS(T.text, "love");
+
+
+REGISTER QUERY q1 AS
+SELECT * FROM BerlinMOD AS V
+WHERE KNN(V.loc,@f0,1)
+and CONTAINS(V.text,"boiler taxis");
+
+sample output
+
+"{"qname":"q1","oid":"1","text":"Now that Aquarium I have my bOOk @cassiehasaface @thekatieladie @cocogavinstein ","point":{"lng":-87.61942,"lat":41.86715000000001}}"
