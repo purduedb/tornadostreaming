@@ -19,6 +19,8 @@
  */
 package edu.purdue.cs.tornado.output;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -44,47 +46,58 @@ public class KafakaProducerBolt extends BaseRichBolt {
 	private TopologyContext context; // storm context
 	private OutputCollector collector;
 	private Properties props;
-	private KafkaProducer<String,String> producer ;
+	private KafkaProducer<String, String> producer;
 	private String topic;
-	
+	FileWriter fw;
 
 	@Override
-	public void prepare(Map stormConf, TopologyContext context,
-			OutputCollector collector) {
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.context = context;
 		this.collector = collector;
 		this.stormConf = stormConf;
-		topic = (String)stormConf.get(SpatioTextualConstants.kafkaProducerTopic);
+		topic = (String) stormConf.get(SpatioTextualConstants.kafkaProducerTopic);
 		props = new Properties();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,(String)stormConf.get(SpatioTextualConstants.kafkaBootstrapServerConfig));
-		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
-		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
-		producer = new KafkaProducer<String,String>(props);
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, (String) stormConf.get(SpatioTextualConstants.kafkaBootstrapServerConfig));
+		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		producer = new KafkaProducer<String, String>(props);
+		try {
+			fw = new FileWriter("datasources/jsonTrace.txt");
+		} catch (IOException e) {
+
+			e.printStackTrace(System.err);
+		}
 	}
 
 	@Override
 	public void execute(Tuple input) {
-		OutputTuple outputTuple = (OutputTuple) input.getValueByField(SpatioTextualConstants.output);
-		System.out.println(outputTuple.toString());
-		LatLong latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation());
-		Double lat = latLong.getLatitude();
-		Double lon = latLong.getLongitude();
-		String jsonOutput= convertOutputToJson(outputTuple.getQuery().getQueryId(),lat,lon,outputTuple.getDataObject().getOriginalText() );
-		ProducerRecord<String,String> producerRecord = new ProducerRecord<String,String>(topic, outputTuple.getQuery().getQueryId(), jsonOutput);
-		producer.send(producerRecord);
-		if(SpatioTextualConstants.queryTextualSpatialJoin.equals( outputTuple.getQuery().getQueryType())){
-			 latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject2().getLocation());
-			 lat = latLong.getLatitude();
-			 lon = latLong.getLongitude();
-			 jsonOutput= convertOutputToJson(outputTuple.getQuery().getQueryId(),lat,lon,outputTuple.getDataObject2().getOriginalText()  );
-			 System.out.println(jsonOutput);
-			 producerRecord = new ProducerRecord<String,String>(topic, outputTuple.getQuery().getQueryId(), jsonOutput);
+		try {
+			OutputTuple outputTuple = (OutputTuple) input.getValueByField(SpatioTextualConstants.output);
+			//		System.out.println(outputTuple.toString());
+			LatLong latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation());
+			Double lat = latLong.getLatitude();
+			Double lon = latLong.getLongitude();
+			String jsonOutput = convertOutputToJson(outputTuple.getQuery().getQueryId(), lat, lon, outputTuple.getDataObject().getOriginalText());
+			fw.write(jsonOutput.toString()+"\n");
+			ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), jsonOutput);
 			producer.send(producerRecord);
-		}
+			if (SpatioTextualConstants.queryTextualSpatialJoin.equals(outputTuple.getQuery().getQueryType())) {
+				latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject2().getLocation());
+				lat = latLong.getLatitude();
+				lon = latLong.getLongitude();
+				jsonOutput = convertOutputToJson(outputTuple.getQuery().getQueryId(), lat, lon, outputTuple.getDataObject2().getOriginalText());
+				fw.write(jsonOutput.toString()+"\n");
+				producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), jsonOutput);
+				producer.send(producerRecord);
+			}
+		} catch (Exception e) {
 
+			e.printStackTrace(System.err);
+		}
 	}
-	private String convertOutputToJson(String queriId,Double lat, Double lon, String text){
-		String json ="";
+
+	private String convertOutputToJson(String queriId, Double lat, Double lon, String text) {
+		String json = "";
 		Map outputMap = new HashMap<Object, Object>();
 		Map locationMap = new HashMap<Object, Object>();
 		locationMap.put("lat", lat);
@@ -92,7 +105,7 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		outputMap.put("text", text);
 		outputMap.put("name", queriId);
 		outputMap.put("point", locationMap);
-		json=JsonHelper.convertMapToJsonString(outputMap);
+		json = JsonHelper.convertMapToJsonString(outputMap);
 		return json;
 	}
 

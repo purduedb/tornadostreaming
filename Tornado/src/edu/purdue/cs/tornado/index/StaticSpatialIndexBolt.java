@@ -280,7 +280,7 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 		if(input.contains(SpatioTextualConstants.queryText2Field)){
 			text2 = input.getStringByField(SpatioTextualConstants.queryText2Field);
 			ArrayList<String> queryText = new ArrayList<String>();
-			if (text != null && !"".equals(text)) {
+			if (text2 != null && !"".equals(text2)) {
 				queryText = StringHelpers.transformIntoSortedArrayListOfString(text2);
 				if (SpatioTextualConstants.semantic.equals(query.getTextualPredicate()) && disco != null) {
 					ArrayList<String> similarKeyWord = SemanticHelper.getSematicallySimilarKeyWords(disco, queryText);
