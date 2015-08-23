@@ -72,7 +72,9 @@ public class TestMain {
 
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(TestPOIsStaticDataSource.POIS_PATH, properties.getProperty(TestPOIsStaticDataSource.POIS_PATH));
-		builder.addStaticSpatioTextualProcessor("spatiotextualcomponent1", SpatioTextualConstants.globalGridGranularity * SpatioTextualConstants.globalGridGranularity).addVolatileSpatioTextualInput("Tweets")
+		builder.addStaticSpatioTextualProcessor("spatiotextualcomponent1", SpatioTextualConstants.globalGridGranularity * SpatioTextualConstants.globalGridGranularity)
+				//.addVolatileSpatioTextualInput("Tweets")
+				.addCleanVolatileSpatioTextualInput("Tweets")
 				//				.addCurrentSpatioTextualInput("movingobjects")
 				//				.addContinuousQuerySource("TextualKNNQueryGenerator")
 				.addContinuousQuerySource("TextualRangeQueryGenerator").addStaticDataSource("OSM_Data", "edu.purdue.cs.tornado.test.TestPOIsStaticDataSource", staticSourceConf)

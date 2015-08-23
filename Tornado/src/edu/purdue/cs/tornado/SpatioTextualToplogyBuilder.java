@@ -145,6 +145,8 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 			this._boltDeclarer=this._boltDeclarer.shuffleGrouping(componentId, streamId);
 			this._boltDeclarer.addConfiguration(SpatioTextualConstants.Data_Source+"_"+componentId+"_"+streamId, SpatioTextualConstants.Volatile);
 			spatioTextualConfig.put(SpatioTextualConstants.Data_Source+"_"+componentId+"_"+streamId, SpatioTextualConstants.Volatile);
+			this._boltDeclarer.addConfiguration(SpatioTextualConstants.getVolatilePropertyKey(componentId,streamId), SpatioTextualConstants.NOTCLEAN);
+			spatioTextualConfig.put(SpatioTextualConstants.getVolatilePropertyKey(componentId,streamId), SpatioTextualConstants.NOTCLEAN);
 			return this;
 			
 		}
@@ -152,6 +154,25 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 			this._boltDeclarer=this._boltDeclarer.shuffleGrouping(componentId);
 			this._boltDeclarer.addConfiguration(SpatioTextualConstants.Data_Source+"_"+componentId, SpatioTextualConstants.Volatile);
 			spatioTextualConfig.put(SpatioTextualConstants.Data_Source+"_"+componentId, SpatioTextualConstants.Volatile);
+			this._boltDeclarer.addConfiguration(SpatioTextualConstants.getVolatilePropertyKey(componentId), SpatioTextualConstants.NOTCLEAN);
+			spatioTextualConfig.put(SpatioTextualConstants.getVolatilePropertyKey(componentId), SpatioTextualConstants.NOTCLEAN);
+			return this;
+		}
+		public SpatioTextualBoltDeclarer addCleanVolatileSpatioTextualInput(String componentId,String streamId){
+			this._boltDeclarer=this._boltDeclarer.shuffleGrouping(componentId, streamId);
+			this._boltDeclarer.addConfiguration(SpatioTextualConstants.Data_Source+"_"+componentId+"_"+streamId, SpatioTextualConstants.Volatile);
+			spatioTextualConfig.put(SpatioTextualConstants.Data_Source+"_"+componentId+"_"+streamId, SpatioTextualConstants.Volatile);
+			this._boltDeclarer.addConfiguration(SpatioTextualConstants.getVolatilePropertyKey(componentId,streamId), SpatioTextualConstants.CLEAN);
+			spatioTextualConfig.put(SpatioTextualConstants.getVolatilePropertyKey(componentId, streamId), SpatioTextualConstants.CLEAN);
+			return this;
+			
+		}
+		public SpatioTextualBoltDeclarer addCleanVolatileSpatioTextualInput(String componentId){
+			this._boltDeclarer=this._boltDeclarer.shuffleGrouping(componentId);
+			this._boltDeclarer.addConfiguration(SpatioTextualConstants.Data_Source+"_"+componentId, SpatioTextualConstants.Volatile);
+			spatioTextualConfig.put(SpatioTextualConstants.Data_Source+"_"+componentId, SpatioTextualConstants.Volatile);
+			this._boltDeclarer.addConfiguration(SpatioTextualConstants.getVolatilePropertyKey(componentId), SpatioTextualConstants.CLEAN);
+			spatioTextualConfig.put(SpatioTextualConstants.getVolatilePropertyKey(componentId), SpatioTextualConstants.CLEAN);
 			return this;
 		}
 		public SpatioTextualBoltDeclarer addContinuousQuerySource(String componentId,String streamId){

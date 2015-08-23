@@ -26,9 +26,11 @@ public interface SpatioTextualBoltDeclarer{
 	public SpatioTextualBoltDeclarer addPersistentSpatioTextualInput(String componentId,String streamID);
 	public SpatioTextualBoltDeclarer addPersistentSpatioTextualInput(String componentId);
 	public SpatioTextualBoltDeclarer addVolatileSpatioTextualInput(String componentId,String streamID);
+	public SpatioTextualBoltDeclarer addCleanVolatileSpatioTextualInput(String componentId,String streamID);
 	public SpatioTextualBoltDeclarer addCurrentSpatioTextualInput(String componentId);
 	public SpatioTextualBoltDeclarer addCurrentSpatioTextualInput(String componentId,String streamID);
 	public SpatioTextualBoltDeclarer addVolatileSpatioTextualInput(String componentId);
+	public SpatioTextualBoltDeclarer addCleanVolatileSpatioTextualInput(String componentId);
 	public SpatioTextualBoltDeclarer addContinuousQuerySource(String componentId,String streamID);
 	public SpatioTextualBoltDeclarer addContinuousQuerySource(String componentId);
 	public SpatioTextualBoltDeclarer addSnapShotQuerySource(String componentId,String streamID);

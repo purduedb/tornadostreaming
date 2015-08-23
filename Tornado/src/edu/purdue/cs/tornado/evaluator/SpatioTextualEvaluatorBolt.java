@@ -34,6 +34,7 @@ import backtype.storm.topology.base.BaseRichBolt;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Tuple;
 import backtype.storm.tuple.Values;
+import edu.purdue.cs.tornado.cleaning.Deduplication;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
@@ -80,6 +81,8 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	//outer KNN queries, these are KNN queries that come from other evaluators and need to 
 	//reevaluated for incomming data
 	private HashMap<String, HashMap<String, Query>> externalKNNMap; //source to query id to index cellqueyr
+	//*******************************************************************************************************
+	private HashMap<String,Deduplication> cleaningMap; //source to query id to index cellqueyr
 
 	//**************** Evaluator bolts attributes **********************
 	private Integer numberOfEvaluatorTasks;
@@ -203,6 +206,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		textToObjectInvertedlist = new HashMap<String, HashMap<String, ArrayList<DataObject>>>();
 		queryInformationHashMap = new HashMap<String, HashMap<String, Query>>();
 		externalKNNMap = new HashMap<String, HashMap<String, Query>>();
+		cleaningMap = new HashMap<String, Deduplication>();
 
 		String sourceId = "";
 		String sourceType = "";
@@ -233,14 +237,18 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 				persistenceState = SpatioTextualConstants.persistentPersistenceState;
 			else if (value.contains(SpatioTextualConstants.Current))
 				persistenceState = SpatioTextualConstants.currentPersistenceState;
-
-			DataSourceInformation dataSourcesInformation = new DataSourceInformation(sourceId, sourceType, persistenceState);
+			String cleanState=SpatioTextualConstants.NOTCLEAN;
+			if(stormConf.containsKey(SpatioTextualConstants.getVolatilePropertyKey(sourceId)))
+				cleanState= (String)stormConf.get(SpatioTextualConstants.getVolatilePropertyKey(sourceId));
+			DataSourceInformation dataSourcesInformation = new DataSourceInformation(sourceId, sourceType, persistenceState,cleanState);
 			addIndexesPerSource(sourceId, sourceType, dataSourcesInformation);
 			sourcesInformations.put(sourceId, dataSourcesInformation);
 			System.out.println(key + " = " + value);
 
 		}
 	}
+	
+	
 
 	private void addIndexesPerSource(String sourceId, String sourceType, DataSourceInformation dataSourcesInformation) {
 		if (sourceType.equals(SpatioTextualConstants.Data_Source)) {
@@ -249,6 +257,9 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			objectToLocalCellIndex.put(sourceId, new HashMap<String, IndexCell>());
 			textToObjectInvertedlist.put(sourceId, new HashMap<String, ArrayList<DataObject>>());
 			externalKNNMap.put(sourceId, new HashMap<String, Query>());
+			if(dataSourcesInformation.isClean()){
+				cleaningMap.put(sourceId, new Deduplication(SpatioTextualConstants.CACHE_SIZE));
+			}
 		} else if (sourceType.equals(SpatioTextualConstants.Query_Source)) {
 			queryInformationHashMap.put(sourceId, new HashMap<String, Query>());
 
@@ -784,6 +795,12 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		} else {
 			fromNeighbour = false;
 		}
+		//check if the incomming data object is duplicate 
+		if(!fromNeighbour
+				&&cleaningMap.containsKey(dataObject.getSrcId())
+				&& ((Deduplication)cleaningMap.get(dataObject.getSrcId())).isDuplicate(dataObject))
+			return; //this object does not need to be processde			
+		
 		HashMap<String, Query> queriesMap = localDataSpatioTextualIndex.get(dataObject.getSrcId()).getReleventQueries(dataObject, fromNeighbour);
 
 		Iterator queriesIterator = queriesMap.entrySet().iterator();

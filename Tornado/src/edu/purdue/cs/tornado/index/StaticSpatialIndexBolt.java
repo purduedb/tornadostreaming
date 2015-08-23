@@ -150,7 +150,11 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 			else if (value.contains(SpatioTextualConstants.Current))
 				persistenceState = SpatioTextualConstants.currentPersistenceState;
 
-			DataSourceInformation dataSourcesInformation = new DataSourceInformation(sourceId, sourceType, persistenceState);
+			String cleanState=SpatioTextualConstants.NOTCLEAN;
+			if(stormConf.containsKey(SpatioTextualConstants.getVolatilePropertyKey(sourceId)))
+				cleanState= (String)stormConf.get(SpatioTextualConstants.getVolatilePropertyKey(sourceId));
+			DataSourceInformation dataSourcesInformation = new DataSourceInformation(sourceId, sourceType, persistenceState,cleanState);
+			
 			sourcesInformations.put(sourceId, dataSourcesInformation);
 			System.out.println(key + " = " + value);
 

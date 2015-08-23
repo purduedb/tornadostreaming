@@ -39,6 +39,9 @@ public class SpatioTextualConstants {
 	public static String Fields_Grouping_ID_Field= "id";
 	public static String Persistent= "persistent";
 	public static String Volatile= "volatile";
+	public static String CLEAN= "CLEAN";
+	public static String NOTCLEAN= "NOTCLEAN";
+	public static String VOLATILECLEANSTATE= "VOLATILECLEANSTATE";
 	public static String Current= "current";
 	public static String Static= "static";
 	public static String Continuous= "continuous";
@@ -88,13 +91,7 @@ public class SpatioTextualConstants {
 	public static final String dropCommand = "dropCommand";
 	public static final String updateCommand = "updateCommand";
 	
-	
-	
-	
-	
-	
-	
-	
+
 	public static final String query = "query";
 	public static final String data = "data";
 	public static final String output = "output";
@@ -179,6 +176,10 @@ public class SpatioTextualConstants {
 	//***********************Semantic constansts
 	public static Integer maxSimilarKeywords =20;
 	public static final String discoDir ="discoDir";
+	//****************************************************************************
+	//***********************Cleaning constansts
+	public static Integer CACHE_SIZE =200000;  //TODO may need to move this value to configuration file
+
 	
 	//****************************************************************************
 	//***********************Test constants
@@ -195,4 +196,11 @@ public class SpatioTextualConstants {
 	public static final String STORM_JAR_PATH="STORM_JAR_PATH";
 	public static final String STORM_NUMBER_OF_WORKERS="STORM_NUMBER_OF_WORKERS";
 	public static final String STORM_ZOOKEEPER_SERVERS="STORM_ZOOKEEPER_SERVERS";
+	
+	public static String getVolatilePropertyKey(String componentId){
+		return (SpatioTextualConstants.VOLATILECLEANSTATE+"_"+componentId);
+	}
+	public static String getVolatilePropertyKey(String componentId,String streamId){
+		return (SpatioTextualConstants.VOLATILECLEANSTATE+"_"+componentId+"_"+streamId);
+	}
 }

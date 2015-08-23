@@ -35,6 +35,7 @@ public class DataSourceInformation {
 	private String dataSourceId; // component id of the data source
 	private String dataSourceType; // Query, data source
 	private String persisteneceState; // data source
+	private String cleanState; // data source
 	private Map<String, ArrayList<EvaluatorBoltHistory>> lastBoltTasKInformation;
 	
 	public DataSourceInformation() {
@@ -43,10 +44,12 @@ public class DataSourceInformation {
 
 	public DataSourceInformation(String dataSourceId,
 			 String dataSourceType,
-			String  persisteneceState) {
+			String  persisteneceState,
+			String cleanState) {
 		this.dataSourceId = dataSourceId;
 		this.dataSourceType = dataSourceType;
 		this.persisteneceState = persisteneceState;
+		this.cleanState= cleanState;
 		lastBoltTasKInformation = new HashMap<String, ArrayList<EvaluatorBoltHistory>>();
 	}
 
@@ -88,6 +91,9 @@ public class DataSourceInformation {
 
 	public void setDataSourceType(String dataSourceType) {
 		this.dataSourceType = dataSourceType;
+	}
+	public boolean isClean(){
+		return SpatioTextualConstants.CLEAN.equals(cleanState);
 	}
 	public boolean isPersistent(){
 		return SpatioTextualConstants.persistentPersistenceState.equals(persisteneceState);
