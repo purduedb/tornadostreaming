@@ -36,6 +36,7 @@ import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.storage.AbstractStaticDataSource;
 
 public class TestPOIsStaticDataSource extends AbstractStaticDataSource{
+	public static final String POIS_PATH = "POIS_PATH";
 	private Integer count;
 	private Integer maxCount;
 	private ArrayList<DataObject> pois;
@@ -49,7 +50,7 @@ public class TestPOIsStaticDataSource extends AbstractStaticDataSource{
 	public void  prepareData() {
 		pois = new ArrayList<DataObject>();
 		count = 0;
-		 String filePath="datasources/pois.csv";
+		 String filePath=config.get(POIS_PATH);//"datasources/pois.csv";
 		try {
 			FileInputStream fstream = new FileInputStream(filePath);
 			BufferedReader br = new BufferedReader(new InputStreamReader(

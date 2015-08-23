@@ -183,6 +183,16 @@ public class SpatioTextualConstants {
 	//****************************************************************************
 	//***********************Test constants
 	public static final Integer maxStaticDataEntriesCount=1000000;
-	
-	
+	//****************************************************************************
+	//***********************RUN constants
+	public static final String localCluster="localCluster";
+	public static final String stormServer="stormServer";
+	public static final String stormSubmitType="stormSubmitType";
+	public static final String stormNimbusServer="stormNimbusServer";
+	public static final String NIMBUS_HOST="NIMBUS_HOST";
+	public static final String NIMBUS_THRIFT_PORT="NIMBUS_HOST";
+	public static final String STORM_ZOOKEEPER_PORT="STORM_ZOOKEEPER_PORT";
+	public static final String STORM_JAR_PATH="STORM_JAR_PATH";
+	public static final String STORM_NUMBER_OF_WORKERS="STORM_NUMBER_OF_WORKERS";
+	public static final String STORM_ZOOKEEPER_SERVERS="STORM_ZOOKEEPER_SERVERS";
 }

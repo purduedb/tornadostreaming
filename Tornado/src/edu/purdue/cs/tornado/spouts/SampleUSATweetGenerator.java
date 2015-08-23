@@ -48,14 +48,16 @@ import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
  *
  */
 public class SampleUSATweetGenerator extends BaseRichSpout {
+	public static final String TWEETS_FILE_PATH = "TWEETS_FILE_PATH";
 	private RandomGenerator randomGenerator;
 	private static final long serialVersionUID = 1L;
 	private SpoutOutputCollector collector;
 	ArrayList<String> tweets;
+	Map conf;
 	BufferedReader br;
 	int i = 0;
 	FileInputStream fstream;
-	String filePath = "/home/ahmed/Downloads/sample_usa_tweets.csv";
+	String filePath;//= "/home/ahmed/Downloads/sample_usa_tweets.csv"; //this is the sample path 
 
 	public void ack(Object msgId) {
 		System.out.println("OK:" + msgId);
@@ -70,9 +72,7 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 
 	@Override
 	public void nextTuple() {
-		//		if(i>=tweets.size())
-		//			i=0;
-		//		String tweet = tweets.get(i++);
+
 		String tweet = "";
 		try {
 
@@ -80,7 +80,7 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 			if ((tweet = br.readLine()) == null) {
 				br.close();
 				fstream = new FileInputStream(filePath);
-				br= new BufferedReader(new InputStreamReader(fstream));
+				br = new BufferedReader(new InputStreamReader(fstream));
 
 			}
 		} catch (Exception e) {
@@ -88,41 +88,36 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 			try {
 				br.close();
 				fstream = new FileInputStream(filePath);
-				br= new BufferedReader(new InputStreamReader(fstream));
-			
+				br = new BufferedReader(new InputStreamReader(fstream));
+
 			} catch (Exception e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace(System.err);
 			}
-			
-		}
-		if(tweet==null||tweet.isEmpty()) return;
-		StringTokenizer stringTokenizer = new StringTokenizer(tweet, ",");
-		
-		String id =stringTokenizer.hasMoreTokens()? stringTokenizer.nextToken():"";
 
-		String dateString = stringTokenizer.hasMoreTokens()?stringTokenizer.nextToken():"";
+		}
+		if (tweet == null || tweet.isEmpty())
+			return;
+		StringTokenizer stringTokenizer = new StringTokenizer(tweet, ",");
+
+		String id = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
+
+		String dateString = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
 		//dateString = stringTokenizer.hasMoreTokens()?stringTokenizer.nextToken():"";
-		
+
 		Double lat = 0.0;
-		Double lon =0.0;
-		
-		try{
-		lat = stringTokenizer.hasMoreTokens()? Double.parseDouble(stringTokenizer.nextToken()):0.0;
-	
-		 lon = stringTokenizer.hasMoreTokens()? Double.parseDouble(stringTokenizer.nextToken()):0.0;
-		}catch(Exception e ){
+		Double lon = 0.0;
+
+		try {
+			lat = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
+
+			lon = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		//		if(!SpatialHelper.overlapsSpatially(new Point (lat,lon), new Rectangle(new Point(41.40,-89.0), new Point(42.11,-87.3)))){
-		//		//Changing the tweets to the location of the initial view of the sample case 
-		//			lat = randomGenerator.nextDouble(41.40,42.11);
-		//			lon = randomGenerator.nextDouble(-89.0,-87.3);
-		//		}
 
-	
 		String textContent = "";
-		String dummy = stringTokenizer.hasMoreTokens()?stringTokenizer.nextToken():"";
+		String dummy = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
 		while (stringTokenizer.hasMoreTokens())
 			textContent = textContent + stringTokenizer.nextToken() + " ";
 
@@ -145,27 +140,18 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.collector = collector;
 		randomGenerator = new RandomGenerator(SpatioTextualConstants.generatorSeed);
+		this.conf = conf;
+		this.filePath = (String) conf.get(TWEETS_FILE_PATH);
 		tweets = new ArrayList<String>();
 		try {
 			//FileInputStream fstream = new FileInputStream("datasources/twitterdata.csv");
 			fstream = new FileInputStream(filePath);
 			br = new BufferedReader(new InputStreamReader(fstream));
-
-			//			String strLine;
-			//
-			//			// Read File Line By Line
-			//			while ((strLine = br.readLine()) != null) {
-			//				// Print the content on the console
-			//				tweets.add(strLine);
+			//			try {
+			//				Thread.sleep(30000);
+			//			} catch (InterruptedException e) {
+			//				e.printStackTrace();
 			//			}
-
-			// Close the input stream
-			//		br.close();
-//			try {
-//				Thread.sleep(30000);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
