@@ -204,8 +204,7 @@ public class LocalGridIndex {
 		ArrayList<IndexCellCoordinates> indexCells = mapQueryToPartitions(query);
 		for(IndexCellCoordinates indexCell :indexCells){
 			index.get(indexCell.getX()).get(indexCell.getY()).dropQuery(query);
-			if(query.getDataSrc2()!=null)
-				index.get(indexCell.getX()).get(indexCell.getY()).dropQuery(query);
+			
 		}
 		return true;
 	}

@@ -322,12 +322,13 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @param input
 	 */
 	void handleContinousQuery(Query query) {
-		if(!sourcesInformations.containsKey(query.getDataSrc())){
-			System.err.println("Data Source not found: "+query.getDataSrc());
-			return;
 		
-		}
 		if (query.getCommand().equals(SpatioTextualConstants.addCommand)) {
+			if(!sourcesInformations.containsKey(query.getDataSrc())){
+				System.err.println("Data Source not found: "+query.getDataSrc());
+				return;
+			
+			}
 			queryInformationHashMap.get(query.getSrcId()).put(query.getQueryId(), query);
 			if (!sourcesInformations.get(query.getDataSrc()).isVolatile() || (query.getDataSrc2() != null && !sourcesInformations.get(query.getDataSrc2()).isVolatile())) {
 				//this means that this query works on existing data and hence needs to first perorm a snapshop query 
@@ -339,17 +340,23 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			if (query.getDataSrc2() != null)
 				localDataSpatioTextualIndex.get(query.getDataSrc2()).addContinousQuery(query);
 		} else if (query.getCommand().equals(SpatioTextualConstants.updateCommand)) {
+			if(!sourcesInformations.containsKey(query.getDataSrc())){
+				System.err.println("Data Source not found: "+query.getDataSrc());
+				return;
+			
+			}
 			//delete then update
 			Query queryInfo = queryInformationHashMap.get(query.getSrcId()).get(query.getQueryId());
 			localDataSpatioTextualIndex.get(query.getDataSrc()).updateContinousQuery(queryInfo, query);
 			if (query.getDataSrc2() != null)
 				localDataSpatioTextualIndex.get(query.getDataSrc2()).updateContinousQuery(queryInfo, query);
 		} else if (query.getCommand().equals(SpatioTextualConstants.dropCommand)) {
+			//only getting information from oldStored Query as the new query may not have all information and it may contain source and query ids
 			Query oldQuery = queryInformationHashMap.get(query.getSrcId()).get(query.getQueryId());
-			localDataSpatioTextualIndex.get(query.getDataSrc()).dropContinousQuery(oldQuery);
-			if (query.getDataSrc2() != null)
-				localDataSpatioTextualIndex.get(query.getDataSrc2()).dropContinousQuery(oldQuery);
-			queryInformationHashMap.get(query.getSrcId()).remove(query.getQueryId());
+			localDataSpatioTextualIndex.get(oldQuery.getDataSrc()).dropContinousQuery(oldQuery);
+			if (oldQuery.getDataSrc2() != null)
+				localDataSpatioTextualIndex.get(oldQuery.getDataSrc2()).dropContinousQuery(oldQuery);
+			queryInformationHashMap.get(oldQuery.getSrcId()).remove(oldQuery.getQueryId());
 		}
 
 	}
@@ -810,7 +817,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 
 			if (!fromNeighbour && q.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
 				//apply spatial predicate then textual predicate 
-				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && StringHelpers.evaluateTextualPredicate(q.getQueryText(), dataObject.getObjectText(), q.getTextualPredicate()))
+				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && StringHelpers.evaluateTextualPredicate( dataObject.getObjectText(),q.getQueryText(), q.getTextualPredicate()))
 					generateOutput(q, dataObject, SpatioTextualConstants.addCommand);
 			} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
 				//apply spatial predicate 
@@ -842,7 +849,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @param q
 	 */
 	void processVolatileDataObjectForTextualKNNQuery(DataObject dataObject, Query q, Boolean fromNeighbour) {
-		if (!StringHelpers.evaluateTextualPredicate(q.getQueryText(), dataObject.getObjectText(), q.getTextualPredicate())) {
+		if (!StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(),q.getQueryText(),  q.getTextualPredicate())) {
 			//this data object does not overlap with the textual predicate of the query and hence cannot affect the result
 
 		}
@@ -907,7 +914,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(Query q, DataObject obj, String command) {
-	//	System.out.println("[Output: " + q.toString() + "\n******" + obj.toString() + "]");
+		System.out.println("[Output: " + q.toString() + "\n******" + obj.toString() + "]");
 		OutputTuple outputTuple = new OutputTuple();
 		outputTuple.setDataObject(obj);
 		outputTuple.setQuery(q);
@@ -916,7 +923,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(Query q, DataObject obj, DataObject obj2, String obj1Command, String obj2Command) {
-	//	System.out.println("[Output: " + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
+		System.out.println("[Output: " + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
 		OutputTuple outputTuple = new OutputTuple();
 		outputTuple.setDataObject(obj);
 		outputTuple.setDataObject2(obj2);

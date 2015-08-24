@@ -130,7 +130,7 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 
 		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date.getTime(), SpatioTextualConstants.addCommand));
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

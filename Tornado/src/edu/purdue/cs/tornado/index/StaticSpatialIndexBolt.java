@@ -70,7 +70,7 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 
 	// ******************Grid parameters ********************************
 	GlobalGridIndex globalGridIndex;
-	
+
 	// ******************Textual Semantic Attributes ********************************
 	DISCO disco;
 
@@ -150,11 +150,11 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 			else if (value.contains(SpatioTextualConstants.Current))
 				persistenceState = SpatioTextualConstants.currentPersistenceState;
 
-			String cleanState=SpatioTextualConstants.NOTCLEAN;
-			if(stormConf.containsKey(SpatioTextualConstants.getVolatilePropertyKey(sourceId)))
-				cleanState= (String)stormConf.get(SpatioTextualConstants.getVolatilePropertyKey(sourceId));
-			DataSourceInformation dataSourcesInformation = new DataSourceInformation(sourceId, sourceType, persistenceState,cleanState);
-			
+			String cleanState = SpatioTextualConstants.NOTCLEAN;
+			if (stormConf.containsKey(SpatioTextualConstants.getVolatilePropertyKey(sourceId)))
+				cleanState = (String) stormConf.get(SpatioTextualConstants.getVolatilePropertyKey(sourceId));
+			DataSourceInformation dataSourcesInformation = new DataSourceInformation(sourceId, sourceType, persistenceState, cleanState);
+
 			sourcesInformations.put(sourceId, dataSourcesInformation);
 			System.out.println(key + " = " + value);
 
@@ -177,34 +177,33 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 		selfTaskId = context.getThisTaskId();
 		selfTaskIndex = context.getThisTaskIndex();
 		globalGridIndex = new GlobalGridIndex(numberOfEvaluatorTasks, evaluatorBoltTasks);
-		
+
 		//TODO maybe move this to a seperate bolt and adjust the topology accordingly
-		if(this.stormConf.get(SpatioTextualConstants.discoDir)!=null)
-			disco = SemanticHelper.getDiskBasedDiscoInstance((String)this.stormConf.get(SpatioTextualConstants.discoDir));
+		if (this.stormConf.get(SpatioTextualConstants.discoDir) != null)
+			disco = SemanticHelper.getDiskBasedDiscoInstance((String) this.stormConf.get(SpatioTextualConstants.discoDir));
 		else
-			disco=null;
-		
-		
+			disco = null;
+
 		readDataSourcesInformation();
 	}
 
 	@Override
 	public synchronized void execute(Tuple input) {
 		// get tuple source information
-		try{
-		String source = input.getSourceComponent();
-		String streamId = input.getSourceStreamId();
-		if (!SpatioTextualConstants.Default.equals(streamId))
-			source = source + "_" + streamId;
+		try {
+			String source = input.getSourceComponent();
+			String streamId = input.getSourceStreamId();
+			if (!SpatioTextualConstants.Default.equals(streamId))
+				source = source + "_" + streamId;
 
-		String sourceType = sourcesInformations.get(source).getDataSourceType();
+			String sourceType = sourcesInformations.get(source).getDataSourceType();
 
-		if (SpatioTextualConstants.Query_Source.equals(sourceType)) {
-			handleQuery(input, source);
-		} else if (SpatioTextualConstants.Data_Source.equals(sourceType)) {
-			handleData(input, source);
-		}}
-		catch(Exception e ){
+			if (SpatioTextualConstants.Query_Source.equals(sourceType)) {
+				handleQuery(input, source);
+			} else if (SpatioTextualConstants.Data_Source.equals(sourceType)) {
+				handleData(input, source);
+			}
+		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 
@@ -215,15 +214,19 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 		//TODO add code handling for the special case of query update and query droping
 		String queryType = input.getStringByField(SpatioTextualConstants.queryTypeField);
 		Query query = readQueryByType(input, queryType, source);
-		ArrayList<EvaluatorBoltHistory> evalauatorTaskList = mapQueryToPartitions(query);
+
 		// update the last evaluator bolt information
 		if (sourcesInformations.get(source).isContinuous()) {
 			ArrayList<EvaluatorBoltHistory> previousEvalauatorTaskList = sourcesInformations.get(source).getLastBoltTasKInformation().get(query.getQueryId());
-			if (SpatioTextualConstants.dropCommand.equals(query.getCommand())) {
+
+			if (previousEvalauatorTaskList != null && SpatioTextualConstants.dropCommand.equals(query.getCommand())) {
 				for (EvaluatorBoltHistory task : previousEvalauatorTaskList) {
 					collector.emitDirect(task.getTaskId(), id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Values(query));
 				}
-			} else {
+				sourcesInformations.get(source).getLastBoltTasKInformation().put(query.getQueryId(), null);
+			} else if (SpatioTextualConstants.addCommand.equals(query.getCommand())) {
+				ArrayList<EvaluatorBoltHistory> evalauatorTaskList = mapQueryToPartitions(query);
+
 				sourcesInformations.get(source).getLastBoltTasKInformation().put(query.getQueryId(), evalauatorTaskList);
 				if (previousEvalauatorTaskList != null && previousEvalauatorTaskList.size() != 0) {
 					for (EvaluatorBoltHistory task : previousEvalauatorTaskList) {
@@ -236,11 +239,18 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 						}
 					}
 				}
-			}
-		}
-		for (EvaluatorBoltHistory task : evalauatorTaskList)
-			collector.emitDirect(task.getTaskId(), id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Values(query));
+				for (EvaluatorBoltHistory task : evalauatorTaskList)
+					collector.emitDirect(task.getTaskId(), id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Values(query));
 
+			} else if (SpatioTextualConstants.updateCommand.equals(query.getCommand())) {
+				//TODO carefully handle updates
+			}
+		} else {//this query is snapshot
+				//just submit the query and do not maintain any information about it 
+			ArrayList<EvaluatorBoltHistory> evalauatorTaskList = mapQueryToPartitions(query);
+			for (EvaluatorBoltHistory task : evalauatorTaskList)
+				collector.emitDirect(task.getTaskId(), id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Values(query));
+		}
 	}
 
 	private Query readQueryByType(Tuple input, String queryType, String source) {
@@ -251,17 +261,15 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 		query.setTimeStamp(input.getLongByField(SpatioTextualConstants.queryTimeStampField));
 		query.setDataSrc(input.getStringByField(SpatioTextualConstants.dataSrc));
 		query.setCommand(input.getStringByField(SpatioTextualConstants.queryCommand));
-		String text = "",text2="";
-		if(input.contains(SpatioTextualConstants.textualPredicate)){
+		String text = "", text2 = "";
+		if (input.contains(SpatioTextualConstants.textualPredicate)) {
 			query.setTextualPredicate(input.getStringByField(SpatioTextualConstants.textualPredicate));
-		}
-		else{
+		} else {
 			query.setTextualPredicate(SpatioTextualConstants.none);
 		}
-		if(input.contains(SpatioTextualConstants.textualPredicate2)){
+		if (input.contains(SpatioTextualConstants.textualPredicate2)) {
 			query.setTextualPredicate2(input.getStringByField(SpatioTextualConstants.textualPredicate2));
-		}
-		else{
+		} else {
 			query.setTextualPredicate2(SpatioTextualConstants.none);
 		}
 		if (input.contains(SpatioTextualConstants.queryTextField)) {
@@ -275,13 +283,13 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 
 					query.setTextualPredicate(SpatioTextualConstants.semantic);
 				}
-			}else{
+			} else {
 				query.setTextualPredicate(SpatioTextualConstants.none);
 			}
 			query.setQueryText(queryText);
 
 		}
-		if(input.contains(SpatioTextualConstants.queryText2Field)){
+		if (input.contains(SpatioTextualConstants.queryText2Field)) {
 			text2 = input.getStringByField(SpatioTextualConstants.queryText2Field);
 			ArrayList<String> queryText = new ArrayList<String>();
 			if (text2 != null && !"".equals(text2)) {
@@ -291,22 +299,19 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 					queryText = StringHelpers.sortTextArrayList(similarKeyWord);
 					query.setTextualPredicate2(SpatioTextualConstants.semantic);
 				}
-			}
-			else{
+			} else {
 				query.setTextualPredicate2(SpatioTextualConstants.none);
 			}
 			query.setQueryText2(queryText);
-				
+
 		}
-		
-	
-		if(input.contains(SpatioTextualConstants.joinTextualPredicate)){
+
+		if (input.contains(SpatioTextualConstants.joinTextualPredicate)) {
 			query.setJoinTextualPredicate(input.getStringByField(SpatioTextualConstants.joinTextualPredicate));
-		}
-		else{
+		} else {
 			query.setJoinTextualPredicate(SpatioTextualConstants.none);
 		}
-		
+
 		if (SpatioTextualConstants.queryTextualKNN.equals(queryType)) {
 			query.setK(input.getIntegerByField(SpatioTextualConstants.kField));
 			query.getFocalPoint().setX(input.getDoubleByField(SpatioTextualConstants.focalXCoordField));
@@ -362,7 +367,7 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 			if (sourcesInformations.get(source).isCurrent()) {
 				ArrayList<EvaluatorBoltHistory> previousEvalauatorTaskList = sourcesInformations.get(source).getLastBoltTasKInformation().get(dataObject.getObjectId());
 				sourcesInformations.get(source).getLastBoltTasKInformation().put(dataObject.getObjectId(), evalauatorTaskList);
-				
+
 				if (previousEvalauatorTaskList != null && previousEvalauatorTaskList.size() != 0) {
 					//this means there are previous location information about this object and hence 
 					//we make sure that the command for this dataobject is an update 
@@ -377,12 +382,12 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 							removeDataObjectList.addDataObject(removeDataObject);
 							collector.emitDirect(task.getTaskId(), id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data, new Values(removeDataObjectList));
 						}
-				}else{
+				} else {
 					//this means there are NO previous location information about this object and hence 
 					//we make sure that the command for this dataobject is an add 
 					dataObject.setCommand(SpatioTextualConstants.addCommand);
 				}
-			}else if (sourcesInformations.get(source).isPersistent()) {
+			} else if (sourcesInformations.get(source).isPersistent()) {
 				//TODO handle persient data and sliding window 
 			}
 			//sending the new dataobject information to proper bolt task 

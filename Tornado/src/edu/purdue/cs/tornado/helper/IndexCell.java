@@ -134,7 +134,7 @@ public class IndexCell {
 	        Map.Entry<String, DataObject> entry = (Map.Entry<String, DataObject>)it.next();
 	        DataObject dataObject = (DataObject)entry.getValue();
 	       if(SpatialHelper.overlapsSpatially(dataObject.getLocation(),query.getSpatialRange())&&
-	    		   StringHelpers.evaluateTextualPredicate(query.getQueryText(), dataObject.getObjectText(),query.getTextualPredicate()))
+	    		   StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(),query.getQueryText(), query.getTextualPredicate()))
 	    	   qulifiedObjects.add((DataObject)entry.getValue());
 	    }
 		return qulifiedObjects;

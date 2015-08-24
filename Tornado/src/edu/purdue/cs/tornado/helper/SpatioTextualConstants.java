@@ -78,7 +78,7 @@ public class SpatioTextualConstants {
 	public static final Double maxLong =-60.0;
 	
 	//Bolt constansnts
-	public static final Integer fineGridGranularity = 1000;
+	public static final Integer fineGridGranularity = 64;
 	public static final Integer globalGridGranularity = 8;
 	
 	//Textual content length

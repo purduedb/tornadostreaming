@@ -177,13 +177,13 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 		}
 		public SpatioTextualBoltDeclarer addContinuousQuerySource(String componentId,String streamId){
 			this._boltDeclarer=this._boltDeclarer.fieldsGrouping(componentId, streamId,new Fields(SpatioTextualConstants.queryIdField));
-			this._boltDeclarer.addConfiguration(SpatioTextualConstants.Query_Source+"_"+componentId+"_"+streamId, SpatioTextualConstants.Persistent);
-			spatioTextualConfig.put(SpatioTextualConstants.Query_Source+"_"+componentId+"_"+streamId, SpatioTextualConstants.Persistent);
+			this._boltDeclarer.addConfiguration(SpatioTextualConstants.Query_Source+"_"+componentId+"_"+streamId, SpatioTextualConstants.Continuous);
+			spatioTextualConfig.put(SpatioTextualConstants.Query_Source+"_"+componentId+"_"+streamId, SpatioTextualConstants.Continuous);
 			return this;
 		}
 		public SpatioTextualBoltDeclarer addContinuousQuerySource(String componentId){
 			this._boltDeclarer=this._boltDeclarer.fieldsGrouping(componentId,new Fields(SpatioTextualConstants.queryIdField));
-			this._boltDeclarer.addConfiguration(SpatioTextualConstants.Query_Source+"_"+componentId, SpatioTextualConstants.Persistent);
+			this._boltDeclarer.addConfiguration(SpatioTextualConstants.Query_Source+"_"+componentId, SpatioTextualConstants.Continuous);
 			spatioTextualConfig.put(SpatioTextualConstants.Query_Source+"_"+componentId, SpatioTextualConstants.Continuous);
 			return this;
 		}

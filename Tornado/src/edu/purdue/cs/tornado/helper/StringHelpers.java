@@ -123,6 +123,15 @@ public class StringHelpers {
 				return true;
 		return false;
 	}
+	/**
+	 * This function evaluates textual predicates 
+	 * the function is order sensetive , so you evlaute as eval(list1,list2)
+	 * this function evluates contains textual predicate which is order sensetive 
+	 * @param textList1
+	 * @param textList2
+	 * @param textualPredicate
+	 * @return
+	 */
 	public static boolean evaluateTextualPredicate(ArrayList<String> textList1,ArrayList<String> textList2, String textualPredicate){
 		
 		if(SpatioTextualConstants.none.equals(textualPredicate))
