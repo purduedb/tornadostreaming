@@ -43,7 +43,7 @@ public class PartitionPOISfile {
 
 		ArrayList<FileWriter> fwList = new ArrayList<FileWriter>();
 		for (int i = 0; i < SpatioTextualConstants.globalGridGranularity*SpatioTextualConstants.globalGridGranularity; i++) {
-			fwList.add(new FileWriter("/home/ahmed/Downloads/partitionedPOIsusa2/" + i + ".csv"));
+			fwList.add(new FileWriter("/home/ahmed/Downloads/partitionedPOIsusa3/" + i + ".csv"));
 		}
 		String poiline = "";
 		try {

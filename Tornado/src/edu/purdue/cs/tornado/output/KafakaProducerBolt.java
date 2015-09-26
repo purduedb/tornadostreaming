@@ -70,25 +70,39 @@ public class KafakaProducerBolt extends BaseRichBolt {
 	}
 
 	@Override
-	public void execute(Tuple input) {
+	public synchronized void  execute(Tuple input) {
 		try {
 			OutputTuple outputTuple = (OutputTuple) input.getValueByField(SpatioTextualConstants.output);
 			//		System.out.println(outputTuple.toString());
 			LatLong latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation());
 			Double lat = latLong.getLatitude();
 			Double lon = latLong.getLongitude();
-			String jsonOutput = convertOutputToJson(outputTuple.getQuery().getQueryId(), lat, lon, outputTuple.getDataObject().getOriginalText());
-			fw.write(jsonOutput.toString()+"\n");
-			ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), jsonOutput);
-			producer.send(producerRecord);
+			//String jsonOutput = convertOutputToJson(outputTuple.getQuery().getQueryId(), lat, lon, outputTuple.getDataObject().getOriginalText());
+		//	fw.write(jsonOutput.toString()+"\n");
+//			ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), jsonOutput);
+//			producer.send(producerRecord);
 			if (SpatioTextualConstants.queryTextualSpatialJoin.equals(outputTuple.getQuery().getQueryType())) {
 				latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject2().getLocation());
 				lat = latLong.getLatitude();
 				lon = latLong.getLongitude();
-				jsonOutput = convertOutputToJson(outputTuple.getQuery().getQueryId(), lat, lon, outputTuple.getDataObject2().getOriginalText());
-				fw.write(jsonOutput.toString()+"\n");
-				producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), jsonOutput);
+				
+				//jsonOutput = convertOutputToJson(outputTuple.getQuery().getQueryId(), lat, lon, outputTuple.getDataObject2().getOriginalText());
+				String json = convertOutputToJsonForJoin(outputTuple);
+			//	fw.write(jsonOutput.toString()+"\n");
+				ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), json);
 				producer.send(producerRecord);
+				
+				
+				
+				
+				
+			}
+			else{
+
+				String json2 = convertOutputToJsonForSingleQuery(outputTuple);
+				ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), json2);
+				producer.send(producerRecord);
+				fw.write(json2.toString()+"\n");
 			}
 		} catch (Exception e) {
 
@@ -105,6 +119,61 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		outputMap.put("text", text);
 		outputMap.put("name", queriId);
 		outputMap.put("point", locationMap);
+		json = JsonHelper.convertMapToJsonString(outputMap);
+		return json;
+	}
+	private String convertOutputToJsonForSingleQuery(OutputTuple outputTuple) {
+		String json = "";
+		Map outputMap = new HashMap<Object, Object>();
+		
+		outputMap.put("name", outputTuple.getQuery().getQueryId());
+		String tag = "+";
+		if(outputTuple.getDataObjectCommand()!=null){
+			if(SpatioTextualConstants.addCommand.equals(outputTuple.getDataObjectCommand()))
+				tag="+";
+			else if(SpatioTextualConstants.updateCommand.equals(outputTuple.getDataObjectCommand()))
+				tag="u";
+			else if(SpatioTextualConstants.dropCommand.equals(outputTuple.getDataObjectCommand()))
+				tag="-";
+		}
+		outputMap.put("tag", tag);
+		outputMap.put("oid", outputTuple.getDataObject().getObjectId());
+		Map location1Map = new HashMap<Object, Object>();
+		location1Map.put("lat", SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation()).getLatitude());
+		location1Map.put("lng",  SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation()).getLongitude());
+		outputMap.put("text", outputTuple.getDataObject().getOriginalText());
+		outputMap.put("point", location1Map);
+		json = JsonHelper.convertMapToJsonString(outputMap);
+		return json;
+	}
+	private String convertOutputToJsonForJoin(OutputTuple outputTuple) {
+		String json = "";
+		Map outputMap = new HashMap<Object, Object>();
+		
+		outputMap.put("name", outputTuple.getQuery().getQueryId());
+		String tag = "+";
+		if(outputTuple.getDataObjectCommand()!=null){
+			if(SpatioTextualConstants.addCommand.equals(outputTuple.getDataObjectCommand()))
+				tag="+";
+			else if(SpatioTextualConstants.updateCommand.equals(outputTuple.getDataObjectCommand()))
+				tag="u";
+			else if(SpatioTextualConstants.dropCommand.equals(outputTuple.getDataObjectCommand()))
+				tag="-";
+		}
+		outputMap.put("tag", tag);
+		outputMap.put("oid1", outputTuple.getDataObject().getObjectId());
+		Map location1Map = new HashMap<Object, Object>();
+		location1Map.put("lat", SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation()).getLatitude());
+		location1Map.put("lng",  SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation()).getLongitude());
+		outputMap.put("text1", outputTuple.getDataObject().getOriginalText());
+		outputMap.put("point1", location1Map);
+		
+		outputMap.put("oid2", outputTuple.getDataObject2().getObjectId());
+		Map location2Map = new HashMap<Object, Object>();
+		location2Map.put("lat", SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject2().getLocation()).getLatitude());
+		location2Map.put("lng",  SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject2().getLocation()).getLongitude());
+		outputMap.put("text2", outputTuple.getDataObject2().getOriginalText());
+		outputMap.put("point2", location2Map);
 		json = JsonHelper.convertMapToJsonString(outputMap);
 		return json;
 	}

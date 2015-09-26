@@ -91,7 +91,7 @@ public class EvalSentimentBolt extends BaseRichBolt {
 		if(sentment==1)
 			return "[Negative] : ";
 		if(sentment==2)
-			return "[Nuteral] : ";
+			return "[Neutral] : ";
 		if(sentment==3)
 			return "[Positive] : ";
 		else

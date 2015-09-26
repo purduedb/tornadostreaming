@@ -47,17 +47,15 @@ import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
  * @author Ahmed Mahmood
  *
  */
-public class SampleUSATweetGenerator extends BaseRichSpout {
-	public static final String TWEETS_FILE_PATH = "TWEETS_FILE_PATH";
-	private RandomGenerator randomGenerator;
+public class BrinkhoffSpout extends BaseRichSpout {
+	public static final String BRINKHOFF_FILE_PATH = "BRINKHOFF_FILE_PATH";
 	private static final long serialVersionUID = 1L;
 	private SpoutOutputCollector collector;
-	ArrayList<String> tweets;
 	Map conf;
 	BufferedReader br;
 	int i = 0;
 	FileInputStream fstream;
-	String filePath;//= "/home/ahmed/Downloads/sample_usa_tweets.csv"; //this is the sample path 
+	String filePath;
 
 	public void ack(Object msgId) {
 		System.out.println("OK:" + msgId);
@@ -73,11 +71,11 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 	@Override
 	public void nextTuple() {
 
-		String tweet = "";
+		String line = "";
 		try {
 
 			// Read File Line By Line
-			if ((tweet = br.readLine()) == null) {
+			if ((line = br.readLine()) == null) {
 				br.close();
 				fstream = new FileInputStream(filePath);
 				br = new BufferedReader(new InputStreamReader(fstream));
@@ -96,13 +94,14 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 			}
 
 		}
-		if (tweet == null || tweet.isEmpty())
+		if (line == null || line.isEmpty())
 			return;
-		StringTokenizer stringTokenizer = new StringTokenizer(tweet, ",");
+		StringTokenizer stringTokenizer = new StringTokenizer(line, " ");
 
 		String id = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
-
+		id =""+Integer.parseInt(id)%100;
 		String dateString = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
+		String command = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
 		//dateString = stringTokenizer.hasMoreTokens()?stringTokenizer.nextToken():"";
 
 		Double lat = 0.0;
@@ -116,12 +115,14 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 			e.printStackTrace();
 		}
 
-		String textContent = "";
-		String dummy = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
-		while (stringTokenizer.hasMoreTokens())
-			textContent = textContent + stringTokenizer.nextToken() + " ";
-
-		Point xy = SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat, lon));
+		String textContent = ""+id;
+//		String dummy = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
+//		while (stringTokenizer.hasMoreTokens())
+//			textContent = textContent + stringTokenizer.nextToken() + " ";
+		
+	//	LatLong latlongOrinal= SpatialHelper.convertFromXYToLatLonTo(new Point(lat,lon), 39.4425565320774, -85.7208251953125, 40.1641823503742, -86.7837524414063);
+		
+		Point xy = SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat,lon));
 
 		Double xCoord = xy.getX();
 		Double yCoord = xy.getY();
@@ -130,7 +131,7 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 
 		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date.getTime(), SpatioTextualConstants.addCommand));
 		try {
-			Thread.sleep(50);
+			Thread.sleep(100);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -139,10 +140,9 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.collector = collector;
-		randomGenerator = new RandomGenerator(SpatioTextualConstants.generatorSeed);
+	
 		this.conf = conf;
-		this.filePath = (String) conf.get(TWEETS_FILE_PATH);
-		tweets = new ArrayList<String>();
+		this.filePath = "/media/E/work/purdue/database/research/datasets/trajecotry/brinkhoffdataset/907.txt";//(String) conf.get(TWEETS_FILE_PATH);
 		try {
 			//FileInputStream fstream = new FileInputStream("datasources/twitterdata.csv");
 			fstream = new FileInputStream(filePath);

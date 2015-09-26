@@ -142,6 +142,16 @@ public class StringHelpers {
 			return overlapsTextually(textList1, textList2);
 		return false;
 		}
+  public static boolean evaluateTextualPredicate(HashMap<String,Integer> textMap,ArrayList<String> textList2, String textualPredicate){
+		
+		if(SpatioTextualConstants.none.equals(textualPredicate))
+			return true;
+		else if(SpatioTextualConstants.contains.equals(textualPredicate))
+		return 	containsTextually(textMap,textList2);
+		else if (textualPredicate==null || SpatioTextualConstants.overlaps.equals(textualPredicate))
+			return overlapsTextually(textMap, textList2);
+		return false;
+		}
 	/**
 	 * This method returns true if input list have shared keywords 
 	 * This method assumes that input lists are sorted on text to speed up the overlap identification process and entries in this arraylist are distinict
@@ -193,7 +203,18 @@ public class StringHelpers {
 			  return true;
 		  return false;
 	}
-
+	/**
+	 * This method determines if one keyword list contains all keywords of the other list
+	 * This method assumes that input lists are sorted on text to speed up the overlap identification process
+	 * @param list1 sorted array of strings
+	 * @param list2 sorted array of strings
+	 * @return
+	 */
+	private static boolean containsTextually(HashMap<String,Integer> textMap,ArrayList<String> textListSubset){
+		for(String s: textListSubset)
+			if(!textMap.containsKey(s)) return false;
+		return true;
+	}
 	public static String convertArrayListOfStringToText(
 			ArrayList<String> textList) {
 		if (textList != null) {

@@ -52,6 +52,13 @@ public class DataObject {
 			return false;
 		return (this.srcId == ((DataObject) other).srcId && this.objectId == ((DataObject) other).objectId);
 	}
+	public boolean equalsLocation(Object other) {
+		if (other == this)
+			return true;
+		if (!(other instanceof DataObject))
+			return false;
+		return (this.srcId == ((DataObject) other).srcId && this.objectId == ((DataObject) other).objectId &&this.location.equals(((DataObject) other).location));
+	}
 
 	public DataObject() {
 		location = new Point();
@@ -142,10 +149,11 @@ public class DataObject {
 	@Override
 	public String toString() {
 		String output = "Data Object[: " + (getObjectId() == null ? "" :getObjectId() )
+				+ " , " + "Command: "+ (getLocation() == null ? "" : getCommand())
 				+ " , " + "Source: " + (getSrcId() == null  ? "" :getSrcId())
 				+ " , " + "Text: " + (getObjectText() == null ? "" : getObjectText().toString()) 
 				+ " , " + "Location: "+ (getLocation() == null ? "" : getLocation().toString()) 
-				+ " , " + "Relevant area: " + (getRelevantArea() == null ? "" : getRelevantArea().toString()) + "]";
+				+"]";
 		return output;
 	}
 

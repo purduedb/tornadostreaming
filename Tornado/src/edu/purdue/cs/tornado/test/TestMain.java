@@ -37,6 +37,7 @@ import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.output.KafakaProducerBolt;
 import edu.purdue.cs.tornado.sentiment.EvalSentimentBolt;
+import edu.purdue.cs.tornado.spouts.BrinkhoffSpout;
 import edu.purdue.cs.tornado.spouts.KafkaSpout;
 import edu.purdue.cs.tornado.spouts.SampleUSATweetGenerator;
 
@@ -57,6 +58,7 @@ public class TestMain {
 
 		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
 		builder.setSpout("Tweets", new SampleUSATweetGenerator(), 1);
+		builder.setSpout("MovingObjects", new BrinkhoffSpout(), 1);
 		//		builder.setSpout("movingobjects", new TestMovingObjectWithTextSpout(), 1);
 		//		builder.setSpout("TextualKNNQueryGenerator",
 		//				new TestTextualKNNQueryGenerator("movingobjects"), 1);
@@ -74,10 +76,11 @@ public class TestMain {
 		staticSourceConf.put(TestPOIsStaticDataSource.POIS_PATH, properties.getProperty(TestPOIsStaticDataSource.POIS_PATH));
 		builder.addStaticSpatioTextualProcessor("spatiotextualcomponent1", SpatioTextualConstants.globalGridGranularity * SpatioTextualConstants.globalGridGranularity)
 				.addVolatileSpatioTextualInput("Tweets")
+				.addCurrentSpatioTextualInput("MovingObjects")
 				//.addCleanVolatileSpatioTextualInput("Tweets")
 				//				.addCurrentSpatioTextualInput("movingobjects")
 				//				.addContinuousQuerySource("TextualKNNQueryGenerator")
-				.addContinuousQuerySource("TextualRangeQueryGenerator").addStaticDataSource("OSM_Data", "edu.purdue.cs.tornado.test.TestPOIsStaticDataSource", staticSourceConf)
+				.addContinuousQuerySource("TextualRangeQueryGenerator").addStaticDataSource("POI_Data", "edu.purdue.cs.tornado.test.TestPOIsStaticDataSource", staticSourceConf)
 				//				.addStaticDataSource(
 				//						"OSM_Data",
 				//						"edu.purdue.cs.tornado.storage.POIsStaticDataSource",
@@ -111,8 +114,9 @@ public class TestMain {
 		    conf.put(Config.NIMBUS_HOST, properties.getProperty(SpatioTextualConstants.NIMBUS_HOST));
 		    conf.put(Config.NIMBUS_THRIFT_PORT,properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT));
 		    conf.put(Config.STORM_ZOOKEEPER_PORT,properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT));
-		    conf.put(Config.STORM_ZOOKEEPER_SERVERS,properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS));
+		    conf.put(Config.STORM_ZOOKEEPER_SERVERS,properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(","));
 		    conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS)));
+		    System.setProperty("storm.jar",properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
 		    try {
 				SpatioTextualToplogySubmitter.submitTopology("test", conf, builder.createTopology());
 			} catch (AlreadyAliveException e) {

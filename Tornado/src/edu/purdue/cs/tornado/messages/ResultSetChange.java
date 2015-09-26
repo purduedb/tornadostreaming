@@ -19,6 +19,7 @@
  */
 package edu.purdue.cs.tornado.messages;
 
+import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
 
@@ -34,9 +35,9 @@ public class ResultSetChange {
 	public void setQuery(Query query) {
 		this.query = query;
 	}
-	public static String Update = "update";
-	public static String Add = "add";
-	public static String Remove = "remove";
+	public static String Update = SpatioTextualConstants.updateCommand;
+	public static String Add = SpatioTextualConstants.addCommand;
+	public static String Remove =  SpatioTextualConstants.dropCommand;
 	public DataObject getDataObject() {
 		return dataObject;
 	}

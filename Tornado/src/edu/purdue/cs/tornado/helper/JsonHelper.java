@@ -229,9 +229,9 @@ public class JsonHelper {
 					q.setQueryText(StringHelpers.sortTextArrayList(text));
 				} else if (JsonHelper.knn.equals(operation.toLowerCase())) {
 					q.setK(((Double)condition.get(JsonHelper.kval)).intValue());
-					Double lat = (Double)((Map)condition.get(JsonHelper.focal)).get(JsonHelper.lat);
-					Double lng =(Double)((Map)condition.get(JsonHelper.focal)).get(JsonHelper.lng);
-					q.setFocalPoint(new Point(lat,lng));
+					Double lat =(Double)((Map)((Map) ((Map)condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lat);
+					Double lng =(Double)((Map)((Map) ((Map)condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lng);
+					q.setFocalPoint(SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat,lng)));
 				}
 
 			}

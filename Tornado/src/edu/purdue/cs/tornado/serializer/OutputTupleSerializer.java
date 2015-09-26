@@ -34,6 +34,8 @@ public class OutputTupleSerializer  extends  com.esotericsoftware.kryo.Serialize
 		OutputTuple outputTuple = new OutputTuple();
 		outputTuple.setDataObject(kryo.readObjectOrNull(input,DataObject.class));
 		outputTuple.setDataObject2(kryo.readObjectOrNull(input,DataObject.class));
+		outputTuple.setDataObjectCommand(kryo.readObjectOrNull(input,String.class));
+		outputTuple.setDataObject2Command(kryo.readObjectOrNull(input,String.class));
 		outputTuple.setQuery(kryo.readObjectOrNull(input,Query.class));
 		return outputTuple;
 	}
@@ -42,6 +44,8 @@ public class OutputTupleSerializer  extends  com.esotericsoftware.kryo.Serialize
 	public void write(Kryo kryo, Output output, OutputTuple outputTuple) {
 		kryo.writeObjectOrNull(output,outputTuple.getDataObject(),DataObject.class);
 		kryo.writeObjectOrNull(output,outputTuple.getDataObject2(),DataObject.class);
+		kryo.writeObjectOrNull(output,outputTuple.getDataObjectCommand(),String.class);
+		kryo.writeObjectOrNull(output,outputTuple.getDataObject2Command(),String.class);
 		kryo.writeObjectOrNull(output,outputTuple.getQuery(),Query.class);
 		
 	}

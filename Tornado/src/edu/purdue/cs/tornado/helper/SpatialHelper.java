@@ -109,6 +109,14 @@ public class SpatialHelper {
 		
         return latlong;
 	}
+	public static LatLong convertFromXYToLatLonTo(Point xy,Double latMin,Double lonMin,Double latMax,Double lonMax ){
+		
+		 LatLong latlong = new LatLong();
+		 latlong.setLatitude((xy.getX()/SpatioTextualConstants.xMaxRange*(latMax-latMin))+latMin);
+		 latlong.setLongitude((xy.getY()/SpatioTextualConstants.yMaxRange*(lonMax-lonMin))+lonMin);
+		
+       return latlong;
+	}
 	/**
 	 * This function checks if a KNN query is fully satisfied internal to the current evaluator bolt
 	 * @param query

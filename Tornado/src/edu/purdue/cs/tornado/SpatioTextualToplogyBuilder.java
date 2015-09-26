@@ -63,8 +63,7 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 		String indexId = id + SpatioTextualConstants.IndexIDExtension;
 		String indexToBoltStreamId_Query = id
 				+ SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query;
-		String indexToBoltStreamId_Data = id
-				+ SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data;
+		String indexToBoltStreamId_Data = SpatioTextualConstants.getIndexBoltDataStreamId(id);
 		String indexToBoltStreamId_Control = id
 				+ SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control;
 		
@@ -79,8 +78,7 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 				+ SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Query;
 		String boltToBoltStreamId_Data = id
 				+ SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data;
-		String boltToBoltStreamId_Control = id
-				+ SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control;
+		String boltToBoltStreamId_Control =  SpatioTextualConstants.getBoltBoltControlStreamId( id);
 		
 		
 		

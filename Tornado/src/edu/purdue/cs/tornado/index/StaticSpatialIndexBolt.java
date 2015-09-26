@@ -36,6 +36,7 @@ import de.linguatools.disco.DISCO;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SemanticHelper;
+import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.StringHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
@@ -281,7 +282,7 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 					ArrayList<String> similarKeyWord = SemanticHelper.getSematicallySimilarKeyWords(disco, queryText);
 					queryText = StringHelpers.sortTextArrayList(similarKeyWord);
 
-					query.setTextualPredicate(SpatioTextualConstants.semantic);
+					query.setTextualPredicate(SpatioTextualConstants.overlaps);
 				}
 			} else {
 				query.setTextualPredicate(SpatioTextualConstants.none);
@@ -297,7 +298,7 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 				if (SpatioTextualConstants.semantic.equals(query.getTextualPredicate()) && disco != null) {
 					ArrayList<String> similarKeyWord = SemanticHelper.getSematicallySimilarKeyWords(disco, queryText);
 					queryText = StringHelpers.sortTextArrayList(similarKeyWord);
-					query.setTextualPredicate2(SpatioTextualConstants.semantic);
+					query.setTextualPredicate2(SpatioTextualConstants.overlaps);
 				}
 			} else {
 				query.setTextualPredicate2(SpatioTextualConstants.none);
@@ -343,6 +344,7 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 		// and the send to the proper bolt
 		DataObject dataObject = readDataObject(input, source);
 		if (SpatioTextualConstants.dropCommand.equals(dataObject.getCommand())) {
+			//this case is an legitimate drop command from the data source and it is not related to an update drop
 			ArrayList<EvaluatorBoltHistory> previousEvalauatorTaskList = sourcesInformations.get(source).getLastBoltTasKInformation().get(dataObject.getObjectId());
 			if (previousEvalauatorTaskList != null && previousEvalauatorTaskList.size() != 0) {
 				for (EvaluatorBoltHistory task : previousEvalauatorTaskList) {
@@ -352,12 +354,16 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 					removeDataObject.setSrcId(dataObject.getSrcId());
 					DataObjectList removeDataObjectList = new DataObjectList();
 					removeDataObjectList.addDataObject(removeDataObject);
-					collector.emitDirect(task.getTaskId(), id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data, new Values(removeDataObjectList));
+					collector.emitDirect(task.getTaskId(), SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(removeDataObjectList));
 				}
 			}
 			sourcesInformations.get(source).getLastBoltTasKInformation().remove(dataObject.getObjectId());
-		} else if (SpatioTextualConstants.addCommand.equals(dataObject.getCommand()) || SpatioTextualConstants.updateCommand.equals(dataObject.getCommand()) || dataObject.getCommand() == null //assuming that a null data object command means an add command
+		} else if (SpatioTextualConstants.addCommand.equals(dataObject.getCommand())
+				|| SpatioTextualConstants.updateCommand.equals(dataObject.getCommand()) 
+				|| dataObject.getCommand() == null //assuming that a null data object command means an add command
 		) {
+			//the underlying datasource may not be aware if the incomming data object is an update to a previous dataobject 
+			//or if it is a new data object
 			DataObjectList dataObjectList = new DataObjectList();
 			dataObjectList.addDataObject(dataObject);
 
@@ -375,12 +381,12 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 					for (EvaluatorBoltHistory task : previousEvalauatorTaskList)
 						if (!evalauatorTaskList.contains(task)) {
 							DataObject removeDataObject = new DataObject();
-							removeDataObject.setCommand(SpatioTextualConstants.dropCommand);
+							removeDataObject.setCommand(SpatioTextualConstants.updateDropCommand);
 							removeDataObject.setObjectId(dataObject.getObjectId());
 							removeDataObject.setSrcId(dataObject.getSrcId());
 							DataObjectList removeDataObjectList = new DataObjectList();
 							removeDataObjectList.addDataObject(removeDataObject);
-							collector.emitDirect(task.getTaskId(), id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data, new Values(removeDataObjectList));
+							collector.emitDirect(task.getTaskId(), SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(removeDataObjectList));
 						}
 				} else {
 					//this means there are NO previous location information about this object and hence 
@@ -392,7 +398,7 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 			}
 			//sending the new dataobject information to proper bolt task 
 			for (EvaluatorBoltHistory task : evalauatorTaskList)
-				collector.emitDirect(task.getTaskId(), id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data, new Values(dataObjectList));
+				collector.emitDirect(task.getTaskId(), SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(dataObjectList));
 		}
 
 	}
@@ -427,7 +433,7 @@ public class StaticSpatialIndexBolt extends BaseRichBolt {
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declareStream(id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Fields(SpatioTextualConstants.query));
-		declarer.declareStream(id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data, new Fields(SpatioTextualConstants.data));
+		declarer.declareStream(SpatioTextualConstants.getIndexBoltDataStreamId(id), new Fields(SpatioTextualConstants.data));
 		declarer.declareStream(id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control, new Fields(SpatioTextualConstants.control));
 
 	}
