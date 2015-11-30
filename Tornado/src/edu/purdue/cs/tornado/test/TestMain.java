@@ -29,17 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import backtype.storm.Config;
-import backtype.storm.generated.AlreadyAliveException;
-import backtype.storm.generated.InvalidTopologyException;
 import edu.purdue.cs.tornado.SpatioTextualLocalCluster;
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
-import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.output.KafakaProducerBolt;
-import edu.purdue.cs.tornado.sentiment.EvalSentimentBolt;
-import edu.purdue.cs.tornado.spouts.BrinkhoffSpout;
-import edu.purdue.cs.tornado.spouts.KafkaSpout;
+import edu.purdue.cs.tornado.spouts.FileSpout;
+import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
 import edu.purdue.cs.tornado.spouts.SampleUSATweetGenerator;
+import edu.purdue.cs.tornado.spouts.TweetsFSSpout;
+import edu.purdue.cs.tornado.storage.POILFSDataSource;
 
 public class TestMain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestMain.class);
@@ -57,12 +54,30 @@ public class TestMain {
 		}
 
 		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
-		builder.setSpout("Tweets", new SampleUSATweetGenerator(), 1);
-		builder.setSpout("MovingObjects", new BrinkhoffSpout(), 1);
+		
+		Map<String, Object> tweetsSpoutConf = new HashMap<String, Object>();
+		tweetsSpoutConf.put(FileSpout.FILE_PATH,properties.getProperty("TWEETS_FILE_PATH"));
+		tweetsSpoutConf.put(FileSpout.FILE_SYS_TYPE,FileSpout.LFS);
+		tweetsSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC,new Integer (1000));
+		builder.setSpout("Tweets", new TweetsFSSpout(tweetsSpoutConf), 1);
+				
+		Map<String, Object> queriesSpoutConf = new HashMap<String, Object>();
+		queriesSpoutConf.put(FileSpout.FILE_PATH,properties.getProperty("QUERIES_FILE_PATH"));
+		queriesSpoutConf.put(FileSpout.FILE_SYS_TYPE,FileSpout.LFS);
+		queriesSpoutConf.put(QueriesFileSystemSpout.SPATIAL_RANGE,new Double(10));
+		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT,new Integer(1000));
+		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT,new Integer(5));
+		queriesSpoutConf.put(SpatioTextualConstants.dataSrc,"Tweets");
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField,SpatioTextualConstants.queryTextualRange);
+		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate,SpatioTextualConstants.overlaps);
+		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC,new Integer (1000));
+		builder.setSpout("TextualRangeQueryGenerator", new QueriesFileSystemSpout(queriesSpoutConf), 1);
+		//builder.setSpout("Tweets", new TweetsHDFSSpout(), 1);
+		//builder.setSpout("MovingObjects", new BrinkhoffSpout(), 1);
 		//		builder.setSpout("movingobjects", new TestMovingObjectWithTextSpout(), 1);
 		//		builder.setSpout("TextualKNNQueryGenerator",
 		//				new TestTextualKNNQueryGenerator("movingobjects"), 1);
-		builder.setSpout("TextualRangeQueryGenerator", new KafkaSpout());
+	    //	builder.setSpout("TextualRangeQueryGenerator", new KafkaSpout());
 
 		//		builder.setSpout("TextualDistanceJoinQueryGenerator",
 		//				new TestSpatialJoinQueryGenerator("OpenStreetMap",
@@ -74,13 +89,16 @@ public class TestMain {
 
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(TestPOIsStaticDataSource.POIS_PATH, properties.getProperty(TestPOIsStaticDataSource.POIS_PATH));
-		builder.addStaticSpatioTextualProcessor("spatiotextualcomponent1", SpatioTextualConstants.globalGridGranularity * SpatioTextualConstants.globalGridGranularity)
+	//	staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty(POILFSDataSource.POI_FOLDER_PATH));
+		builder.addSpatioTextualProcessor("spatiotextualcomponent1", 36,36)
 				.addVolatileSpatioTextualInput("Tweets")
-				.addCurrentSpatioTextualInput("MovingObjects")
+				//.addCurrentSpatioTextualInput("MovingObjects")
 				//.addCleanVolatileSpatioTextualInput("Tweets")
 				//				.addCurrentSpatioTextualInput("movingobjects")
 				//				.addContinuousQuerySource("TextualKNNQueryGenerator")
-				.addContinuousQuerySource("TextualRangeQueryGenerator").addStaticDataSource("POI_Data", "edu.purdue.cs.tornado.test.TestPOIsStaticDataSource", staticSourceConf)
+				.addContinuousQuerySource("TextualRangeQueryGenerator")
+				.addStaticDataSource("POI_Data", "edu.purdue.cs.tornado.test.TestPOIsStaticDataSource", staticSourceConf)
+				//.addStaticDataSource("POI_Data", "edu.purdue.cs.tornado.storage.POILFSDataSource", staticSourceConf)
 				//				.addStaticDataSource(
 				//						"OSM_Data",
 				//						"edu.purdue.cs.tornado.storage.POIsStaticDataSource",
@@ -89,9 +107,11 @@ public class TestMain {
 				//				.addContinuousQuerySource("test kafka")
 		;
 
-		builder.setBolt("SentimentBolt", new EvalSentimentBolt("Tweets")).shuffleGrouping("spatiotextualcomponent1", SpatioTextualConstants.Bolt_Output_STreamIDExtension);
-		builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("SentimentBolt");
+		//builder.setBolt("SentimentBolt", new EvalSentimentBolt("Tweets")).shuffleGrouping("spatiotextualcomponent1", SpatioTextualConstants.Bolt_Output_STreamIDExtension);
+		//builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("SentimentBolt");
 
+		
+		
 		Config conf = new Config();
 		conf.setDebug(true);
 		conf.setNumWorkers(2);
@@ -103,31 +123,15 @@ public class TestMain {
 		conf.put(SpatioTextualConstants.kafkaConsumerTopic, properties.getProperty(SpatioTextualConstants.kafkaConsumerTopic));
 		conf.put(SpatioTextualConstants.kafkaProducerTopic, properties.getProperty(SpatioTextualConstants.kafkaProducerTopic));
 		conf.put(SpatioTextualConstants.kafkaBootstrapServerConfig, properties.getProperty(SpatioTextualConstants.kafkaBootstrapServerConfig));
-		conf.put(SpatioTextualConstants.discoDir, properties.getProperty(SpatioTextualConstants.discoDir));
-		conf.put(SampleUSATweetGenerator.TWEETS_FILE_PATH, properties.getProperty(SampleUSATweetGenerator.TWEETS_FILE_PATH));
 		
-		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
-		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
-			SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
-			cluster.submitTopology("test", conf, builder.createTopology());
-		}else{
-		    conf.put(Config.NIMBUS_HOST, properties.getProperty(SpatioTextualConstants.NIMBUS_HOST));
-		    conf.put(Config.NIMBUS_THRIFT_PORT,properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT));
-		    conf.put(Config.STORM_ZOOKEEPER_PORT,properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT));
-		    conf.put(Config.STORM_ZOOKEEPER_SERVERS,properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(","));
-		    conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS)));
-		    System.setProperty("storm.jar",properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
-		    try {
-				SpatioTextualToplogySubmitter.submitTopology("test", conf, builder.createTopology());
-			} catch (AlreadyAliveException e) {
-				LOGGER.error(e.getMessage(), e);
-				e.printStackTrace(System.err);
-			} catch (InvalidTopologyException e) {
-				LOGGER.error(e.getMessage(), e);
-				e.printStackTrace(System.err);
-				
-			}
-		}
+		
+		conf.put(SpatioTextualConstants.discoDir, properties.getProperty(SpatioTextualConstants.discoDir));
+		
+		
+		
+		SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
+		cluster.submitTopology("test", conf, builder.createTopology());
+		
 		// Utils.sleep(10000);
 		// cluster.killTopology("test");
 		// cluster.shutdown();

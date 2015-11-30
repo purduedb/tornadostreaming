@@ -86,7 +86,7 @@ public class StringHelpers {
 	 * @return
 	 */
 	public static ArrayList<String> transformIntoSortedArrayListOfString(String inputText) {
-		String[] splitText = inputText.split(SpatioTextualConstants.textDelimiter);
+		String[] splitText = inputText.replaceAll("[^A-Za-z0-9]" , " ").split(SpatioTextualConstants.textDelimiter);
 		Arrays.sort(splitText);
 		ArrayList<String> sortedTextList = new ArrayList<String>(Arrays.asList(splitText));
 		ArrayList<String> finalSortedList = new ArrayList<String>();
@@ -94,10 +94,7 @@ public class StringHelpers {
 		for (String s:sortedTextList)
 			if(s!=null&&!s.equals(previousString)&&isReleventKeyword(s)){
 				previousString = s;
-				finalSortedList.add(s.toLowerCase());
-				
-				;;
-				
+				finalSortedList.add(s.toLowerCase());				
 		}
 		return finalSortedList;
 	}

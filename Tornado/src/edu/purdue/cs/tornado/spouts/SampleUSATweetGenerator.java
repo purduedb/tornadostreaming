@@ -21,12 +21,13 @@ package edu.purdue.cs.tornado.spouts;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.TimeUnit;
 
 import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
@@ -37,7 +38,6 @@ import backtype.storm.tuple.Values;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.RandomGenerator;
-import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 
@@ -55,24 +55,29 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 	ArrayList<String> tweets;
 	Map conf;
 	BufferedReader br;
-	int i = 0;
+	Long i = new Long(0);
 	FileInputStream fstream;
 	String filePath;//= "/home/ahmed/Downloads/sample_usa_tweets.csv"; //this is the sample path 
-
+	Map <Long, String> faultToleranceMap = new HashMap<Long, String>();
 	public void ack(Object msgId) {
-		System.out.println("OK:" + msgId);
+		//System.out.println("OK:" + msgId);
+	//	faultToleranceMap.remove((Long)msgId);
 	}
 
 	public void close() {
+//		faultToleranceMap.clear();
 	}
 
 	public void fail(Object msgId) {
-		System.out.println("FAIL:" + msgId);
+//		System.out.println("FAIL:" + msgId);
+//		emitTweet(faultToleranceMap.get(msgId),(Long) msgId);
 	}
 
 	@Override
 	public void nextTuple() {
 
+		if(i.equals(Long.MAX_VALUE))
+			i=(long) 0;
 		String tweet = "";
 		try {
 
@@ -98,6 +103,17 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 		}
 		if (tweet == null || tweet.isEmpty())
 			return;
+	//	faultToleranceMap.put(i, tweet);
+		i++;
+		 emitTweet( tweet,i);
+		try {
+			TimeUnit.NANOSECONDS.sleep(1000); //million tuples per second
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+	}
+	private void emitTweet(String tweet,Long msgId){
 		StringTokenizer stringTokenizer = new StringTokenizer(tweet, ",");
 
 		String id = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
@@ -127,16 +143,9 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 		Double yCoord = xy.getY();
 
 		Date date = new Date();
-
-		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date.getTime(), SpatioTextualConstants.addCommand));
-		try {
-			Thread.sleep(50);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-
+	
+		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date.getTime(), SpatioTextualConstants.addCommand),msgId);
 	}
-
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.collector = collector;
 		randomGenerator = new RandomGenerator(SpatioTextualConstants.generatorSeed);
@@ -144,7 +153,6 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 		this.filePath = (String) conf.get(TWEETS_FILE_PATH);
 		tweets = new ArrayList<String>();
 		try {
-			//FileInputStream fstream = new FileInputStream("datasources/twitterdata.csv");
 			fstream = new FileInputStream(filePath);
 			br = new BufferedReader(new InputStreamReader(fstream));
 			//			try {

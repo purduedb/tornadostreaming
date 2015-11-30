@@ -47,23 +47,42 @@ public class TestTextualRangeQueryGenerator extends BaseRichSpout {
 			try {
 				if (SpatioTextualConstants.dataGeneratorDelay != 0)
 					Thread.sleep(SpatioTextualConstants.dataGeneratorDelay);
-				return ;
+			
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+		else if (i>20)
+			return;
 		
-		
-		String textList="text2 text3 text4 text5";
+		String textList="sale food love";
 		
                      		
 		Date date = new Date();
 		this.collector.emit(new Values(
-				SpatioTextualConstants.queryTextualRange, ""+(i++), 0.0, 0.0,
-				10000.0, 10000.0, textList, date.getTime(),dataSrcId,SpatioTextualConstants.addCommand));
-		this.collector.emit(new Values(
-				SpatioTextualConstants.queryTextualRange, ""+(i++), 2400.0, 2400.0,
-				2500.0, 2500.0, textList, date.getTime(),dataSrcId,SpatioTextualConstants.addCommand));
+				SpatioTextualConstants.queryTextualRange,
+				""+(i++),
+				null,
+				null, 
+				0.0, 0.0,
+				10000.0,
+				10000.0,
+				null,
+				textList, 
+				null,
+				date.getTime(),
+				dataSrcId,
+				null,
+				SpatioTextualConstants.addCommand,
+				null,
+				SpatioTextualConstants.overlaps,
+				null,
+				null
+				
+				));
+//		this.collector.emit(new Values(
+//				SpatioTextualConstants.queryTextualRange, ""+(i++), 2400.0, 2400.0,
+//				2500.0, 2500.0, textList, date.getTime(),dataSrcId,SpatioTextualConstants.addCommand));
 
 			
 		
@@ -78,15 +97,25 @@ public class TestTextualRangeQueryGenerator extends BaseRichSpout {
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(SpatioTextualConstants.queryTypeField,
+		declarer.declare(new Fields(
+				SpatioTextualConstants.queryTypeField,
 				SpatioTextualConstants.queryIdField,
+				SpatioTextualConstants.focalXCoordField,
+				SpatioTextualConstants.focalYCoordField,
 				SpatioTextualConstants.queryXMinField,
 				SpatioTextualConstants.queryYMinField,
 				SpatioTextualConstants.queryXMaxField,
 				SpatioTextualConstants.queryYMaxField,
+				SpatioTextualConstants.kField,
 				SpatioTextualConstants.queryTextField,
+				SpatioTextualConstants.queryText2Field,
 				SpatioTextualConstants.queryTimeStampField,
 				SpatioTextualConstants.dataSrc,
-				SpatioTextualConstants.queryCommand));
+				SpatioTextualConstants.dataSrc2,
+				SpatioTextualConstants.queryCommand,
+				SpatioTextualConstants.queryDistance,
+				SpatioTextualConstants.textualPredicate,
+				SpatioTextualConstants.textualPredicate2,
+				SpatioTextualConstants.joinTextualPredicate));
 	}
 }

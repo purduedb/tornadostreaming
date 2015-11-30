@@ -93,4 +93,10 @@ public class TestStaticDataSource  extends AbstractStaticDataSource{
 		return null;
 	}
 
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

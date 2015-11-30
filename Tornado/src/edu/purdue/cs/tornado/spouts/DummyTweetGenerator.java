@@ -22,15 +22,17 @@ package edu.purdue.cs.tornado.spouts;
 import java.util.Date;
 import java.util.Map;
 
+import backtype.storm.Config;
 import backtype.storm.spout.SpoutOutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
-
+import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.RandomGenerator;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.messages.DataObject;
 
 /**
  * This is a sample of a transient spatio-textual object generator
@@ -44,21 +46,27 @@ public class DummyTweetGenerator extends BaseRichSpout {
 	private SpoutOutputCollector collector;
 	private RandomGenerator randomGenerator;
 	int i = 0;
-
+	private Integer selfTaskId;
+	private Boolean reliable;
+	Integer objectTextualContentLength;
 	public void ack(Object msgId) {
-		System.out.println("OK:" + msgId);
+		//System.out.println("OK:" + msgId);
+	}
+	public DummyTweetGenerator(Integer objectTextualContentLength){
+		this.objectTextualContentLength=objectTextualContentLength;
 	}
 
 	public void close() {
 	}
 
 	public void fail(Object msgId) {
-		System.out.println("FAIL:" + msgId);
+		//System.out.println("FAIL:" + msgId);
 	}
 
 	@Override
 	public void nextTuple() {
-
+		if(i>Integer.MAX_VALUE)
+			i=0;
 		String id = ""+randomGenerator
 				.nextInt(SpatioTextualConstants.numMovingObjects);
 		Double xCoord = randomGenerator.nextDouble(0,
@@ -66,7 +74,7 @@ public class DummyTweetGenerator extends BaseRichSpout {
 		Double yCoord = randomGenerator.nextDouble(0,
 				SpatioTextualConstants.yMaxRange);
 		String textContent = "";
-		for (int i = 0; i < SpatioTextualConstants.objectTextualContentLength-1; i++)
+		for (int i = 0; i < objectTextualContentLength-1; i++)
 			textContent += SampleTextualContent.TextArr[randomGenerator
 					.nextInt(SampleTextualContent.TextArr.length - 1)] + SpatioTextualConstants.textDelimiter;
 		textContent += SampleTextualContent.TextArr[randomGenerator
@@ -75,31 +83,32 @@ public class DummyTweetGenerator extends BaseRichSpout {
 		
 		Date date = new Date();
 
-		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date
-				.getTime(),SpatioTextualConstants.addCommand));
-		try {
-			Thread.sleep(SpatioTextualConstants.dataGeneratorDelay);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 
+		DataObject dataObject= new DataObject(id, new Point(xCoord, yCoord), textContent, date
+				.getTime(), SpatioTextualConstants.addCommand);
+		if (reliable)
+			this.collector.emit(new Values(id,dataObject), "" + selfTaskId + "_" + (i++));
+		else	this.collector.emit(new Values(id,dataObject));
 	}
 
 	public void open(Map conf, TopologyContext context,
 			SpoutOutputCollector collector) {
 		this.collector = collector;
+		this.selfTaskId =context.getThisTaskId();
 		randomGenerator = new RandomGenerator(
 				SpatioTextualConstants.generatorSeed);
+		this.reliable =((Long)conf.get(Config.TOPOLOGY_ACKER_EXECUTORS))>0;
 
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(SpatioTextualConstants.objectIdField,
-				SpatioTextualConstants.objectXCoordField,
-				SpatioTextualConstants.objectYCoordField,
-				SpatioTextualConstants.objectTextField,
-				SpatioTextualConstants.timeStamp,
-				SpatioTextualConstants.dataObjectCommand));
+//		declarer.declare(new Fields(SpatioTextualConstants.objectIdField,
+//				SpatioTextualConstants.objectXCoordField,
+//				SpatioTextualConstants.objectYCoordField,
+//				SpatioTextualConstants.objectTextField,
+//				SpatioTextualConstants.timeStamp,
+//				SpatioTextualConstants.dataObjectCommand));
+		declarer.declare(new Fields(SpatioTextualConstants.objectIdField,SpatioTextualConstants.dataObject));
 	}
 
 }

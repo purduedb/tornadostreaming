@@ -31,9 +31,8 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.StringHelpers;
-import edu.purdue.cs.tornado.index.GlobalIndexKNNIterator;
-import edu.purdue.cs.tornado.index.LocalIndexKNNIterator;
-import edu.stanford.nlp.patterns.Data;
+import edu.purdue.cs.tornado.index.global.GlobalIndexIterator;
+import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 
 
 public class Query {
@@ -57,7 +56,7 @@ public class Query {
 	private PriorityQueue<DataObject> kNNQueue;  // Priority queue (max-heap).
 	private HashMap<String, Integer> currentRanks;  // Records the current rank of each object in the top-k list.
 	private LocalIndexKNNIterator localKNNIterator;
-	private GlobalIndexKNNIterator globalKNNIterator;
+	private GlobalIndexIterator globalKNNIterator;
 	private ArrayList<Integer> pendingKNNTaskIds ;
 	private Double farthestDistance;
 	
@@ -96,10 +95,10 @@ public class Query {
 	public void setContinousQuery(Boolean continousQuery) {
 		this.continousQuery = continousQuery;
 	}
-	public GlobalIndexKNNIterator getGlobalKNNIterator() {
+	public GlobalIndexIterator getGlobalKNNIterator() {
 		return globalKNNIterator;
 	}
-	public void setGlobalKNNIterator(GlobalIndexKNNIterator globalKNNIterator) {
+	public void setGlobalKNNIterator(GlobalIndexIterator globalKNNIterator) {
 		this.globalKNNIterator = globalKNNIterator;
 	}
 	public LocalIndexKNNIterator getLocalKnnIterator() {

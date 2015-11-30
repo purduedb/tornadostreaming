@@ -32,20 +32,22 @@ import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.spouts.SampleTextualContent;
 
 public class RandomStaticDataGenerator extends AbstractStaticDataSource{
-	
+	public static final Integer maxStaticDataEntriesCount = 1000000;
 
 	private Integer count;
 	private Integer maxCount;
 
-
+	private Integer objectTextualContentLength;
+	
 	public RandomStaticDataGenerator(Rectangle bounds,
-			Map<String, String> config, String sourceId,Integer selfTaskId,Integer selfTaskIdIndex) {
+			Map<String, String> config, String sourceId,Integer selfTaskId,Integer selfTaskIdIndex,Integer objectTextualContentLength) {
 		super(bounds, config, sourceId, selfTaskIdIndex, selfTaskIdIndex);
+		this.objectTextualContentLength=objectTextualContentLength;
 		
 	}
 
 	public void  prepareData() {
-		maxCount = SpatioTextualConstants.maxStaticDataEntriesCount;
+		maxCount =maxStaticDataEntriesCount;
 		count = 0;
 	}
 
@@ -67,7 +69,7 @@ public class RandomStaticDataGenerator extends AbstractStaticDataSource{
 			Double yCoord = randomGenerator.nextDouble(bounds.getMin().getY(),
 					bounds.getMax().getY());
 			ArrayList<String> textContent = new ArrayList<String>();
-			for (int j = 0; j < SpatioTextualConstants.queryTextualContentLength; j++)
+			for (int j = 0; j < objectTextualContentLength; j++)
 				textContent.add(SampleTextualContent.TextArr[randomGenerator
 						.nextInt(SampleTextualContent.TextArr.length - 1)]);
 
@@ -83,6 +85,12 @@ public class RandomStaticDataGenerator extends AbstractStaticDataSource{
 			return dataObject;
 		} else
 			return null;
+	}
+
+	@Override
+	public void close() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

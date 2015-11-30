@@ -21,8 +21,11 @@ package edu.purdue.cs.tornado.messages;
 
 import java.util.ArrayList;
 
+import backtype.storm.tuple.Tuple;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
+import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.helper.StringHelpers;
 
 public class DataObject {
 	private String srcId;
@@ -33,6 +36,8 @@ public class DataObject {
 	private Long timeStamp;
 	private Rectangle relevantArea;
 	private String command;
+
+	
 	public DataObject(DataObject other){
 		this.srcId=new String(other.srcId);
 		this.objectId=new String(other.objectId);
@@ -41,7 +46,6 @@ public class DataObject {
 		this.objectText=(ArrayList<String>) other.objectText.clone();
 	//	this.relevantArea = new Rectangle(new Point(other.relevantArea.getMin()), new Point(other.relevantArea.getMax()));
 		this.command=new String(other.command);
-		
 		
 	}
 	@Override
@@ -121,6 +125,17 @@ public class DataObject {
 		this.timeStamp = timeStamp;
 	}
 
+	public DataObject(String objectId, Point location, String originalText, Long timeStamp, String command) {
+		super();
+	
+		this.objectId = objectId;
+		this.location = location;
+		this.originalText = originalText;
+		ArrayList<String> objectTextList = StringHelpers.transformIntoSortedArrayListOfString(originalText);
+		this.objectText=objectTextList;
+		this.timeStamp = timeStamp;
+		this.command = command;
+	}
 	public Rectangle getRelevantArea() {
 		return relevantArea;
 	}
@@ -156,5 +171,6 @@ public class DataObject {
 				+"]";
 		return output;
 	}
+	
 
 }

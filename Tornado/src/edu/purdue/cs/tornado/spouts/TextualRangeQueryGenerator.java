@@ -44,44 +44,40 @@ public class TextualRangeQueryGenerator extends BaseRichSpout {
 	private RandomGenerator randomGenerator;
 	int i;
 	private String dataSrcId;
-
-	public TextualRangeQueryGenerator(String dataSrcId){
+	Double queryMaxWidth, queryMaxHeight;
+	Integer queryTextualContentLength;
+	public TextualRangeQueryGenerator(String dataSrcId, Double queryMaxWidth, Double queryMaxHeight,Integer queryTextualContentLength) {
+		this.queryTextualContentLength=queryTextualContentLength;
+		this.queryMaxWidth = queryMaxWidth;
+		this.queryMaxHeight = queryMaxHeight;
 		this.dataSrcId = dataSrcId;
 	}
+
 	public void nextTuple() {
 
 		if (i < SpatioTextualConstants.numQueries) { // i will be the query id.
 			i++;
-			Double xMin = randomGenerator.nextDouble(0,
-					SpatioTextualConstants.xMaxRange);
-			Double yMin = randomGenerator.nextDouble(0,
-					SpatioTextualConstants.yMaxRange);
+			Double xMin = randomGenerator.nextDouble(0, SpatioTextualConstants.xMaxRange);
+			Double yMin = randomGenerator.nextDouble(0, SpatioTextualConstants.yMaxRange);
 
-			Double width = randomGenerator.nextDouble(0,
-					SpatioTextualConstants.queryMaxWidth);
+			Double width = randomGenerator.nextDouble(0, queryMaxWidth);
 			Double xMax = xMin + width;
 			if (xMax > SpatioTextualConstants.xMaxRange) {
 				xMax = SpatioTextualConstants.xMaxRange;
 			}
 
-			Double height = randomGenerator.nextDouble(0,
-					SpatioTextualConstants.queryMaxHeight);
+			Double height = randomGenerator.nextDouble(0, queryMaxHeight);
 			Double yMax = yMin + height;
 			if (yMax > SpatioTextualConstants.yMaxRange) {
 				yMax = SpatioTextualConstants.yMaxRange;
 			}
 			String textContent = "";
-			for (int i = 0; i < SpatioTextualConstants.queryTextualContentLength-1; i++)
-				textContent += SampleTextualContent.TextArr[randomGenerator
-						.nextInt(SampleTextualContent.TextArr.length - 1)]
-						+ SpatioTextualConstants.textDelimiter;
-			textContent += SampleTextualContent.TextArr[randomGenerator
-					.nextInt(SampleTextualContent.TextArr.length - 1)];
-                     		
+			for (int i = 0; i < queryTextualContentLength - 1; i++)
+				textContent += SampleTextualContent.TextArr[randomGenerator.nextInt(SampleTextualContent.TextArr.length - 1)] + SpatioTextualConstants.textDelimiter;
+			textContent += SampleTextualContent.TextArr[randomGenerator.nextInt(SampleTextualContent.TextArr.length - 1)];
+
 			Date date = new Date();
-			this.collector.emit(new Values(
-					SpatioTextualConstants.queryTextualRange, ""+""+i, xMin, yMin,
-					xMax, yMax, textContent, date.getTime(),dataSrcId,SpatioTextualConstants.addCommand));
+			this.collector.emit(new Values(SpatioTextualConstants.queryTextualRange, "" + "" + i, xMin, yMin, xMax, yMax, textContent, date.getTime(), dataSrcId, SpatioTextualConstants.addCommand));
 
 			try {
 				if (SpatioTextualConstants.queryGeneratorDelay != 0)
@@ -92,26 +88,15 @@ public class TextualRangeQueryGenerator extends BaseRichSpout {
 		}
 	}
 
-	public void open(Map conf, TopologyContext context,
-			SpoutOutputCollector collector) {
+	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		i = 0;
 		this.collector = collector;
-		randomGenerator = new RandomGenerator(
-				SpatioTextualConstants.generatorSeed);
+		randomGenerator = new RandomGenerator(SpatioTextualConstants.generatorSeed);
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(
-				SpatioTextualConstants.queryTypeField,
-				SpatioTextualConstants.queryIdField,
-				SpatioTextualConstants.queryXMinField,
-				SpatioTextualConstants.queryYMinField,
-				SpatioTextualConstants.queryXMaxField,
-				SpatioTextualConstants.queryYMaxField,
-				SpatioTextualConstants.queryTextField,
-				SpatioTextualConstants.queryTimeStampField,
-				SpatioTextualConstants.dataSrc,
-				SpatioTextualConstants.dataSrc2,
+		declarer.declare(new Fields(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryIdField, SpatioTextualConstants.queryXMinField, SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField,
+				SpatioTextualConstants.queryYMaxField, SpatioTextualConstants.queryTextField, SpatioTextualConstants.queryTimeStampField, SpatioTextualConstants.dataSrc, SpatioTextualConstants.dataSrc2,
 				SpatioTextualConstants.queryCommand));
 	}
 }

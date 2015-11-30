@@ -19,6 +19,7 @@
  */
 package edu.purdue.cs.tornado;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,9 +28,12 @@ import backtype.storm.topology.BoltDeclarer;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
+import edu.purdue.cs.tornado.evaluator.DynamicEvalautorBolt;
 import edu.purdue.cs.tornado.evaluator.SpatioTextualEvaluatorBolt;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.index.StaticSpatialIndexBolt;
+import edu.purdue.cs.tornado.index.DynamicGlobalIndexBolt;
+import edu.purdue.cs.tornado.index.GlobalIndexBolt;
+import edu.purdue.cs.tornado.loadbalance.Partition;
 /**
  * This class is an extension to the storm topology builder and it allows adding spatio- textual query processing abilities 
  * @author Ahmed Mahmood
@@ -57,15 +61,35 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 		
 		return stormTopology;
 	}
-	public SpatioTextualBoltDeclarer addStaticSpatioTextualProcessor(String id,
-			Number parallelism_hint) {
-		
+	/**
+	 * specificy all details of the index, either static /dynamic, gird, kd tree, and the partitions 
+	 * @param id
+	 * @param routing_parallelism_hint
+	 * @param evaluator_parallelism_hint
+	 * @param partitions
+	 * @param indexType Must be from the GlobalIndex types
+	 * @return
+	 */
+	public SpatioTextualBoltDeclarer addSpatioTextualProcessor(String id,
+			Number routing_parallelism_hint,Number evaluator_parallelism_hint,ArrayList<Partition> partitions,String indexType ) {
+	
+		//TODO add validation on the inputs 
+		//TODO remove extra streams 
+		//TODO consider the difference between many streams or a single stream
 		String indexId = id + SpatioTextualConstants.IndexIDExtension;
 		String indexToBoltStreamId_Query = id
 				+ SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query;
 		String indexToBoltStreamId_Data = SpatioTextualConstants.getIndexBoltDataStreamId(id);
 		String indexToBoltStreamId_Control = id
 				+ SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control;
+		
+		String indexToIndexStreamId_Query = id
+				+ SpatioTextualConstants.Index_Index_STreamIDExtension_Query;
+		String indexToIndexStreamId_Data = id
+				+ SpatioTextualConstants.Index_Index_STreamIDExtension_Data;
+		String indexToIndexStreamId_Control = id
+				+ SpatioTextualConstants.Index_Index_STreamIDExtension_Control;
+		
 		
 		String boltToIndexStreamId_Query = id
 				+ SpatioTextualConstants.Bolt_Index_STreamIDExtension_Query;
@@ -82,15 +106,15 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 		
 		
 		
-		StaticSpatialIndexBolt staticSpatialIndexBolt = new StaticSpatialIndexBolt(id);
+		GlobalIndexBolt indexBolt = new GlobalIndexBolt(id,partitions,indexType);
 		SpatioTextualEvaluatorBolt spatioTextualBolt = new SpatioTextualEvaluatorBolt(id);
-		_spatioTexualIndexes.put(id, staticSpatialIndexBolt);
+		_spatioTexualIndexes.put(id, indexBolt);
 		_spatioTexualEvaluators.put(id, spatioTextualBolt);
 		
 		
 		BoltDeclarer indexDeclarer = this.setBolt(indexId,
-				staticSpatialIndexBolt, parallelism_hint).directGrouping(id, boltToIndexStreamId_Query)
-				.directGrouping(id, boltToIndexStreamId_Data).directGrouping(id, boltToIndexStreamId_Control);
+				indexBolt, routing_parallelism_hint).directGrouping(id, boltToIndexStreamId_Query)
+				.directGrouping(id, boltToIndexStreamId_Data).directGrouping(id, boltToIndexStreamId_Control).allGrouping(indexId,indexToIndexStreamId_Control);
 				
 				
 				
@@ -100,7 +124,7 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 		
 		SpatioTextualIndexGetter spatioTextualIndexGetter = new SpatioTextualIndexGetter(indexDeclarer);
 		
-		BoltDeclarer evaluatorBoltDeclarer = this.setBolt(id, spatioTextualBolt, parallelism_hint).directGrouping(
+		BoltDeclarer evaluatorBoltDeclarer = this.setBolt(id, spatioTextualBolt, evaluator_parallelism_hint).directGrouping(
 				indexId, indexToBoltStreamId_Data).directGrouping(indexId, indexToBoltStreamId_Query).directGrouping(indexId, indexToBoltStreamId_Control)
 				.directGrouping(id, boltToBoltStreamId_Query).directGrouping(id, boltToBoltStreamId_Data).directGrouping(id, boltToBoltStreamId_Control);
 				
@@ -108,14 +132,109 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 		this._IndexGetter.put(id, spatioTextualIndexGetter);
 		return spatioTextualIndexGetter;
 	}
-	/**are you 
-	 * This method adds a dynamic spatio-textual index processor to the tornado
+	
+	/**
+	 * specificy all details of the index, either static /dynamic, gird, kd tree, and the partitions 
+	 * @param id
+	 * @param routing_parallelism_hint
+	 * @param evaluator_parallelism_hint
+	 * @param partitions
+	 * @param indexType Must be from the GlobalIndex types
+	 * @return
 	 */
 	public SpatioTextualBoltDeclarer addDynamicSpatioTextualProcessor(String id,
-			Number parallelism_hint) {
+			Number routing_parallelism_hint,Number evaluator_parallelism_hint,ArrayList<Partition> partitions,String indexType ) {
+	
+		//TODO add validation on the inputs 
+		//TODO remove extra streams 
+		//TODO consider the difference between many streams or a single stream
+		String indexId = id + SpatioTextualConstants.IndexIDExtension;
+		String indexToBoltStreamId_Query = id
+				+ SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query;
+		String indexToBoltStreamId_Data = SpatioTextualConstants.getIndexBoltDataStreamId(id);
+		String indexToBoltStreamId_Control = id
+				+ SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control;
 		
-		return null;
+		String indexToIndexStreamId_Query = id
+				+ SpatioTextualConstants.Index_Index_STreamIDExtension_Query;
+		String indexToIndexStreamId_Data = id
+				+ SpatioTextualConstants.Index_Index_STreamIDExtension_Data;
+		String indexToIndexStreamId_Control = id
+				+ SpatioTextualConstants.Index_Index_STreamIDExtension_Control;
+		
+		
+		String boltToIndexStreamId_Query = id
+				+ SpatioTextualConstants.Bolt_Index_STreamIDExtension_Query;
+		String boltToIndexStreamId_Data = id
+				+ SpatioTextualConstants.Bolt_Index_STreamIDExtension_Data;
+		String boltToIndexStreamId_Control = id
+				+ SpatioTextualConstants.Bolt_Index_STreamIDExtension_Control;
+		
+		String boltToBoltStreamId_Query = id
+				+ SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Query;
+		String boltToBoltStreamId_Data = id
+				+ SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data;
+		String boltToBoltStreamId_Control =  SpatioTextualConstants.getBoltBoltControlStreamId( id);
+		
+		
+		
+		DynamicGlobalIndexBolt indexBolt = new DynamicGlobalIndexBolt(id);
+		DynamicEvalautorBolt spatioTextualBolt = new DynamicEvalautorBolt(id);
+		_spatioTexualIndexes.put(id, indexBolt);
+		_spatioTexualEvaluators.put(id, spatioTextualBolt);
+		
+		
+		BoltDeclarer indexDeclarer = this.setBolt(indexId,
+				indexBolt, routing_parallelism_hint).directGrouping(id, boltToIndexStreamId_Query)
+				.directGrouping(id, boltToIndexStreamId_Data).directGrouping(id, boltToIndexStreamId_Control).allGrouping(indexId,indexToIndexStreamId_Control);
+				
+				
+				
+				
+				
+				
+		
+		SpatioTextualIndexGetter spatioTextualIndexGetter = new SpatioTextualIndexGetter(indexDeclarer);
+		
+		BoltDeclarer evaluatorBoltDeclarer = this.setBolt(id, spatioTextualBolt, evaluator_parallelism_hint).directGrouping(
+				indexId, indexToBoltStreamId_Data).directGrouping(indexId, indexToBoltStreamId_Query).directGrouping(indexId, indexToBoltStreamId_Control)
+				.directGrouping(id, boltToBoltStreamId_Query).directGrouping(id, boltToBoltStreamId_Data).directGrouping(id, boltToBoltStreamId_Control);
+				
+		this._evaluatorIndexGetter.put(id, evaluatorBoltDeclarer);
+		this._IndexGetter.put(id, spatioTextualIndexGetter);
+		return spatioTextualIndexGetter;
 	}
+	/**
+	 * Static index with partitions
+	 * @param id
+	 * @param routing_parallelism_hint
+	 * @param evaluator_parallelism_hint
+	 * @param partitions
+	 * @return
+	 * @throws java.lang.Exception 
+	 */
+	public SpatioTextualBoltDeclarer addSpatioTextualProcessor(String id,
+			Number routing_parallelism_hint,Number evaluator_parallelism_hint,ArrayList<Partition> partitions) throws Exception{
+		if(partitions==null||(Integer)evaluator_parallelism_hint!=partitions.size()){
+			Exception  e = new Exception("Partitions list sizes and number of evaluators do not match  ");
+			throw e;
+		}
+			
+		return  addSpatioTextualProcessor(id,routing_parallelism_hint, evaluator_parallelism_hint,partitions,null);
+	}
+	/**
+	 * Static grid index
+	 * @param id
+	 * @param routing_parallelism_hint
+	 * @param evaluator_parallelism_hint
+	 * @return
+	 */
+	public SpatioTextualBoltDeclarer addSpatioTextualProcessor(String id,
+			Number routing_parallelism_hint,Number evaluator_parallelism_hint) {
+		
+		return  addSpatioTextualProcessor(id,routing_parallelism_hint, evaluator_parallelism_hint,null,null);
+	}
+
 	protected class SpatioTextualIndexGetter implements SpatioTextualBoltDeclarer {
 		private BoltDeclarer _boltDeclarer;
 		private Map <String, Object> spatioTextualConfig = new HashMap<String, Object>();

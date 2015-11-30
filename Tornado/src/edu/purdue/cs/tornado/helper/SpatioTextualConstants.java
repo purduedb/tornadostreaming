@@ -1,5 +1,5 @@
 /**
- * Copyright Jul 5, 2015
+r * Copyright Jul 5, 2015
  * Author : Ahmed Mahmood
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -22,19 +22,23 @@ package edu.purdue.cs.tornado.helper;
 public class SpatioTextualConstants {
 	//Properties file which has all the configurable parameters required for execution of this Topology.
 	public static final String CONFIG_PROPERTIES_FILE = "resources/config.properties";
+	public static final String CLUSTER_CONFIG_PROPERTIES_FILE = "resources/clusterconfig.properties";
 
 	//**********************************************************************************
 	//**********************Spatio-textual index constants
 	public static String IndexIDExtension = "_index";
 	public static String Index_Bolt_STreamIDExtension_Query = "_index_bolt_extension_query";
-	private static String Index_Bolt_STreamIDExtension_Data = "_index_bolt_extension_data";
+	public static String Index_Bolt_STreamIDExtension_Data = "_index_bolt_extension_data";
 	public static String Index_Bolt_STreamIDExtension_Control = "_index_bolt_extension_control";
+	public static String Index_Index_STreamIDExtension_Query = "_index_index_extension_query";
+	public static String Index_Index_STreamIDExtension_Data = "_index_index_extension_data";
+	public static String Index_Index_STreamIDExtension_Control = "_index_index_extension_control";
 	public static String Bolt_Index_STreamIDExtension_Query = "_bolt_index_extension_query";
 	public static String Bolt_Index_STreamIDExtension_Data = "_bolt_index_extension_data";
 	public static String Bolt_Index_STreamIDExtension_Control = "_bolt_index_extension_control";
 	public static String Bolt_Bolt_STreamIDExtension_Query = "_bolt_bolt_extension_query";
 	public static String Bolt_Bolt_STreamIDExtension_Data = "_bolt_bolt_extension_data";
-	private static String Bolt_Bolt_STreamIDExtension_Control = "_bolt_bolt_extension_control";
+	public static String Bolt_Bolt_STreamIDExtension_Control = "_bolt_bolt_extension_control";
 	public static String Bolt_Output_STreamIDExtension = "_bolt_output_extension";
 	public static String Fields_Grouping_ID_Field = "id";
 	public static String Persistent = "persistent";
@@ -65,24 +69,24 @@ public class SpatioTextualConstants {
 	//Data constants 
 	public static final Double xMaxRange = 10000.0;
 	public static final Double yMaxRange = 10000.0;
+	//find grid granuality constansnts
+	public static final Integer fineGridGranularityX = 64;
+	public static final Integer fineGridGranularityY = 64;
+	public static final Double fineGridGranularityXstep = xMaxRange/fineGridGranularityX;
+	public static final Double fineGridGranularityYstep = yMaxRange/fineGridGranularityY;
+	
 
 	//Data constants 
-	//	public static final Double minLat = -90.0;
-	//	public static final Double minLong = -180.0;
-	//	public static final Double maxLat = 90.0;
-	//	public static final Double maxLong =180.0;	48.491158, -61.327106
-	public static final Double minLat = 20.0;
-	public static final Double minLong = -130.0;
-	public static final Double maxLat = 50.0;
-	public static final Double maxLong = -60.0;
+		public static final Double minLat = -90.0;
+		public static final Double minLong = -180.0;
+		public static final Double maxLat = 90.0;
+		public static final Double maxLong =180.0;//	48.491158, -61.327106
+//	public static final Double minLat = 20.0;
+//	public static final Double minLong = -130.0;
+//	public static final Double maxLat = 50.0;
+//	public static final Double maxLong = -60.0;
 
-	//Bolt constansnts
-	public static final Integer fineGridGranularity = 64;
-	public static final Integer globalGridGranularity = 8;
-
-	//Textual content length
-	public static final Integer objectTextualContentLength = 100;
-	public static final Integer queryTextualContentLength = 100;
+	
 
 	//Control message types 
 	public static final String control = "control";
@@ -96,6 +100,7 @@ public class SpatioTextualConstants {
 	public static final String output = "output";
 
 	// Object's fields
+	public static final String dataObject="dataObject"; 
 	public static final String objectIdField = Fields_Grouping_ID_Field + "_Object";
 	public static final String objectXCoordField = "xCoord";
 	public static final String objectYCoordField = "yCoord";
@@ -110,12 +115,6 @@ public class SpatioTextualConstants {
 	public static final String queryText2Field = "queryText2";
 	// Text Timesatoamp field
 	public static final String queryTimeStampField = "queryTimeStampField";
-
-	//Query constants 
-	public static final Integer maxK = 10; // for kNN queries.
-	public static final Double queryMaxWidth = 1000.0;
-	public static final Double queryMaxHeight = 1000.0;
-	public static final Double queryDistanceJoin = 20.0;
 
 	public static final String dataSrc = "dataSrc";
 	public static final String dataSrc2 = "dataSrc2";
@@ -169,18 +168,15 @@ public class SpatioTextualConstants {
 	public static final String kafkaConsumerTopic = "kafkaConsumerTopic";//"queries";
 	public static final String kafkaProducerTopic = "kafkaProducerTopic";//"output";
 	public static final String kafkaBootstrapServerConfig = "kafkaBootstrapServerConfig";//"localhost:9092";
-
+	
+	
+	
+	
 	//****************************************************************************
 	//***********************Semantic constansts
 	public static Integer maxSimilarKeywords = 20;
 	public static final String discoDir = "discoDir";
-	//****************************************************************************
-	//***********************Cleaning constansts
-	public static Integer CACHE_SIZE = 200000; //TODO may need to move this value to configuration file
 
-	//****************************************************************************
-	//***********************Test constants
-	public static final Integer maxStaticDataEntriesCount = 1000000;
 	//****************************************************************************
 	//***********************RUN constants
 	public static final String localCluster = "localCluster";
@@ -188,7 +184,9 @@ public class SpatioTextualConstants {
 	public static final String stormSubmitType = "stormSubmitType";
 	public static final String stormNimbusServer = "stormNimbusServer";
 	public static final String NIMBUS_HOST = "NIMBUS_HOST";
-	public static final String NIMBUS_THRIFT_PORT = "NIMBUS_HOST";
+	public static final String NIMBUS_THRIFT_PORT = "NIMBUS_THRIFT_PORT";
+	public static final String UI_HOST = "UI_HOST";
+	public static final String UI_PORT = "UI_PORT";
 	public static final String STORM_ZOOKEEPER_PORT = "STORM_ZOOKEEPER_PORT";
 	public static final String STORM_JAR_PATH = "STORM_JAR_PATH";
 	public static final String STORM_NUMBER_OF_WORKERS = "STORM_NUMBER_OF_WORKERS";
@@ -207,10 +205,20 @@ public class SpatioTextualConstants {
 	public static String getBoltBoltControlStreamId(String id) {
 		return (id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control);
 	}
+	public static String getBoltIndexControlStreamId(String id) {
+		return (id + SpatioTextualConstants.Bolt_Index_STreamIDExtension_Control);
+	}
+	public static String getIndexBoltControlStreamId(String id) {
+		return (id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control);
+	}
+	public static String getIndexIndexControlStreamId(String id) {
+		return (id + SpatioTextualConstants.Index_Index_STreamIDExtension_Control);
+	}
 	public static Boolean isDataStreamSource(String sourceType) {
 		return sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data) || sourceType.contains(SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data);
 	}
 	public static Boolean isControlStreamSource(String sourceType) {
 		return sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control) || sourceType.contains(SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control);
 	}
+	
 }

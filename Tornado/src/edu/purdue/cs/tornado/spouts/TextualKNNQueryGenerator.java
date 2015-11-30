@@ -38,9 +38,11 @@ public class TextualKNNQueryGenerator extends BaseRichSpout {
 	private RandomGenerator randomGenerator;
 	int i ;
 	private String dataSrcId;
-
-	
-	public TextualKNNQueryGenerator(String dataSrcId){
+	private Integer maxK;
+	Integer queryTextualContentLength;
+	public TextualKNNQueryGenerator(String dataSrcId, Integer maxK,Integer queryTextualContentLength) {
+		this.queryTextualContentLength=queryTextualContentLength;
+		this.maxK =maxK;
 		this.dataSrcId = dataSrcId;
 	}
 	public void ack(Object msgId) {
@@ -62,9 +64,9 @@ public class TextualKNNQueryGenerator extends BaseRichSpout {
 			Double xCoord = randomGenerator.nextDouble(0,SpatioTextualConstants.xMaxRange);
 			Double yCoord = randomGenerator.nextDouble(0,SpatioTextualConstants.yMaxRange);
 
-			int k = randomGenerator.nextInt(SpatioTextualConstants.maxK) + 1; 
+			int k = randomGenerator.nextInt(maxK) + 1; 
 			String textContent = "";
-			for (int i = 0; i < SpatioTextualConstants.queryTextualContentLength-1; i++)
+			for (int i = 0; i < queryTextualContentLength-1; i++)
 				textContent += SampleTextualContent.TextArr[randomGenerator
 						.nextInt(SampleTextualContent.TextArr.length - 1)]
 						+ SpatioTextualConstants.textDelimiter;

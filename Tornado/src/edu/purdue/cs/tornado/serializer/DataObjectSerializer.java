@@ -44,6 +44,7 @@ public class DataObjectSerializer extends  com.esotericsoftware.kryo.Serializer<
 		dataObject.setTimeStamp(kryo.readObjectOrNull(input, Long.class));
 		dataObject.setRelevantArea(kryo.readObjectOrNull(input, Rectangle.class));
 		dataObject.setCommand(kryo.readObjectOrNull(input, String.class));
+		
 		return dataObject;
 	}
 
@@ -57,6 +58,7 @@ public class DataObjectSerializer extends  com.esotericsoftware.kryo.Serializer<
 		kryo.writeObjectOrNull(output,dataObject.getTimeStamp(),Long.class);
 		kryo.writeObjectOrNull(output,dataObject.getRelevantArea(),Rectangle.class);
 		kryo.writeObjectOrNull(output,dataObject.getCommand(),String.class);
+
 		
 	}
 

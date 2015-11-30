@@ -44,4 +44,5 @@ public abstract class  AbstractStaticDataSource {
 	abstract public void prepareData();
 	abstract  public Boolean hasNext();
 	abstract   public DataObject getNext() ;
+	abstract   public void close() ;
 }

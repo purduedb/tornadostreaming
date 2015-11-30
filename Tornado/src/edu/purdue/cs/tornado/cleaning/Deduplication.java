@@ -6,14 +6,14 @@ import java.util.HashMap;
 import edu.purdue.cs.tornado.messages.DataObject;
 
 public class Deduplication {
-
+	public static Integer CACHE_SIZE = 200000; 
 	private int max_cache_size;
 	private HashMap<String, Integer> words_index = new HashMap<String, Integer>();
 	private String min_string;
 	private int min_freq;
 
-	public Deduplication(int max_cache_size) {
-		this.max_cache_size = max_cache_size;
+	public Deduplication() {
+		this.max_cache_size = CACHE_SIZE;
 		min_freq = Integer.MAX_VALUE;
 		min_string = "";
 

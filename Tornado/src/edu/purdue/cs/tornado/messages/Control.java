@@ -21,19 +21,38 @@ package edu.purdue.cs.tornado.messages;
 
 import java.util.ArrayList;
 
+import edu.purdue.cs.tornado.loadbalance.LoadBalanceMessage;
+
 public class Control {
 	//**********Constants***********************//
-	
+	//**************control messages types related to KKN (TOPK ) predicates
 	public static String DROP_CONTININOUS_KNN_PREDICATE ="DROP_CONTININOUS_KNN_PREDICATE";
 	public static String UPDATE_CONTININOUS_KNN_PREDICATE ="UPDATE_CONTININOUS_KNN_PREDICATE";
 	public static String ANSWER_SNAPSHOT_KNN_PREDICATE ="ANSWER_SNAPSHOT_KNN_PREDICATE";
 	public static String REQUEST_KNN_PREDICATE ="REQUEST_KNN_PREDICATE";
 	public static String CHANGES_SET_CONTINOUS_KNN_PREDICATE ="CHANGES_SET_CONTINOUS_KNN_PREDICATE";
+	public static String LOAD_BALANCE ="LOAD_BALANCE";
+	
 	private String controlMessageType;
+
+	//******************************************************
+	//DATA related to top-k queries 
 	ArrayList<Query> queriesList;
 	ArrayList<DataObject> dataObjects;
 	ArrayList<ResultSetChange> resultSetChanges;
 	
+	//******************************************************
+	//DATA related to load balance
+	LoadBalanceMessage leadBalanceMessage;
+	
+	public LoadBalanceMessage getLeadBalanceMessage() {
+		return leadBalanceMessage;
+	}
+
+	public void setLeadBalanceMessage(LoadBalanceMessage leadBalanceMessage) {
+		this.leadBalanceMessage = leadBalanceMessage;
+	}
+
 	public Control (){
 		this.controlMessageType=null;
 		this.queriesList = null;

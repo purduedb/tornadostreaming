@@ -36,7 +36,10 @@ public class ObjectLocationGenerator extends BaseRichSpout {
 	private static final long serialVersionUID = 1L;
 	private SpoutOutputCollector collector;
 	private RandomGenerator randomGenerator;
-
+	private Integer objectTextualContentLength;
+	public ObjectLocationGenerator (Integer objectTextualContentLength){
+		this.objectTextualContentLength=objectTextualContentLength;
+	}
 	public void ack(Object msgId) {
 		System.out.println("OK:" + msgId);
 	}
@@ -57,7 +60,7 @@ public class ObjectLocationGenerator extends BaseRichSpout {
 		Double yCoord = randomGenerator.nextDouble(0,
 				SpatioTextualConstants.yMaxRange);
 		String textContent = "";
-		for (int i = 0; i < SpatioTextualConstants.objectTextualContentLength - 1; i++)
+		for (int i = 0; i < objectTextualContentLength - 1; i++)
 			textContent += SampleTextualContent.TextArr[randomGenerator
 					.nextInt(SampleTextualContent.TextArr.length - 1)]
 					+ SpatioTextualConstants.textDelimiter;

@@ -21,13 +21,13 @@ package edu.purdue.cs.tornado.test;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 
+import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
@@ -41,9 +41,13 @@ public class PartitionPOISfile {
 		FileInputStream mainFileStream = new FileInputStream(mainFile);
 		BufferedReader br = new BufferedReader(new InputStreamReader(mainFileStream));
 
-		ArrayList<FileWriter> fwList = new ArrayList<FileWriter>();
-		for (int i = 0; i < SpatioTextualConstants.globalGridGranularity*SpatioTextualConstants.globalGridGranularity; i++) {
-			fwList.add(new FileWriter("/home/ahmed/Downloads/partitionedPOIsusa3/" + i + ".csv"));
+		ArrayList<ArrayList<FileWriter>> fwList = new ArrayList<ArrayList<FileWriter>>();
+		for (int i = 0; i < SpatioTextualConstants.fineGridGranularityX; i++){
+			ArrayList<FileWriter> jfwList = new ArrayList<FileWriter>();
+			for(int j = 0; j < SpatioTextualConstants.fineGridGranularityY; j++) {
+				jfwList.add(new FileWriter("/home/ahmed/Downloads/partitionedPOIsusa/" + i +"_"+j+ ".csv"));
+			}
+			fwList.add(jfwList);
 		}
 		String poiline = "";
 		try {
@@ -59,6 +63,8 @@ public class PartitionPOISfile {
 					lat = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
 
 					lon = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
+					if(lat<SpatioTextualConstants.minLat||lat>SpatioTextualConstants.maxLat||lon<SpatioTextualConstants.minLong||lon>SpatioTextualConstants.maxLong)
+						continue ;
 				} catch (Exception e) {
 					e.printStackTrace();
 						}
@@ -66,22 +72,23 @@ public class PartitionPOISfile {
 				while (stringTokenizer.hasMoreTokens())
 					textContent = textContent + stringTokenizer.nextToken() + " ";
 				Point xy = SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat, lon));
-				Integer indexCellIndex = mapDataPointToEvaluatorTask(xy.getX(), xy.getY());
-				fwList.get(indexCellIndex).write(id+","+lat+","+lon+","+textContent+"\n");
+				IndexCellCoordinates indexCellIndex = mapDataPointToEvaluatorTask(xy.getX(), xy.getY());
+				fwList.get(indexCellIndex.getX()).get(indexCellIndex.getY()).write(id+","+lat+","+lon+","+textContent+"\n");
 			}
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 
 		}
 
-		for (int i = 0; i < SpatioTextualConstants.globalGridGranularity*SpatioTextualConstants.globalGridGranularity; i++)
-			fwList.get(i).close();
+		for (int i = 0; i < SpatioTextualConstants.fineGridGranularityX;i++)
+			for(int j=0;j<SpatioTextualConstants.fineGridGranularityY; j++)
+			fwList.get(i).get(j).close();
 		br.close();
 		System.out.println("done");
 	}
-	private static Integer mapDataPointToEvaluatorTask(Double x, Double y) {
-		Double xStep = SpatioTextualConstants.xMaxRange/SpatioTextualConstants.globalGridGranularity;
-		Double yStep = SpatioTextualConstants.yMaxRange/SpatioTextualConstants.globalGridGranularity;
+	private static IndexCellCoordinates mapDataPointToEvaluatorTask(Double x, Double y) {
+		Double xStep = SpatioTextualConstants.xMaxRange/SpatioTextualConstants.fineGridGranularityX;
+		Double yStep = SpatioTextualConstants.yMaxRange/SpatioTextualConstants.fineGridGranularityY;
 	
 		
 		Integer xCell = (int) (x / xStep);
@@ -94,9 +101,9 @@ public class PartitionPOISfile {
 			xCell=0;
 		if(yCell<0)
 			yCell=0;
-		
-		Integer partitionNum = xCell *SpatioTextualConstants.globalGridGranularity + yCell;
-		return partitionNum;
+		IndexCellCoordinates indexCellCoordinates = new IndexCellCoordinates(xCell, yCell);
+	//	Integer partitionNum = xCell *SpatioTextualConstants.fineGridGranularityY + yCell;
+		return indexCellCoordinates;
 	}
 
 }
