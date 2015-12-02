@@ -152,7 +152,7 @@ public class JsonHelper {
 							|| ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.overlaps) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.semantic))) {
 						{
 							
-							text1 =StringHelpers.sortTextArrayList((ArrayList<String>) condition.get(JsonHelper.rhs));
+							text1 =TextHelpers.sortTextArrayList((ArrayList<String>) condition.get(JsonHelper.rhs));
 							
 							textualPredicate1 = ((String) condition.get(JsonHelper.op)).toLowerCase();
 						}
@@ -175,7 +175,7 @@ public class JsonHelper {
 					Map condition = (Map) ((List) map2.get(JsonHelper.conditions)).get(i);
 					if (condition.containsKey(JsonHelper.op) && (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.contains)
 							|| ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.overlaps) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.semantic))) {
-						text2 =StringHelpers.sortTextArrayList((ArrayList<String>) condition.get(JsonHelper.rhs));
+						text2 =TextHelpers.sortTextArrayList((ArrayList<String>) condition.get(JsonHelper.rhs));
 						textualPredicate2 = ((String) condition.get(JsonHelper.op)).toLowerCase();
 					}
 				}
@@ -226,7 +226,7 @@ public class JsonHelper {
 					else if (SpatioTextualConstants.contains.equals(operation.toLowerCase()))
 						q.setTextualPredicate(SpatioTextualConstants.contains);
 					ArrayList<String> text = (ArrayList<String>) condition.get(JsonHelper.rhs);
-					q.setQueryText(StringHelpers.sortTextArrayList(text));
+					q.setQueryText(TextHelpers.sortTextArrayList(text));
 				} else if (JsonHelper.knn.equals(operation.toLowerCase())) {
 					q.setK(((Double)condition.get(JsonHelper.kval)).intValue());
 					Double lat =(Double)((Map)((Map) ((Map)condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lat);
@@ -264,7 +264,7 @@ public class JsonHelper {
 					else if (SpatioTextualConstants.contains.equals(operation.toLowerCase()))
 						q.setTextualPredicate(SpatioTextualConstants.contains);
 					ArrayList<String> text = (ArrayList<String>) condition.get(JsonHelper.rhs);
-					q.setQueryText(StringHelpers.sortTextArrayList(text));
+					q.setQueryText(TextHelpers.sortTextArrayList(text));
 				} else if (JsonHelper.loc.equals(lhs.get(JsonHelper.attributeName))) {
 					Map rhs = (Map) condition.get(JsonHelper.rhs);
 					if (rhs.containsKey(JsonHelper.south)) {//location is specified here 

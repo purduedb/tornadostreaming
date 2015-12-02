@@ -25,7 +25,7 @@ import backtype.storm.tuple.Tuple;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 
 public class DataObject {
 	private String srcId;
@@ -131,7 +131,7 @@ public class DataObject {
 		this.objectId = objectId;
 		this.location = location;
 		this.originalText = originalText;
-		ArrayList<String> objectTextList = StringHelpers.transformIntoSortedArrayListOfString(originalText);
+		ArrayList<String> objectTextList = TextHelpers.transformIntoSortedArrayListOfString(originalText);
 		this.objectText=objectTextList;
 		this.timeStamp = timeStamp;
 		this.command = command;

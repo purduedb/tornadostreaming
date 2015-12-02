@@ -33,7 +33,7 @@ import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
 
 public class POILFSDataSource extends AbstractStaticDataSource {
@@ -168,7 +168,7 @@ public class POILFSDataSource extends AbstractStaticDataSource {
 		Date date = new Date();
 		// for now just building random data
 		dataObject.setOriginalText(text);
-		ArrayList<String> textContent = StringHelpers.transformIntoSortedArrayListOfString(text);
+		ArrayList<String> textContent = TextHelpers.transformIntoSortedArrayListOfString(text);
 		dataObject.setLocation(point);
 		dataObject.setObjectId(id);
 		dataObject.setObjectText(textContent);

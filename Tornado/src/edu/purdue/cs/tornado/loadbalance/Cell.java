@@ -1,6 +1,9 @@
 package edu.purdue.cs.tornado.loadbalance;
 
 public class Cell extends Partition {
+	public Cell(){
+		super();
+	}
 	public Cell(int bottom, int top, int left, int right) {
 		super(bottom, top, left, right);
 		this.children = new Cell[2];

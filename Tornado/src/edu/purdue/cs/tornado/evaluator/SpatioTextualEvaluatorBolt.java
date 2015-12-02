@@ -41,7 +41,7 @@ import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.index.global.GlobalGridIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndexIterator;
@@ -483,13 +483,13 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		while (it.hasNext()) {
 			ArrayList<IndexCell> indexCellList = it.next();
 			for (IndexCell indexCell : indexCellList) {
-				if (StringHelpers.evaluateTextualPredicate(indexCell.getAllDataTextInCell(), query.getQueryText(), query.getTextualPredicate())){//indexCell.cellOverlapsTextually(query.getQueryText())) {
+				if (TextHelpers.evaluateTextualPredicate(indexCell.getAllDataTextInCell(), query.getQueryText(), query.getTextualPredicate())){//indexCell.cellOverlapsTextually(query.getQueryText())) {
 					HashMap<String, DataObject> indexedDataObjectsMap = indexCell.getStoredObjects();
 					Iterator dataObjectIterator = indexedDataObjectsMap.entrySet().iterator();
 					while (dataObjectIterator.hasNext()) {
 						Map.Entry entry = (Map.Entry) dataObjectIterator.next();
 						DataObject dataObject = (DataObject) entry.getValue();
-						if (StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate())) {
+						if (TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate())) {
 							changes.addAll(query.processDataObject(dataObject));
 						}
 					}
@@ -850,7 +850,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 
 			if (!fromNeighbour && q.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
 				//apply spatial predicate then textual predicate 
-				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && StringHelpers.evaluateTextualPredicate( dataObject.getObjectText(),q.getQueryText(), q.getTextualPredicate()))
+				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && TextHelpers.evaluateTextualPredicate( dataObject.getObjectText(),q.getQueryText(), q.getTextualPredicate()))
 					generateOutput(q, dataObject, SpatioTextualConstants.addCommand);
 			} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
 				//apply spatial predicate 
@@ -882,7 +882,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @param q
 	 */
 	void processVolatileDataObjectForTextualKNNQuery(DataObject dataObject, Query q, Boolean fromNeighbour) {
-		if (!StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(),q.getQueryText(),  q.getTextualPredicate())) {
+		if (!TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(),q.getQueryText(),  q.getTextualPredicate())) {
 			//this data object does not overlap with the textual predicate of the query and hence cannot affect the result
 
 		}
@@ -904,11 +904,11 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		// verify the textual predicate of the incomming data source and the query 
 		if (dataObject.getSrcId().equals(q.getDataSrc())){
 			otherDataSource = q.getDataSrc2();
-			if(!StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate())) return ;
+			if(!TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate())) return ;
 		}
 		else{
 			otherDataSource = q.getDataSrc();
-			if(!StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2()))return ;
+			if(!TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2()))return ;
 		}
 
 		Double distance = q.getDistance();
@@ -930,9 +930,9 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 				while (it.hasNext()) {
 					Map.Entry entry = (Map.Entry) it.next();
 					DataObject storedDataObject = (DataObject) entry.getValue();
-					if (  	StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(), storedDataObject.getObjectText(), q.getJoinTextualPredicate())&&
-							 	(otherDataSource.equals(q.getDataSrc2()) &&   StringHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2())     ||
-							 otherDataSource.equals(q.getDataSrc()) &&   StringHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate())     )
+					if (  	TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), storedDataObject.getObjectText(), q.getJoinTextualPredicate())&&
+							 	(otherDataSource.equals(q.getDataSrc2()) &&   TextHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2())     ||
+							 otherDataSource.equals(q.getDataSrc()) &&   TextHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate())     )
 						
 							&&SpatialHelper.getDistanceInBetween(dataObject.getLocation(), storedDataObject.getLocation()) <= q.getDistance() //evaluate distance 
 							

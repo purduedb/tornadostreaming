@@ -27,7 +27,7 @@ import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.RandomGenerator;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.spouts.SampleTextualContent;
 
@@ -73,7 +73,7 @@ public class RandomStaticDataGenerator extends AbstractStaticDataSource{
 				textContent.add(SampleTextualContent.TextArr[randomGenerator
 						.nextInt(SampleTextualContent.TextArr.length - 1)]);
 
-			textContent = StringHelpers.sortTextArrayList(textContent);
+			textContent = TextHelpers.sortTextArrayList(textContent);
 
 			DataObject dataObject = new DataObject();
 			dataObject.setLocation(new Point(xCoord, yCoord));

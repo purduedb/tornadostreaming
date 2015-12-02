@@ -42,7 +42,7 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SemanticHelper;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.global.GlobalGridIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndex;
 import edu.purdue.cs.tornado.index.global.GlobalStaticPartitionedIndex;
@@ -326,10 +326,10 @@ public class GlobalIndexBolt extends BaseRichBolt {
 			text = input.getStringByField(SpatioTextualConstants.queryTextField);
 			ArrayList<String> queryText = new ArrayList<String>();
 			if (text != null && !"".equals(text)) {
-				queryText = StringHelpers.transformIntoSortedArrayListOfString(text);
+				queryText = TextHelpers.transformIntoSortedArrayListOfString(text);
 				if (SpatioTextualConstants.semantic.equals(query.getTextualPredicate()) && disco != null) {
 					ArrayList<String> similarKeyWord = SemanticHelper.getSematicallySimilarKeyWords(disco, queryText);
-					queryText = StringHelpers.sortTextArrayList(similarKeyWord);
+					queryText = TextHelpers.sortTextArrayList(similarKeyWord);
 
 					query.setTextualPredicate(SpatioTextualConstants.overlaps);
 				}
@@ -343,10 +343,10 @@ public class GlobalIndexBolt extends BaseRichBolt {
 			text2 = input.getStringByField(SpatioTextualConstants.queryText2Field);
 			ArrayList<String> queryText = new ArrayList<String>();
 			if (text2 != null && !"".equals(text2)) {
-				queryText = StringHelpers.transformIntoSortedArrayListOfString(text2);
+				queryText = TextHelpers.transformIntoSortedArrayListOfString(text2);
 				if (SpatioTextualConstants.semantic.equals(query.getTextualPredicate()) && disco != null) {
 					ArrayList<String> similarKeyWord = SemanticHelper.getSematicallySimilarKeyWords(disco, queryText);
-					queryText = StringHelpers.sortTextArrayList(similarKeyWord);
+					queryText = TextHelpers.sortTextArrayList(similarKeyWord);
 					query.setTextualPredicate2(SpatioTextualConstants.overlaps);
 				}
 			} else {

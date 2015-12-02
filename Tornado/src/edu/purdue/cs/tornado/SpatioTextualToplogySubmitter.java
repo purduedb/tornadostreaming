@@ -29,16 +29,22 @@ import backtype.storm.generated.StormTopology;
 import backtype.storm.generated.SubmitOptions;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
+import edu.purdue.cs.tornado.loadbalance.Cell;
+import edu.purdue.cs.tornado.loadbalance.LoadBalanceMessage;
+import edu.purdue.cs.tornado.loadbalance.Partition;
 import edu.purdue.cs.tornado.messages.Control;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.DataObjectList;
 import edu.purdue.cs.tornado.messages.OutputTuple;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.messages.ResultSetChange;
+import edu.purdue.cs.tornado.serializer.CellSerializer;
 import edu.purdue.cs.tornado.serializer.ControlSerializer;
 import edu.purdue.cs.tornado.serializer.DataObjectListSerializer;
 import edu.purdue.cs.tornado.serializer.DataObjectSerializer;
+import edu.purdue.cs.tornado.serializer.LoadBalanceMessageSerializer;
 import edu.purdue.cs.tornado.serializer.OutputTupleSerializer;
+import edu.purdue.cs.tornado.serializer.PartitionSerializer;
 import edu.purdue.cs.tornado.serializer.PointSerializer;
 import edu.purdue.cs.tornado.serializer.QuerySerializer;
 import edu.purdue.cs.tornado.serializer.RectangleSerializer;
@@ -74,5 +80,9 @@ public class SpatioTextualToplogySubmitter extends StormSubmitter{
 		((Config)conf).registerSerialization(Rectangle.class, RectangleSerializer.class);
 		((Config)conf).registerSerialization(OutputTuple.class, OutputTupleSerializer.class);
 		((Config)conf).registerSerialization(ResultSetChange.class, ResultSetChangeSerializer.class);
+		((Config)conf).registerSerialization(LoadBalanceMessage.class, LoadBalanceMessageSerializer.class);
+		((Config)conf).registerSerialization(Partition.class, PartitionSerializer.class);
+		((Config)conf).registerSerialization(Cell.class, CellSerializer.class);
+		
 	}
 }

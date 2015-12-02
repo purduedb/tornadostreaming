@@ -9,7 +9,7 @@ import edu.purdue.cs.tornado.evaluator.Geometry;
 import edu.purdue.cs.tornado.evaluator.Operator;
 import edu.purdue.cs.tornado.evaluator.OperatorType;
 import edu.purdue.cs.tornado.evaluator.Query2;
-import edu.purdue.cs.tornado.evaluator.SpatialDistance;
+import edu.purdue.cs.tornado.evaluator.SpatialDistanceType;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.messages.DataObject;
@@ -27,13 +27,15 @@ public class TestBuildingBlocksEvaluator {
 		op.arguments = new ArrayList<Object>();
 		op.arguments.add(new Rectangle(new Point(0.0,0.0),new Point(100.0,100.0)));
 		
+		
+		
+		
 		Operator op2 = new Operator();
 		op.dataSourceId="Tweets";
 		op.operatorType=OperatorType.SPATIAL_DIST;
 		op.arguments = new ArrayList<Object>();
 		op.arguments.add(Geometry.POINT);
-		op.arguments.add(SpatialDistance.EUCLIDEAN);
-		
+		op.arguments.add(SpatialDistanceType.EUCLIDEAN);
 		op.arguments.add(new Point(100.0,110.0));
 		
 		DataObject obj = new DataObject();

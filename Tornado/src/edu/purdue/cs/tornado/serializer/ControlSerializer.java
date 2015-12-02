@@ -25,6 +25,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import edu.purdue.cs.tornado.loadbalance.LoadBalanceMessage;
 import edu.purdue.cs.tornado.messages.Control;
 //TODO change to support all null values
 public class ControlSerializer extends  com.esotericsoftware.kryo.Serializer<Control> {
@@ -36,6 +37,7 @@ public class ControlSerializer extends  com.esotericsoftware.kryo.Serializer<Con
 		control.setDataObjects(kryo.readObjectOrNull(input, ArrayList.class));
 		control.setQueriesList(kryo.readObjectOrNull(input, ArrayList.class));
 		control.setResultSetChanges(kryo.readObjectOrNull(input, ArrayList.class));
+		control.setLeadBalanceMessage(kryo.readObjectOrNull(input, LoadBalanceMessage.class));//kryo.readObjectOrNull(input, LoadBalanceMessage.class));
 		return control;
 	}
 
@@ -45,6 +47,7 @@ public class ControlSerializer extends  com.esotericsoftware.kryo.Serializer<Con
 		kryo.writeObjectOrNull(output,control.getDataObjects(),ArrayList.class);
 		kryo.writeObjectOrNull(output,control.getQueriesList(),ArrayList.class);
 		kryo.writeObjectOrNull(output,control.getResultSetChanges(),ArrayList.class);
+		kryo.writeObjectOrNull(output,control.getLeadBalanceMessage(),LoadBalanceMessage.class);
 	}
 
 	

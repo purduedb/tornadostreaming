@@ -138,7 +138,7 @@ public class IndexCell {
 	        Map.Entry<String, DataObject> entry = (Map.Entry<String, DataObject>)it.next();
 	        DataObject dataObject = (DataObject)entry.getValue();
 	       if(SpatialHelper.overlapsSpatially(dataObject.getLocation(),query.getSpatialRange())&&
-	    		   StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(),query.getQueryText(), query.getTextualPredicate()))
+	    		   TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(),query.getQueryText(), query.getTextualPredicate()))
 	    	   qulifiedObjects.add((DataObject)entry.getValue());
 	    }
 		return qulifiedObjects;
@@ -152,7 +152,7 @@ public class IndexCell {
 	}
 	public boolean cellOverlapsTextually(ArrayList<String> textList){
 		if(allDataTextInCell.size()!=0)
-		return StringHelpers.overlapsTextually(allDataTextInCell, textList);
+		return TextHelpers.overlapsTextually(allDataTextInCell, textList);
 		return false;
 	}
 	public ArrayList<Query>getQueries(){

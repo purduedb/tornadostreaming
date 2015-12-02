@@ -25,7 +25,7 @@ import java.util.Map;
 
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.storage.AbstractStaticDataSource;
 
@@ -61,7 +61,7 @@ public class TestStaticDataSource  extends AbstractStaticDataSource{
 	}
 	DataObject getDataObject(Double x,Double y, ArrayList<String > textList,Integer id){
 		Date date = new Date();
-		textList = StringHelpers.sortTextArrayList(textList);
+		textList = TextHelpers.sortTextArrayList(textList);
 		DataObject dataObject = new DataObject();
 		dataObject.setLocation(new Point(x, y));
 		dataObject.setObjectId(""+id);

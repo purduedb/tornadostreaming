@@ -25,7 +25,7 @@ public class LoadBalanceMessage {
 
 	
 
-	//all fields are TBD
+	
 	Partition parition;
 	Integer sendTo;
 	Partition newCell, auxCell;
@@ -109,7 +109,7 @@ public class LoadBalanceMessage {
 		this.newAuxiliaryExecutorTask = newAuxiliaryExecutorTask;
 	}
 
-	public List<Cell> getNewPartitions() {
+	public ArrayList<Cell> getNewPartitions() {
 		return newPartitions;
 	}
 

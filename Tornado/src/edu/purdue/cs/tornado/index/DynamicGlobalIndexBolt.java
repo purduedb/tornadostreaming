@@ -39,7 +39,7 @@ import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SemanticHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.helper.TornadoZooKeeperConnection;
 import edu.purdue.cs.tornado.index.global.GlobalDynamicIndex;
 import edu.purdue.cs.tornado.loadbalance.LoadBalanceMessage;
@@ -426,10 +426,10 @@ public class DynamicGlobalIndexBolt extends BaseRichBolt {
 			text = input.getStringByField(SpatioTextualConstants.queryTextField);
 			ArrayList<String> queryText = new ArrayList<String>();
 			if (text != null && !"".equals(text)) {
-				queryText = StringHelpers.transformIntoSortedArrayListOfString(text);
+				queryText = TextHelpers.transformIntoSortedArrayListOfString(text);
 				if (SpatioTextualConstants.semantic.equals(query.getTextualPredicate()) && disco != null) {
 					ArrayList<String> similarKeyWord = SemanticHelper.getSematicallySimilarKeyWords(disco, queryText);
-					queryText = StringHelpers.sortTextArrayList(similarKeyWord);
+					queryText = TextHelpers.sortTextArrayList(similarKeyWord);
 
 					query.setTextualPredicate(SpatioTextualConstants.overlaps);
 				}
@@ -443,10 +443,10 @@ public class DynamicGlobalIndexBolt extends BaseRichBolt {
 			text2 = input.getStringByField(SpatioTextualConstants.queryText2Field);
 			ArrayList<String> queryText = new ArrayList<String>();
 			if (text2 != null && !"".equals(text2)) {
-				queryText = StringHelpers.transformIntoSortedArrayListOfString(text2);
+				queryText = TextHelpers.transformIntoSortedArrayListOfString(text2);
 				if (SpatioTextualConstants.semantic.equals(query.getTextualPredicate()) && disco != null) {
 					ArrayList<String> similarKeyWord = SemanticHelper.getSematicallySimilarKeyWords(disco, queryText);
-					queryText = StringHelpers.sortTextArrayList(similarKeyWord);
+					queryText = TextHelpers.sortTextArrayList(similarKeyWord);
 					query.setTextualPredicate2(SpatioTextualConstants.overlaps);
 				}
 			} else {
@@ -567,7 +567,7 @@ public class DynamicGlobalIndexBolt extends BaseRichBolt {
 			dataObject.getLocation().setY(input.getDoubleByField(SpatioTextualConstants.objectYCoordField));
 		if (input.contains(SpatioTextualConstants.objectTextField)) {
 			String objectText = input.getStringByField(SpatioTextualConstants.objectTextField);
-			ArrayList<String> objectTextList = StringHelpers.transformIntoSortedArrayListOfString(objectText);
+			ArrayList<String> objectTextList = TextHelpers.transformIntoSortedArrayListOfString(objectText);
 			dataObject.setOriginalText(objectText);
 			dataObject.setObjectText(objectTextList);
 		}

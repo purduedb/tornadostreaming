@@ -22,7 +22,7 @@ import java.util.TreeMap;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
 
 public class BuildFrequenceySortedWordList {
@@ -138,7 +138,7 @@ public class BuildFrequenceySortedWordList {
 		String dummy = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
 		while (stringTokenizer.hasMoreTokens())
 			textContent = textContent + stringTokenizer.nextToken() + " ";
-		ArrayList<String> objectTextList = StringHelpers.transformIntoSortedArrayListOfString(textContent);
+		ArrayList<String> objectTextList = TextHelpers.transformIntoSortedArrayListOfString(textContent);
 		return objectTextList;
 	}
 
@@ -167,7 +167,7 @@ public class BuildFrequenceySortedWordList {
 		Date date = new Date();
 		// for now just building random data
 		dataObject.setOriginalText(text);
-		ArrayList<String> textContent = StringHelpers.transformIntoSortedArrayListOfString(text);
+		ArrayList<String> textContent = TextHelpers.transformIntoSortedArrayListOfString(text);
 		return textContent;
 	}
 }

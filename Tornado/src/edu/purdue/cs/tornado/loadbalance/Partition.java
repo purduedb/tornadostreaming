@@ -42,6 +42,17 @@ public class Partition implements Serializable{
 	private double cost;
 	public int index;
 
+	public Partition(){
+		
+	}
+	public void setCoords(double[] coords) {
+		this.coords = coords;
+	}
+
+	public void setDimensions(double[] dimensions) {
+		this.dimensions = dimensions;
+	}
+
 	/**
 	 * Creates a new partition.
 	 * 

@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
-public class StringHelpers {
+public class TextHelpers {
 	public static final String[] SET_VALUES = new String[] { "a","ab","abt","attwaction","attwicted",
 			"as","able","about","above","according","accordingly","across","actually","after","afterwards",
 			"again","against","aint","all","allow","allows","almost","alone","along","already","also",

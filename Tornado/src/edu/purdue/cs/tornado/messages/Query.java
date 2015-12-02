@@ -30,7 +30,7 @@ import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.global.GlobalIndexIterator;
 import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 
@@ -274,7 +274,7 @@ public class Query {
 	
 	public synchronized ArrayList<ResultSetChange> processDataObject(DataObject dataObject) {
 		ArrayList<ResultSetChange> changes = new ArrayList<>();
-		boolean textualPredicateMatched = StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(),queryText, textualPredicate);
+		boolean textualPredicateMatched = TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(),queryText, textualPredicate);
 		boolean topkMayHaveChanged = false;
 		// If the new location update corresponds to an object that is already in the top-k list.
 		if (this.currentRanks.containsKey(dataObject.getObjectId())) {

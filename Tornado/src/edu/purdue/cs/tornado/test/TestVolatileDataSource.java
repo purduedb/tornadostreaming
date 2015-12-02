@@ -31,7 +31,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
 
 public class TestVolatileDataSource extends BaseRichSpout {
@@ -98,7 +98,7 @@ public class TestVolatileDataSource extends BaseRichSpout {
 	}
 	DataObject getDataObject(Double x,Double y, ArrayList<String > textList,Integer id){
 		Date date = new Date();
-		textList = StringHelpers.sortTextArrayList(textList);
+		textList = TextHelpers.sortTextArrayList(textList);
 		DataObject dataObject = new DataObject();
 		dataObject.setLocation(new Point(x, y));
 		dataObject.setObjectId(""+id);

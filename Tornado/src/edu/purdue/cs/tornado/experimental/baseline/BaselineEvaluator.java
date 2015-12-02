@@ -16,7 +16,7 @@ import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.OutputTuple;
 import edu.purdue.cs.tornado.messages.Query;
@@ -106,7 +106,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 			text = input.getStringByField(SpatioTextualConstants.queryTextField);
 			ArrayList<String> queryText = new ArrayList<String>();
 			if (text != null && !"".equals(text)) {
-				queryText = StringHelpers.transformIntoSortedArrayListOfString(text);
+				queryText = TextHelpers.transformIntoSortedArrayListOfString(text);
 
 			} else {
 				query.setTextualPredicate(SpatioTextualConstants.none);
@@ -118,7 +118,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 			text2 = input.getStringByField(SpatioTextualConstants.queryText2Field);
 			ArrayList<String> queryText = new ArrayList<String>();
 			if (text2 != null && !"".equals(text2)) {
-				queryText = StringHelpers.transformIntoSortedArrayListOfString(text2);
+				queryText = TextHelpers.transformIntoSortedArrayListOfString(text2);
 
 			} else {
 				query.setTextualPredicate2(SpatioTextualConstants.none);
@@ -159,7 +159,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 		Boolean resend = false;
 		for (Query q : allQueries) {
 			if (!fromNeighbour &&q.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
-				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
+				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
 					generateOutput(q, dataObject, SpatioTextualConstants.addCommand);
 			} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
 				if (processVolatileDataObjectForTextualSpatialJoinQuery(dataObject, q))
@@ -180,13 +180,13 @@ public class BaselineEvaluator extends BaseRichBolt {
 		// verify the textual predicate of the incomming data source and the query 
 		if (dataObject.getSrcId().equals(q.getDataSrc())) {
 			otherDataSource = q.getDataSrc2();
-			if (!StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
+			if (!TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
 				return resend;
 			else
 				resend = true;
 		} else {
 			otherDataSource = q.getDataSrc();
-			if (!StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2()))
+			if (!TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2()))
 				return resend;
 			else
 				resend = true;
@@ -194,9 +194,9 @@ public class BaselineEvaluator extends BaseRichBolt {
 
 		for (DataObject storedDataObject : staticData) {
 
-			if (StringHelpers.evaluateTextualPredicate(dataObject.getObjectText(), storedDataObject.getObjectText(), q.getJoinTextualPredicate())
-					&& (otherDataSource.equals(q.getDataSrc2()) && StringHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2())
-							|| otherDataSource.equals(q.getDataSrc()) && StringHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
+			if (TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), storedDataObject.getObjectText(), q.getJoinTextualPredicate())
+					&& (otherDataSource.equals(q.getDataSrc2()) && TextHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2())
+							|| otherDataSource.equals(q.getDataSrc()) && TextHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
 
 			&& SpatialHelper.getDistanceInBetween(dataObject.getLocation(), storedDataObject.getLocation()) <= q.getDistance() //evaluate distance 
 					&& SpatialHelper.overlapsSpatially(storedDataObject.getLocation(), q.getSpatialRange())) {
@@ -221,7 +221,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 			dataObject.getLocation().setY(input.getDoubleByField(SpatioTextualConstants.objectYCoordField));
 		if (input.contains(SpatioTextualConstants.objectTextField)) {
 			String objectText = input.getStringByField(SpatioTextualConstants.objectTextField);
-			ArrayList<String> objectTextList = StringHelpers.transformIntoSortedArrayListOfString(objectText);
+			ArrayList<String> objectTextList = TextHelpers.transformIntoSortedArrayListOfString(objectText);
 			dataObject.setOriginalText(objectText);
 			dataObject.setObjectText(objectTextList);
 		}

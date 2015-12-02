@@ -34,7 +34,7 @@ import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 import edu.purdue.cs.tornado.helper.JsonHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.helper.StringHelpers;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.Query;
 import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
@@ -103,8 +103,8 @@ public class KafkaSpout extends BaseRichSpout {
     				q.getSpatialRange().getMax().getX(),
     				q.getSpatialRange().getMax().getY(),
     				q.getK(),
-    				StringHelpers.convertArrayListOfStringToText(q.getQueryText()),
-    				StringHelpers.convertArrayListOfStringToText(q.getQueryText2()),
+    				TextHelpers.convertArrayListOfStringToText(q.getQueryText()),
+    				TextHelpers.convertArrayListOfStringToText(q.getQueryText2()),
     				q.getTimeStamp(),
     				q.getDataSrc(),
     				q.getDataSrc2(),

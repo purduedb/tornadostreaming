@@ -2,23 +2,15 @@ package edu.purdue.cs.tornado.evaluator;
 
 public enum OperatorType {
 	//GENERAL
-	LESS_THAN,
-	GREATER_THAN,
-	EQUAL_THAN,
-	AND,
-	OR,
-	NOT,
-	PLUS,
-	MINUS,
-	TIMES,
-	DIVIDE,
+	
+	
 	//INDEX
 	SPATIAL_INDEX,
 	TEXT_INDEX,
 	HYBRID_INDEX,
 	//SPATIAL
-	SPATIAL_INSIDE,
-	SPATIAL_DIST,
+	SPATIAL_INSIDE,//arguments  true /false
+	SPATIAL_DIST, //
 	SPATIAL_OVERLAP,
 	//Textual
 	TEXT_DIST,
