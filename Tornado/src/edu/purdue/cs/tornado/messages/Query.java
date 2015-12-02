@@ -37,9 +37,13 @@ import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 
 public class Query {
 	private  String srcId;
-	private  String  queryType;
 	private  String queryId;
+	
+	
+	
+	
 	private  Point focalPoint;
+	private  String  queryType;
 	private  Integer  k;
 	private  ArrayList<String>  queryText;
 	private  ArrayList<String>  queryText2;
@@ -51,16 +55,24 @@ public class Query {
 	private  String textualPredicate;
 	private  String textualPredicate2;
 	private  String joinTextualPredicate;
+	
+	
+	
 	private  Double distance ;
 	private Boolean continousQuery;
-	private PriorityQueue<DataObject> kNNQueue;  // Priority queue (max-heap).
-	private HashMap<String, Integer> currentRanks;  // Records the current rank of each object in the top-k list.
-	private LocalIndexKNNIterator localKNNIterator;
-	private GlobalIndexIterator globalKNNIterator;
-	private ArrayList<Integer> pendingKNNTaskIds ;
-	private Double farthestDistance;
 	
+	
+	
+	private PriorityQueue<DataObject> topKQueue;  // Priority queue (max-heap).
+	private HashMap<String, Integer> currentRanks;  // Records the current rank of each object in the top-k list.
+	private LocalIndexKNNIterator localTopKIterator;
+	private GlobalIndexIterator globalTopKIterator;
+	private ArrayList<Integer> pendingTopKTaskIds ;
+	private Double farthestDistance;
 	private HashMap<String, DataObject> currentObjects;
+	
+	
+	
 	private static Double maxFarthestDistance=Math.sqrt(SpatioTextualConstants.xMaxRange*SpatioTextualConstants.xMaxRange+
 			SpatioTextualConstants.yMaxRange*SpatioTextualConstants.yMaxRange);//this is the maximum possible space between any two points indexed
 	
@@ -96,16 +108,16 @@ public class Query {
 		this.continousQuery = continousQuery;
 	}
 	public GlobalIndexIterator getGlobalKNNIterator() {
-		return globalKNNIterator;
+		return globalTopKIterator;
 	}
 	public void setGlobalKNNIterator(GlobalIndexIterator globalKNNIterator) {
-		this.globalKNNIterator = globalKNNIterator;
+		this.globalTopKIterator = globalKNNIterator;
 	}
 	public LocalIndexKNNIterator getLocalKnnIterator() {
-		return localKNNIterator;
+		return localTopKIterator;
 	}
 	public void setLocalKnnIterator(LocalIndexKNNIterator localKNNIterator ) {
-		this.localKNNIterator = localKNNIterator;
+		this.localTopKIterator = localKNNIterator;
 	}
 	public Query (){
 		focalPoint = new Point();
@@ -116,7 +128,7 @@ public class Query {
 	}
 	public void resetKNNStructures() {
 		Comparator<DataObject> dataObjectKNNComparator = new DataObjectKNNComparator(this.focalPoint);
-		this.kNNQueue = new PriorityQueue<DataObject>(50, dataObjectKNNComparator);
+		this.topKQueue = new PriorityQueue<DataObject>(50, dataObjectKNNComparator);
 		this.currentRanks = new HashMap<String, Integer>();
 		this.currentObjects = new HashMap<String, DataObject>();
 		
@@ -270,7 +282,7 @@ public class Query {
 			DataObject toBeUpdatedInHeap = null;
 			// Locate that object in the priority queue.
 			//Only one instance of the same object can exist at a time 
-			Iterator<DataObject> it = kNNQueue.iterator();
+			Iterator<DataObject> it = topKQueue.iterator();
 			while (it.hasNext()) {
 				DataObject o = it.next();
 				if (o.getObjectId().equals(dataObject.getObjectId())) {
@@ -287,14 +299,14 @@ public class Query {
 				//or if we are make a remove of an object at a later time stamp
 				if((toBeUpdatedInHeap.getLocation().equals(dataObject.getLocation())&&dataObject.getTimeStamp().equals(toBeUpdatedInHeap.getTimeStamp()))||
 						dataObject.getTimeStamp()>=toBeUpdatedInHeap.getTimeStamp()	){//most likely this condition should not happen
-					kNNQueue.remove(toBeUpdatedInHeap);
+					topKQueue.remove(toBeUpdatedInHeap);
 				}
 			}
 			//what about other objects that may be inside the query area this means the area of stored objects need to extended to include the
 			else if((SpatioTextualConstants.updateCommand.equals( dataObject.getCommand()))&&textualPredicateMatched){
 				if(	dataObject.getTimeStamp()>=toBeUpdatedInHeap.getTimeStamp()	){
-					kNNQueue.remove(toBeUpdatedInHeap);
-					kNNQueue.add(dataObject);
+					topKQueue.remove(toBeUpdatedInHeap);
+					topKQueue.add(dataObject);
 			  }
 				
 			}
@@ -303,7 +315,7 @@ public class Query {
 			
 			if (currentRanks.size() < this.k) {
 				topkMayHaveChanged = true;
-				this.kNNQueue.add(dataObject);			
+				this.topKQueue.add(dataObject);			
 			} else {
 				// Calculate the distance corresponding to new location.
 				double distanceOfObject =   SpatialHelper.getDistanceInBetween(dataObject.getLocation(), this.focalPoint)  ;
@@ -312,8 +324,8 @@ public class Query {
 				if (this.getFarthestDistance() > distanceOfObject) {
 					topkMayHaveChanged = true;
 					// Remove the farthest.
-					DataObject toRemove= this.kNNQueue.remove();
-					this.kNNQueue.add(dataObject);
+					DataObject toRemove= this.topKQueue.remove();
+					this.topKQueue.add(dataObject);
 					
 				}
 			}
@@ -328,7 +340,7 @@ public class Query {
 				
 	}
 	public Integer getKNNlistSize() {
-		return kNNQueue.size();
+		return topKQueue.size();
 				
 	}
 	private ArrayList<ResultSetChange>  getTopkRanks() {
@@ -339,8 +351,8 @@ public class Query {
 		PriorityQueue<DataObject> temp = new PriorityQueue<DataObject>(50, maxHeap);
 		HashMap<String, DataObject> newCurrenObjects = new HashMap<String, DataObject>();
 		int rank = 1;	
-		while (!this.kNNQueue.isEmpty()) {
-			DataObject l = this.kNNQueue.remove();
+		while (!this.topKQueue.isEmpty()) {
+			DataObject l = this.topKQueue.remove();
 			temp.add(l);
 			newRanks.put(l.getObjectId(), rank);
 			rank++;
@@ -359,7 +371,7 @@ public class Query {
 				changes.add(new ResultSetChange(currentObjects.get(objectId),ResultSetChange.Remove, this));
 			}
 		}
-		this.kNNQueue = temp;
+		this.topKQueue = temp;
 		// Finally, update the current ranks to reflect the new ranks.
 		this.currentRanks = newRanks;
 		this.currentObjects = newCurrenObjects;
@@ -367,7 +379,7 @@ public class Query {
 		return changes;
 	}
 	private void calcFarthestDisatance(){
-		DataObject farthest = kNNQueue.peek();
+		DataObject farthest = topKQueue.peek();
 		if(farthest!=null)
 			this.farthestDistance= SpatialHelper.getDistanceInBetween(farthest.getLocation(), this.focalPoint);
 		else 
@@ -375,17 +387,17 @@ public class Query {
 	}
 	public ArrayList<DataObject> getKNNList(){
 		ArrayList<DataObject> KNNlist = new ArrayList<>();
-		Iterator <DataObject> it = kNNQueue.iterator();
+		Iterator <DataObject> it = topKQueue.iterator();
 		while(it.hasNext()){
 			KNNlist.add(it.next());
 		}
 		return KNNlist;
 	}
 	public ArrayList<Integer> getPendingKNNTaskIds() {
-		return pendingKNNTaskIds;
+		return pendingTopKTaskIds;
 	}
 	public void setPendingKNNTaskIds(ArrayList<Integer> pendingKNNTaskIds) {
-		this.pendingKNNTaskIds = pendingKNNTaskIds;
+		this.pendingTopKTaskIds = pendingKNNTaskIds;
 	}
 	
 	

@@ -35,7 +35,7 @@ public class IndexCell {
 	HashMap<String,Integer> allQueryTextInCell; //keyword, count of distinct queries
 	Rectangle bounds ;
 	ArrayList<Query> storedQueries;
-	
+	Integer dataObjectCount;
 	ArrayList<Query> outerEvaluatorQueries;
 	
 	public ArrayList<Query> getOuterEvaluatorQueries() {
@@ -51,6 +51,7 @@ public class IndexCell {
 		storedQueries = new ArrayList<Query>();
 		outerEvaluatorQueries = new ArrayList<Query>();
 		this.bounds = bounds;
+		this.dataObjectCount=0;
 	}
 	public HashMap<String, DataObject> getStoredObjects() {
 		return storedObjects;
@@ -91,6 +92,7 @@ public class IndexCell {
 	public void addDataObject (DataObject dataObject){
 		storedObjects.put(dataObject.getObjectId(), dataObject);
 		String prev="";
+		dataObjectCount++;
 		for(String s:dataObject.getObjectText()){
 			if(!s.equals(prev)){
 				prev=s;
@@ -106,6 +108,8 @@ public class IndexCell {
 		return storedObjects.get(id);
 	}
 	public DataObject dropDataObject(String id){
+		if(dataObjectCount>0)
+			dataObjectCount--;
 		DataObject obj= storedObjects.get(id);
 		storedObjects.remove(id);
 		return obj;
@@ -139,6 +143,10 @@ public class IndexCell {
 	    }
 		return qulifiedObjects;
 	}
+	public Integer getDataObjectCount() {
+		return dataObjectCount;
+	}
+	
 	public boolean cellOverlapsSpatiall(Rectangle rectangle){
 		return SpatialHelper.overlapsSpatially(bounds, rectangle);
 	}

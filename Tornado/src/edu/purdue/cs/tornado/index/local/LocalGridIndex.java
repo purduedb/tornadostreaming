@@ -325,12 +325,23 @@ public class LocalGridIndex {
 			} else {
 				partitions = mapRecToIndexCells(query.getSpatialRange());
 			}
-		} else if (SpatioTextualConstants.queryTextualKNN.equals(query.getQueryType())){
-			partitions  = mapDataPointToPartition(query.getFocalPoint());
+		} else if (SpatioTextualConstants.queryTextualKNN.equals(query.getQueryType())) {
+			partitions = mapDataPointToPartition(query.getFocalPoint());
 		}
 		return partitions;
 	}
 
+	public Integer getCountPerRec(Rectangle rec) {
+		Integer sum=0;
+		ArrayList<IndexCellCoordinates> indexCells = mapRecToIndexCells(rec);
+		for(IndexCellCoordinates indexCoordinate: indexCells)
+			sum+=getIndexCellFromCOordinates(indexCoordinate).getDataObjectCount();
+		return sum;
+				
+	}
+	private IndexCell getIndexCellFromCOordinates(IndexCellCoordinates indexCell){
+		return index.get(indexCell.getX()).get(indexCell.getY());
+	}
 	public LocalKNNGridIndexIterator LocalKNNIterator(Point focalPoint) {
 		return new LocalKNNGridIndexIterator(this, focalPoint);
 	}
