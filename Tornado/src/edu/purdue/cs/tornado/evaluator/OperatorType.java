@@ -2,12 +2,8 @@ package edu.purdue.cs.tornado.evaluator;
 
 public enum OperatorType {
 	//GENERAL
-	
-	
-	//INDEX
-	SPATIAL_INDEX,
-	TEXT_INDEX,
-	HYBRID_INDEX,
+	HYBRIBD_FILTER,//this hybrid operator evluates both a spatial and textual filter using a hybrid index	
+
 	//SPATIAL
 	SPATIAL_INSIDE,//arguments  true /false
 	SPATIAL_DIST, //

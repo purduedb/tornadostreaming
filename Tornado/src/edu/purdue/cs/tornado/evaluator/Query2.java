@@ -7,7 +7,25 @@ public class Query2 {
 	public String querySrcId;
 	public String queryId;
 	public Boolean continousQuery;
-	public HashMap<String,ArrayList<Operator>> dataSrcOperators;
-	public HashMap<String,ArrayList<Operator>> joinOperators;
+	public ArrayList<Operator> dataSrcOperators;
+	public ArrayList<Operator> joinOperators;
+	//this parameter is set by optimizer 
+	public Operator plan;
+	
+	public Query2( String querySrcId,String queryId, Boolean continousQuery){
+		this.querySrcId = querySrcId;
+		this.queryId = queryId;
+		this.continousQuery = continousQuery;
+		dataSrcOperators = new ArrayList<Operator>();
+		joinOperators = new ArrayList<Operator>();
+		
+	}
+	
+	public void addDataSrcOperator(Operator operator){
+		dataSrcOperators.add(operator);
+	}
+	public void addJoinOperator(Operator operator){
+		dataSrcOperators.add(operator);
+	}
 	
 }

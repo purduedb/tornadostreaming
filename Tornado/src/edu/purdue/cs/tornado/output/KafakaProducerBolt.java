@@ -39,7 +39,7 @@ import edu.purdue.cs.tornado.helper.JsonHelper;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.messages.OutputTuple;
+import edu.purdue.cs.tornado.messages.CombinedTuple;
 
 public class KafakaProducerBolt extends BaseRichBolt {
 	private Map stormConf; // configuration
@@ -72,7 +72,7 @@ public class KafakaProducerBolt extends BaseRichBolt {
 	@Override
 	public synchronized void  execute(Tuple input) {
 		try {
-			OutputTuple outputTuple = (OutputTuple) input.getValueByField(SpatioTextualConstants.output);
+			CombinedTuple outputTuple = (CombinedTuple) input.getValueByField(SpatioTextualConstants.output);
 			//		System.out.println(outputTuple.toString());
 			LatLong latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation());
 			Double lat = latLong.getLatitude();
@@ -122,7 +122,7 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		json = JsonHelper.convertMapToJsonString(outputMap);
 		return json;
 	}
-	private String convertOutputToJsonForSingleQuery(OutputTuple outputTuple) {
+	private String convertOutputToJsonForSingleQuery(CombinedTuple outputTuple) {
 		String json = "";
 		Map outputMap = new HashMap<Object, Object>();
 		
@@ -146,7 +146,7 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		json = JsonHelper.convertMapToJsonString(outputMap);
 		return json;
 	}
-	private String convertOutputToJsonForJoin(OutputTuple outputTuple) {
+	private String convertOutputToJsonForJoin(CombinedTuple outputTuple) {
 		String json = "";
 		Map outputMap = new HashMap<Object, Object>();
 		

@@ -77,17 +77,18 @@ public class POILFSDataSource extends AbstractStaticDataSource {
 		int yMaxCell = (int) (bounds.getMax().getY() / yStep);
 		//to handle the case where data is outside the range of the bolts 
 		if (xMaxCell >= SpatioTextualConstants.xMaxRange / xStep)
-			xMaxCell = (int) ((SpatioTextualConstants.xMaxRange / xStep) - 1);
+			xMaxCell = (int) ((SpatioTextualConstants.xMaxRange / xStep) );
 		if (yMaxCell >= SpatioTextualConstants.yMaxRange / xStep)
-			yMaxCell = (int) ((SpatioTextualConstants.yMaxRange / yStep) - 1);
+			yMaxCell = (int) ((SpatioTextualConstants.yMaxRange / yStep) );
 		if (xMinCell < 0)
 			xMinCell = 0;
 		if (yMinCell < 0)
 			yMinCell = 0;
 
-		for (int i = xMinCell; i <= xMaxCell; i++) {
-			for (int j = yMinCell; j <= yMaxCell; j++) {
-				String filePath = folderPath + i + "_" + j + ".csv";
+
+		for (int i = xMinCell; i < xMaxCell; i++) {
+			for (int j = yMinCell; j < yMaxCell; j++) {
+				String filePath = folderPath + j + "_" + i + ".csv";
 				pathArr.add(filePath);
 
 			}

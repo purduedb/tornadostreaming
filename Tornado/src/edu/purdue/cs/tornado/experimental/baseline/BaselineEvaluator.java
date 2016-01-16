@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import backtype.storm.metric.api.CountMetric;
+import backtype.storm.metric.api.MeanReducer;
+import backtype.storm.metric.api.ReducedMetric;
 import backtype.storm.task.OutputCollector;
 import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.OutputFieldsDeclarer;
@@ -18,7 +21,7 @@ import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
-import edu.purdue.cs.tornado.messages.OutputTuple;
+import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.storage.AbstractStaticDataSource;
 import edu.purdue.cs.tornado.storage.POIHDFSSource;
@@ -41,7 +44,12 @@ public class BaselineEvaluator extends BaseRichBolt {
 	Map stormConf;
 	TopologyContext context;
 	OutputCollector collector;
-
+	transient CountMetric _inputDataCountMetric;
+	transient ReducedMetric _dataCountMeanMetric;
+	transient CountMetric _outputCountMetric;
+	transient ReducedMetric _outputCountMeanMetric;
+	transient CountMetric _queriesCountMetric;
+	transient ReducedMetric _queriesCountMeanMetric;
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
 		this.stormConf = stormConf;
@@ -53,25 +61,45 @@ public class BaselineEvaluator extends BaseRichBolt {
 		allQueries = new ArrayList<Query>();
 		staticData = new ArrayList<DataObject>(); //Maybe this needs to be spatially partitioned 
 		selfBounds = new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange));
-		Long startTime = System.nanoTime();
-	    readStaticData();
-	    Long endTime = System.nanoTime();
-	    System.out.println("StaticData load time in nanoseconds="+(startTime-endTime));
+		initMetrics( context) ;
+//		Long startTime = System.nanoTime();
+//	    readStaticData();
+//	    Long endTime = System.nanoTime();
+//	    System.out.println("StaticData load time in nanoseconds="+(startTime-endTime));
 	}
-
+	void initMetrics(TopologyContext context) {
+		_inputDataCountMetric = new CountMetric();
+		context.registerMetric("Data_Object_counter", _inputDataCountMetric, 300);
+		_dataCountMeanMetric = new ReducedMetric(new MeanReducer());
+		context.registerMetric("Data_Object_count_mean", _dataCountMeanMetric,300);
+		_outputCountMetric = new CountMetric();
+		context.registerMetric("Output_counter", _outputCountMetric, 300);
+		_outputCountMeanMetric = new ReducedMetric(new MeanReducer());
+		context.registerMetric("Output_count_mean", _outputCountMeanMetric,300);
+		 _queriesCountMetric= new CountMetric();
+		context.registerMetric("Queries_counter", _queriesCountMetric, 300);
+		_queriesCountMeanMetric = new ReducedMetric(new MeanReducer());
+		context.registerMetric("Queries_count_mean", _queriesCountMeanMetric,300);
+	}
 	@Override
 	public void execute(Tuple input) {
 
 		if (input.getSourceComponent().equals("Datasource")) {
+			_inputDataCountMetric.incr();
+			_dataCountMeanMetric.update(1);
 			DataObject dataObject = readDataObject(input, "Datasource");
 			//iterate over all queries and check if the tuple qualifies for this query
 			Boolean resend = evaluateDataObjectAgainstQueries(dataObject,false);
 			if(resend){
-				collector.emit("sharedData",input, new Values(dataObject));
+				//collector.emit("sharedData",input, new Values(dataObject));
+				collector.emit("sharedData",new Values(dataObject));
 			}
 		} else if (input.getSourceComponent().equals("Querysource")) {
+			_queriesCountMetric.incr();
+			_queriesCountMeanMetric.update(1);
 			String queryType = input.getStringByField(SpatioTextualConstants.queryTypeField);
 			Query query = readQueryByType(input, queryType, "Querysource");
+			for(int i =0;i<10;i++)
 			allQueries.add(query);
 		} else if (input.getSourceComponent().equals("BaseLineEvaluator")) {
 			if(input.getSourceTask()!=selfTaskId){
@@ -80,7 +108,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 			}
 				
 		}
-		collector.ack(input);
+	//	collector.ack(input);
 	}
 
 	private Query readQueryByType(Tuple input, String queryType, String source) {
@@ -209,25 +237,13 @@ public class BaselineEvaluator extends BaseRichBolt {
 	}
 
 	private DataObject readDataObject(Tuple input, String source) {
-		DataObject dataObject = new DataObject();
-		dataObject.setSrcId(source);
-		if (input.contains(SpatioTextualConstants.dataObjectCommand))
-			dataObject.setCommand(input.getStringByField(SpatioTextualConstants.dataObjectCommand));
-		if (input.contains(SpatioTextualConstants.objectIdField))
-			dataObject.setObjectId(input.getStringByField(SpatioTextualConstants.objectIdField));
-		if (input.contains(SpatioTextualConstants.objectXCoordField))
-			dataObject.getLocation().setX(input.getDoubleByField(SpatioTextualConstants.objectXCoordField));
-		if (input.contains(SpatioTextualConstants.objectYCoordField))
-			dataObject.getLocation().setY(input.getDoubleByField(SpatioTextualConstants.objectYCoordField));
-		if (input.contains(SpatioTextualConstants.objectTextField)) {
-			String objectText = input.getStringByField(SpatioTextualConstants.objectTextField);
-			ArrayList<String> objectTextList = TextHelpers.transformIntoSortedArrayListOfString(objectText);
-			dataObject.setOriginalText(objectText);
-			dataObject.setObjectText(objectTextList);
+		DataObject dataObject = null;
+		if (input.contains(SpatioTextualConstants.dataObject)) {
+			dataObject = (DataObject) input.getValueByField(SpatioTextualConstants.dataObject);
+			dataObject.setSrcId(source);
 		}
-		if (input.contains(SpatioTextualConstants.timeStamp))
-			dataObject.setTimeStamp(input.getLongByField(SpatioTextualConstants.timeStamp));
 		return dataObject;
+
 
 	}
 
@@ -243,8 +259,10 @@ public class BaselineEvaluator extends BaseRichBolt {
 	}
 
 	void generateOutput(Query q, DataObject obj, String command) {
+		_outputCountMeanMetric.update(1);
+		_outputCountMetric.incr();
 		//	System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
-		OutputTuple outputTuple = new OutputTuple();
+		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.setDataObject(obj);
 		Query miniQuery = new Query();
 		miniQuery.setQueryId(q.getQueryId());
@@ -257,7 +275,9 @@ public class BaselineEvaluator extends BaseRichBolt {
 
 	void generateOutput(Query q, DataObject obj, DataObject obj2, String obj1Command, String obj2Command) {
 	//		System.out.println("[Output: command  "+obj1Command+" query:"  + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
-		OutputTuple outputTuple = new OutputTuple();
+		_outputCountMeanMetric.update(1);
+		_outputCountMetric.incr();
+		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.setDataObject(obj);
 		outputTuple.setDataObject2(obj2);
 		Query miniQuery = new Query();

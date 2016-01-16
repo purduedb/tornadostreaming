@@ -19,8 +19,10 @@ import edu.purdue.cs.tornado.messages.DataObject;
 
 public class TweetsFSSpout extends FileSpout {
 
-	public TweetsFSSpout(Map spoutConf) {
-		super(spoutConf);
+	Integer spoutReplication;
+	public TweetsFSSpout(Map spoutConf, Integer initialSleepDuration,Integer spoutReplication) {
+		super(spoutConf, initialSleepDuration);
+		this.spoutReplication=spoutReplication;
 	}
 
 	Long i = new Long(0);
@@ -54,13 +56,17 @@ public class TweetsFSSpout extends FileSpout {
 		if (tweet == null || tweet.isEmpty())
 			return;
 		i = i + 1;
+
 		emitTweet(tweet, i);
-		sleep();
+	
+
+	sleep();
+
 	}
 
 	private void emitTweet(String tweet, Long msgId) {
 		StringTokenizer stringTokenizer = new StringTokenizer(tweet, ",");
-		String id = stringTokenizer.hasMoreTokens() ? selfTaskId + "_"+stringTokenizer.nextToken() : "";
+		String id = stringTokenizer.hasMoreTokens() ? selfTaskId + "_" + stringTokenizer.nextToken() : "";
 		String dateString = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
 		//dateString = stringTokenizer.hasMoreTokens()?stringTokenizer.nextToken():"";
 
@@ -73,26 +79,28 @@ public class TweetsFSSpout extends FileSpout {
 			lon = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
 		} catch (Exception e) {
 			e.printStackTrace();
-			return ;
+			return;
 		}
 
 		String textContent = "";
 		String dummy = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
 		while (stringTokenizer.hasMoreTokens())
 			textContent = textContent + stringTokenizer.nextToken() + " ";
-		
+
 		Point xy = SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat, lon));
 		Date date = new Date();
 
-		DataObject obj= new DataObject(id,xy,textContent,date.getTime(),SpatioTextualConstants.addCommand);
-		if (reliable)
-			this.collector.emit(new Values(id,obj), "" + selfTaskId + "_" + (i++));
-		else	this.collector.emit(new Values(id,obj));
+		DataObject obj = new DataObject(id, xy, textContent, date.getTime(), SpatioTextualConstants.addCommand);
+		for (int j = 0; j < spoutReplication; j++) {
+			if (reliable)
+				this.collector.emit(new Values(id, obj), "" + selfTaskId + "_" + (i++));
+			else
+				this.collector.emit(new Values(id, obj));
+		}
 	}
 
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		super.open(conf, context, collector);
-		
 
 	}
 

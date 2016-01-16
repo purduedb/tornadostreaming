@@ -91,6 +91,11 @@
 			<artifactId>jts</artifactId>
 			<version>1.13</version>
 		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>19.0</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.timgroup</groupId>
@@ -217,14 +222,13 @@
 		</dependency>
 
 		<!-- Storm Dependency -->
-		<dependency>
-			<groupId>org.apache.storm</groupId>
-			<artifactId>storm-core</artifactId>
-			<version>0.9.4</version>
-			<scope>provided</scope>
-		</dependency>
-		<!-- <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
-			<version>4.8.1</version> <scope>test</scope> </dependency> <dependency> <groupId>net.sf.jsqlparser</groupId> 
+	<dependency>
+		<groupId>org.apache.storm</groupId>
+		<artifactId>storm-core</artifactId>
+		<version>0.10.0</version>
+	</dependency>
+		<dependency> <groupId>junit</groupId> <artifactId>junit</artifactId> 
+			<version>4.8.1</version></dependency> <!-- <dependency> <groupId>net.sf.jsqlparser</groupId> 
 			<artifactId>jsqlparser</artifactId> <version>0.8.0</version> </dependency> 
 			<dependency> <groupId>args4j</groupId> <version>2.0.16</version> <artifactId>args4j</artifactId> 
 			</dependency> <dependency> <groupId>net.sf.trove4j</groupId> <artifactId>trove4j</artifactId> 

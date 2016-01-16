@@ -32,6 +32,8 @@ import backtype.storm.Config;
 import edu.purdue.cs.tornado.SpatioTextualLocalCluster;
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.index.global.GlobalIndexType;
+import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.spouts.FileSpout;
 import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
 import edu.purdue.cs.tornado.spouts.SampleUSATweetGenerator;
@@ -41,7 +43,7 @@ import edu.purdue.cs.tornado.storage.POILFSDataSource;
 public class TestMain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestMain.class);
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) throws Exception {
 		final Properties properties = new Properties();
 		try {
 			LOGGER.info("******************************************************************");
@@ -59,7 +61,7 @@ public class TestMain {
 		tweetsSpoutConf.put(FileSpout.FILE_PATH,properties.getProperty("TWEETS_FILE_PATH"));
 		tweetsSpoutConf.put(FileSpout.FILE_SYS_TYPE,FileSpout.LFS);
 		tweetsSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC,new Integer (1000));
-		builder.setSpout("Tweets", new TweetsFSSpout(tweetsSpoutConf), 1);
+		builder.setSpout("Tweets", new TweetsFSSpout(tweetsSpoutConf,100,100), 1);
 				
 		Map<String, Object> queriesSpoutConf = new HashMap<String, Object>();
 		queriesSpoutConf.put(FileSpout.FILE_PATH,properties.getProperty("QUERIES_FILE_PATH"));
@@ -71,7 +73,7 @@ public class TestMain {
 		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField,SpatioTextualConstants.queryTextualRange);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate,SpatioTextualConstants.overlaps);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC,new Integer (1000));
-		builder.setSpout("TextualRangeQueryGenerator", new QueriesFileSystemSpout(queriesSpoutConf), 1);
+		builder.setSpout("TextualRangeQueryGenerator", new QueriesFileSystemSpout(queriesSpoutConf,100), 1);
 		//builder.setSpout("Tweets", new TweetsHDFSSpout(), 1);
 		//builder.setSpout("MovingObjects", new BrinkhoffSpout(), 1);
 		//		builder.setSpout("movingobjects", new TestMovingObjectWithTextSpout(), 1);
@@ -90,7 +92,7 @@ public class TestMain {
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(TestPOIsStaticDataSource.POIS_PATH, properties.getProperty(TestPOIsStaticDataSource.POIS_PATH));
 	//	staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty(POILFSDataSource.POI_FOLDER_PATH));
-		builder.addSpatioTextualProcessor("spatiotextualcomponent1", 36,36)
+		builder.addSpatioTextualProcessor("spatiotextualcomponent1", 36,36,GlobalIndexType.GRID,LocalIndexType.HYBRID_GRID)
 				.addVolatileSpatioTextualInput("Tweets")
 				//.addCurrentSpatioTextualInput("MovingObjects")
 				//.addCleanVolatileSpatioTextualInput("Tweets")

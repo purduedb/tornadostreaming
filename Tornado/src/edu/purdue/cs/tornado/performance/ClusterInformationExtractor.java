@@ -24,7 +24,6 @@ import backtype.storm.generated.ExecutorStats;
 import backtype.storm.generated.ExecutorSummary;
 import backtype.storm.generated.GlobalStreamId;
 import backtype.storm.generated.Nimbus.Client;
-import backtype.storm.generated.NotAliveException;
 import backtype.storm.generated.SpoutStats;
 import backtype.storm.generated.TopologyInfo;
 import backtype.storm.generated.TopologySummary;
@@ -352,9 +351,7 @@ public class ClusterInformationExtractor {
 			e.printStackTrace();
 		} catch (TException e) {
 			e.printStackTrace();
-		} catch (NotAliveException e) {
-			e.printStackTrace();
-		}
+		} 
 	}
 
 	/*

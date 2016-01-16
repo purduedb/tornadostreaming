@@ -28,7 +28,7 @@ import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 
 public class LocalKNNGridIndexIterator extends LocalIndexKNNIterator{
-	private LocalGridIndex gridIndex;
+	private LocalHybridGridIndex gridIndex;
 	Integer totalNumberofGridCells;
 	Integer visitedNumberofGridCells;
 	IndexCellCoordinates minIndexCellCoordinates, maxIndexCellCoordinates;
@@ -36,20 +36,20 @@ public class LocalKNNGridIndexIterator extends LocalIndexKNNIterator{
 	ArrayList<ArrayList<IndexCell>> orderedIndexList;
 	Integer orderedListIndex;
 
-	public LocalKNNGridIndexIterator(LocalGridIndex gridIndex, Point focalPoint) {
+	public LocalKNNGridIndexIterator(LocalHybridGridIndex gridIndex, Point focalPoint) {
 		
 		
 		initStructures(gridIndex, focalPoint);
 		
 	}
-	private void initStructures(LocalGridIndex gridIndex, Point focalPoint){
+	private void initStructures(LocalHybridGridIndex gridIndex, Point focalPoint){
 		orderedIndexList = new ArrayList<ArrayList<IndexCell>>();
 		this.gridIndex = gridIndex;
 		totalNumberofGridCells = gridIndex.getLocalXcellCount() * gridIndex.getLocalYcellCount();
 		visitedNumberofGridCells = 0;
 		if(SpatialHelper.overlapsSpatially(focalPoint, gridIndex.getSelfBounds())){
-			minIndexCellCoordinates = gridIndex.mapDataPointToPartition(focalPoint).get(0);
-			maxIndexCellCoordinates = gridIndex.mapDataPointToPartition(focalPoint).get(0);
+			minIndexCellCoordinates = gridIndex.mapDataPointToPartition(focalPoint);
+			maxIndexCellCoordinates = gridIndex.mapDataPointToPartition(focalPoint);
 		}
 		else{
 			int x =0,y=0;
@@ -73,7 +73,7 @@ public class LocalKNNGridIndexIterator extends LocalIndexKNNIterator{
 		orderedListIndex=0;
 	}
 
-	public LocalKNNGridIndexIterator(LocalGridIndex gridIndex, Point focalPoint, Double stratingDistance) {
+	public LocalKNNGridIndexIterator(LocalHybridGridIndex gridIndex, Point focalPoint, Double stratingDistance) {
 		this(gridIndex, focalPoint);
 
 		ArrayList<IndexCell> currentRoundIndexCells;

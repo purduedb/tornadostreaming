@@ -29,7 +29,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
 import edu.purdue.cs.tornado.messages.DataObject;
-import edu.purdue.cs.tornado.messages.OutputTuple;
+import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class JsonHelper {
@@ -289,7 +289,7 @@ public class JsonHelper {
 
 	}
 
-	public static String convertOutputToJsonString(OutputTuple outputTuple) {
+	public static String convertOutputToJsonString(CombinedTuple outputTuple) {
 		return null;
 	}
 

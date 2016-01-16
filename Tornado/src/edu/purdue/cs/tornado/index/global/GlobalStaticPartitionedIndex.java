@@ -40,10 +40,16 @@ public class GlobalStaticPartitionedIndex extends GlobalIndex {
 		super(numberOfEvaluatorTasks, evaluatorBoltTasks);
 		partitionTree =new RTree<Partition>(10, 5, 2);
 		ArrayList<Partition>partitions = PartitionsHelper.getGridBasedParitions(numberOfEvaluatorTasks);
-		for(Partition p : partitions)
-			partitionTree.insert(p.getCoords(), p.getDimensions(), p);
+		for(Partition p : partitions){
+			double[] expandedCoordnates=p.getCoords().clone();
+			double[] expandedDimensions=p.getDimensions().clone();
+			expandedCoordnates[0]*=SpatioTextualConstants.fineGridGranularityXstep;
+			expandedCoordnates[1]*=SpatioTextualConstants.fineGridGranularityYstep;
 			
-
+			expandedDimensions[0]*=SpatioTextualConstants.fineGridGranularityXstep;
+			expandedDimensions[1]*=SpatioTextualConstants.fineGridGranularityYstep;
+			partitionTree.insert(expandedCoordnates, expandedDimensions, p);
+		}
 	}
    public GlobalStaticPartitionedIndex(Integer numberOfEvaluatorTasks, List<Integer> evaluatorBoltTasks,ArrayList<Partition>partitions) {
 		super(numberOfEvaluatorTasks, evaluatorBoltTasks);

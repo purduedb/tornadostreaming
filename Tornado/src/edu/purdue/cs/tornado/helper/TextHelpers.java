@@ -25,6 +25,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import edu.purdue.cs.tornado.messages.Query;
+
 public class TextHelpers {
 	public static final String[] SET_VALUES = new String[] { "a","ab","abt","attwaction","attwicted",
 			"as","able","about","above","according","accordingly","across","actually","after","afterwards",
@@ -120,6 +122,7 @@ public class TextHelpers {
 				return true;
 		return false;
 	}
+
 	/**
 	 * This function evaluates textual predicates 
 	 * the function is order sensetive , so you evlaute as eval(list1,list2)
@@ -173,13 +176,39 @@ public class TextHelpers {
 		  return false;
 	}
 	/**
+	 * This method returns the count of overlapping  keywords 
+	 * This method assumes that input lists are sorted on text to speed up the overlap identification process and entries in this arraylist are distinict
+	 * @param list1 sorted array of strings
+	 * @param list2 sorted array of strings
+	 * @return
+	 */
+	public static Integer getTextOverlapCount(ArrayList<String> textList1,ArrayList<String> textList2){
+		  int n1 = textList1.size();
+		  int n2 = textList2.size();
+		  int i = 0, j = 0;
+		  Integer count=0;
+		  while (i < n1 && j < n2) {
+			int val= textList1.get(i).compareToIgnoreCase(textList2.get(j));
+		    if (val <0 ) { //str1 is greater than str2
+		      i++;
+		    } else if (val>0) {//str2 is greater than str1
+		      j++;
+		    } else {
+		      count++;
+		      i++;
+		      j++;
+		    }
+		  }
+		  return count;
+	}
+	/**
 	 * This method determines if one keyword list contains all keywords of the other list
 	 * This method assumes that input lists are sorted on text to speed up the overlap identification process
 	 * @param list1 sorted array of strings
 	 * @param list2 sorted array of strings
 	 * @return
 	 */
-	private static boolean containsTextually(ArrayList<String> textListContainer,ArrayList<String> textListSubset){
+	public static boolean containsTextually(ArrayList<String> textListContainer,ArrayList<String> textListSubset){
 		  int n1 = textListContainer.size();
 		  int n2 = textListSubset.size();
 		  int matchingCount=0;

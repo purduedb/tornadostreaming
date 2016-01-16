@@ -33,6 +33,8 @@ import edu.purdue.cs.tornado.evaluator.SpatioTextualEvaluatorBolt;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.index.DynamicGlobalIndexBolt;
 import edu.purdue.cs.tornado.index.GlobalIndexBolt;
+import edu.purdue.cs.tornado.index.global.GlobalIndexType;
+import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.loadbalance.Partition;
 /**
  * This class is an extension to the storm topology builder and it allows adding spatio- textual query processing abilities 
@@ -71,7 +73,7 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 	 * @return
 	 */
 	public SpatioTextualBoltDeclarer addSpatioTextualProcessor(String id,
-			Number routing_parallelism_hint,Number evaluator_parallelism_hint,ArrayList<Partition> partitions,String indexType ) {
+			Number routing_parallelism_hint,Number evaluator_parallelism_hint,ArrayList<Partition> partitions,GlobalIndexType globalIndexType,LocalIndexType localIndexType) {
 	
 		//TODO add validation on the inputs 
 		//TODO remove extra streams 
@@ -106,8 +108,8 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 		
 		
 		
-		GlobalIndexBolt indexBolt = new GlobalIndexBolt(id,partitions,indexType);
-		SpatioTextualEvaluatorBolt spatioTextualBolt = new SpatioTextualEvaluatorBolt(id);
+		GlobalIndexBolt indexBolt = new GlobalIndexBolt(id,partitions,globalIndexType);
+		SpatioTextualEvaluatorBolt spatioTextualBolt = new SpatioTextualEvaluatorBolt(id,localIndexType,globalIndexType,partitions);
 		_spatioTexualIndexes.put(id, indexBolt);
 		_spatioTexualEvaluators.put(id, spatioTextualBolt);
 		
@@ -143,7 +145,7 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 	 * @return
 	 */
 	public SpatioTextualBoltDeclarer addDynamicSpatioTextualProcessor(String id,
-			Number routing_parallelism_hint,Number evaluator_parallelism_hint,ArrayList<Partition> partitions,String indexType ) {
+			Number routing_parallelism_hint,Number evaluator_parallelism_hint,ArrayList<Partition> partitions,LocalIndexType localIndexType ) {
 	
 		//TODO add validation on the inputs 
 		//TODO remove extra streams 
@@ -204,35 +206,19 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 		this._IndexGetter.put(id, spatioTextualIndexGetter);
 		return spatioTextualIndexGetter;
 	}
-	/**
-	 * Static index with partitions
-	 * @param id
-	 * @param routing_parallelism_hint
-	 * @param evaluator_parallelism_hint
-	 * @param partitions
-	 * @return
-	 * @throws java.lang.Exception 
-	 */
-	public SpatioTextualBoltDeclarer addSpatioTextualProcessor(String id,
-			Number routing_parallelism_hint,Number evaluator_parallelism_hint,ArrayList<Partition> partitions) throws Exception{
-		if(partitions==null||(Integer)evaluator_parallelism_hint!=partitions.size()){
-			Exception  e = new Exception("Partitions list sizes and number of evaluators do not match  ");
-			throw e;
-		}
-			
-		return  addSpatioTextualProcessor(id,routing_parallelism_hint, evaluator_parallelism_hint,partitions,null);
-	}
+	
 	/**
 	 * Static grid index
 	 * @param id
 	 * @param routing_parallelism_hint
 	 * @param evaluator_parallelism_hint
 	 * @return
+	 * @throws Exception 
 	 */
 	public SpatioTextualBoltDeclarer addSpatioTextualProcessor(String id,
-			Number routing_parallelism_hint,Number evaluator_parallelism_hint) {
+			Number routing_parallelism_hint,Number evaluator_parallelism_hint,GlobalIndexType globalIndexType,LocalIndexType localIndexType) throws Exception {
 		
-		return  addSpatioTextualProcessor(id,routing_parallelism_hint, evaluator_parallelism_hint,null,null);
+		return  addSpatioTextualProcessor(id,routing_parallelism_hint, evaluator_parallelism_hint,null,globalIndexType,localIndexType);
 	}
 
 	protected class SpatioTextualIndexGetter implements SpatioTextualBoltDeclarer {

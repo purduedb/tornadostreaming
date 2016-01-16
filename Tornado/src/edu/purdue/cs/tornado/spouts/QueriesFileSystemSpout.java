@@ -19,8 +19,8 @@ import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class QueriesFileSystemSpout extends FileSpout {
-	public QueriesFileSystemSpout(Map spoutConf) {
-		super(spoutConf);
+	public QueriesFileSystemSpout(Map spoutConf,Integer initialSleepDuration) {
+		super(spoutConf,initialSleepDuration);
 		
 	}
 

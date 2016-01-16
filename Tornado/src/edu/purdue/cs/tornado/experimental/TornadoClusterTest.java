@@ -21,10 +21,14 @@ import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.index.global.GlobalIndexType;
+import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.loadbalance.Partition;
 import edu.purdue.cs.tornado.performance.ClusterInformationExtractor;
 import edu.purdue.cs.tornado.spouts.DummyTweetGenerator;
+import edu.purdue.cs.tornado.spouts.FileSpout;
 import edu.purdue.cs.tornado.storage.POIHDFSSource;
+import edu.purdue.cs.tornado.storage.POILFSDataSource;
 
 public class TornadoClusterTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TornadoClusterTest.class);
@@ -45,23 +49,28 @@ public class TornadoClusterTest {
 		String tweetsSource = "Tweets";
 		String POISource = "POI_Data";
 		String querySource = "querySource";
+		String querySource2 = "querySource2";
+		String querySource3 = "querySource3";
 
 		//builder.setSpout(tweetsSource, new DummyTweetGenerator(5), Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()));
-				DataAndQueriesSources.addHDFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 0);
-		//	DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 50.0, 1000, 5, 0);
-		//	DataAndQueriesSources.addJoinQueries(tweetsSource, POISource, querySource, builder, properties, 1, 50.0, 1000, 5, 20.0, 0);
+		DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 0,10000,1);
+	//	builder.setSpout(tweetsSource, new DummyTweetGenerator(10), Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()));
+		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 50.0, 100000, 5, 0,100,FileSpout.LFS);
+	//	DataAndQueriesSources.addJoinQueries(tweetsSource, POISource, querySource2, builder, properties, 1, 50.0, 1000, 5, 20.0, 0);
+	//	DataAndQueriesSources.addTopKQueries(tweetsSource, querySource3, builder, properties, 1, 10, 1000, 5, 0);
 
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
-		staticSourceConf.put(POIHDFSSource.HDFS_POI_FOLDER_PATH, properties.getProperty(POIHDFSSource.HDFS_POI_FOLDER_PATH));
-		staticSourceConf.put(POIHDFSSource.CORE_FILE_PATH, properties.getProperty("CORE_FILE_PATH"));
-		
+//	staticSourceConf.put(POIHDFSSource.HDFS_POI_FOLDER_PATH, properties.getProperty(POIHDFSSource.HDFS_POI_FOLDER_PATH));
+//		staticSourceConf.put(POIHDFSSource.CORE_FILE_PATH, properties.getProperty("CORE_FILE_PATH"));
+		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
 		ArrayList<Partition> partitions = PartitionsHelper.readSerializedPartitions(properties.getProperty("PARTITIONS_PATH").trim());
 		//builder.addSpatioTextualProcessor("tornado", Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim()), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim()))
-		builder.addDynamicSpatioTextualProcessor("tornado", Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim()), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim()), null, null)
-		//builder.addSpatioTextualProcessor("tornado", Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim()), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim()),partitions)
-				.addVolatileSpatioTextualInput(tweetsSource)
-				//	.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POIHDFSSource", staticSourceConf)
-				//	.addContinuousQuerySource(querySource)
+		//	builder.addDynamicSpatioTextualProcessor("tornado", Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim()), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim()), null, null)
+		builder.addSpatioTextualProcessor("tornado", Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim()), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim()), partitions, GlobalIndexType.PARTITIONED,
+				LocalIndexType.HYBRID_GRID).addVolatileSpatioTextualInput(tweetsSource)
+		//			.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POIHDFSSource", staticSourceConf)
+	//	.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POILFSDataSource", staticSourceConf)
+					.addContinuousQuerySource(querySource)
 		;
 
 		String topologyName = "Tornado";
@@ -108,7 +117,7 @@ public class TornadoClusterTest {
 		nimbusInfo[0] = nimbusHost;
 		nimbusInfo[1] = "" + nimbusPort;
 
-		Integer minutesToStats=Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
+		Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
 		Thread.sleep(1000 * 60 * minutesToStats);
 		ClusterInformationExtractor.main(nimbusInfo);
 		//	KillTopology.killToplogy(topologyName, nimbusHost, nimbusPort);

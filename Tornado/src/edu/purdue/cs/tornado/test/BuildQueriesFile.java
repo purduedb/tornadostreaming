@@ -52,8 +52,6 @@ public class BuildQueriesFile {
 			Integer freq=Integer.parseInt(words[1]);
 			if(freq>cuttOff)
 				keywords.add(keyword);
-				
-
 		}
 		br.close();
 		fstream.close();

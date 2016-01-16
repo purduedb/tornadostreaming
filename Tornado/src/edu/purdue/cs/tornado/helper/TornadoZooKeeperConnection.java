@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.storm.curator.framework.CuratorFramework;
-import org.apache.storm.curator.framework.CuratorFrameworkFactory;
-import org.apache.storm.curator.retry.ExponentialBackoffRetry;
-import org.apache.storm.zookeeper.CreateMode;
-import org.apache.storm.zookeeper.KeeperException;
-import org.apache.storm.zookeeper.WatchedEvent;
-import org.apache.storm.zookeeper.Watcher;
+import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.Watcher;
 
 import backtype.storm.Config;
 

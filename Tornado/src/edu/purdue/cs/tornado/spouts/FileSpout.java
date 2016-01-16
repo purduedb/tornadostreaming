@@ -27,10 +27,11 @@ public class FileSpout extends BaseRichSpout {
 	public static final String CORE_FILE_PATH = "CORE_FILE_PATH";
 	public static final String EMIT_SLEEP_DURATION_NANOSEC = "EMIT_SLEEP_DURATION_NANOSEC";
 	public static final long serialVersionUID = 1L;
+	public Integer initialSleepDuration;
 	public SpoutOutputCollector collector;
-	 Integer selfTaskId;
-	 Boolean reliable;
-	
+	Integer selfTaskId;
+	Boolean reliable;
+
 	//public Map conf;
 	public BufferedReader br;
 	public Configuration hdfsconf;
@@ -39,11 +40,12 @@ public class FileSpout extends BaseRichSpout {
 	public String corePath;
 	public Path pt;
 	public String fileSystemType;
-	public Integer sleepDurationNanoSec;
+	public Integer sleepDurationMicroSec;
 	public Map spoutConf;
 
-	public FileSpout(Map spoutConf) {
+	public FileSpout(Map spoutConf,Integer initialSleepDuration) {
 		this.spoutConf = spoutConf;
+		this.initialSleepDuration = initialSleepDuration;
 	}
 
 	@Override
@@ -60,14 +62,17 @@ public class FileSpout extends BaseRichSpout {
 
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
-		
+
 		//this.conf = conf;
 		this.collector = collector;
-		this.selfTaskId =context.getThisTaskId();
-		this.reliable =((Long)conf.get(Config.TOPOLOGY_ACKER_EXECUTORS))>0;
+		this.selfTaskId = context.getThisTaskId();
+		if (conf != null)
+			this.reliable = ((Long) conf.get(Config.TOPOLOGY_ACKER_EXECUTORS)) > 0;
+		else
+			this.reliable = false;
 		this.filePath = (String) spoutConf.get(FILE_PATH);
 		this.fileSystemType = (String) spoutConf.get(FILE_SYS_TYPE);
-		this.sleepDurationNanoSec = (Integer) spoutConf.get(EMIT_SLEEP_DURATION_NANOSEC);
+		this.sleepDurationMicroSec = (Integer) spoutConf.get(EMIT_SLEEP_DURATION_NANOSEC);
 		if (fileSystemType.equals(HDFS)) {
 			this.corePath = (String) spoutConf.get(CORE_FILE_PATH);
 			hdfsconf = new Configuration();
@@ -78,10 +83,10 @@ public class FileSpout extends BaseRichSpout {
 		}
 		connectToFS();
 		try {
-			Thread.sleep(20000);
+			Thread.sleep(initialSleepDuration);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
-		}
+		}		
 	}
 
 	public void connectToFS() {
@@ -94,9 +99,10 @@ public class FileSpout extends BaseRichSpout {
 	}
 
 	public void sleep() {
-		if (sleepDurationNanoSec != 0) {
+		if (sleepDurationMicroSec != 0) {
 			try {
-				TimeUnit.NANOSECONDS.sleep(sleepDurationNanoSec);
+				//TimeUnit.NANOSECONDS.sleep(sleepDurationNanoSec);
+				Thread.sleep(sleepDurationMicroSec);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

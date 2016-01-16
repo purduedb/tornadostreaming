@@ -86,6 +86,7 @@ public class DummyTweetGenerator extends BaseRichSpout {
 
 		DataObject dataObject= new DataObject(id, new Point(xCoord, yCoord), textContent, date
 				.getTime(), SpatioTextualConstants.addCommand);
+	///	for(int j=0;j<1000;j++)
 		if (reliable)
 			this.collector.emit(new Values(id,dataObject), "" + selfTaskId + "_" + (i++));
 		else	this.collector.emit(new Values(id,dataObject));

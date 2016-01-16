@@ -56,16 +56,16 @@ public class TestPartitions {
 				
 				
 			}
-			partitions = PartitionsHelper.getKDBasedParitionsFromPoints(1024, points);
+			partitions = PartitionsHelper.getKDBasedParitionsFromPoints(64, points);
 			
-			FileOutputStream fos = new FileOutputStream("resources/partitions1024.ser");
+			FileOutputStream fos = new FileOutputStream("resources/partitions64.ser");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 			oos.writeObject(partitions);
 			oos.close();
 			
 			
 			// read object from file
-			FileInputStream fis = new FileInputStream("resources/partitions1024.ser");
+			FileInputStream fis = new FileInputStream("resources/partitions64.ser");
 			ObjectInputStream ois = new ObjectInputStream(fis);
 			ArrayList<Partition> partitions2= (ArrayList<Partition> ) ois.readObject();
 			ois.close();

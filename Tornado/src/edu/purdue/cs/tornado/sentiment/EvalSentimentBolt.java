@@ -31,7 +31,7 @@ import backtype.storm.tuple.Values;
 import edu.purdue.cs.tornado.helper.SemanticHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.messages.DataObject;
-import edu.purdue.cs.tornado.messages.OutputTuple;
+import edu.purdue.cs.tornado.messages.CombinedTuple;
 
 public class EvalSentimentBolt extends BaseRichBolt {
 	private Map stormConf; // configuration
@@ -60,7 +60,7 @@ public class EvalSentimentBolt extends BaseRichBolt {
 		updateOutput( input);
 	}
 	private  synchronized void updateOutput(Tuple input){
-		OutputTuple outputTuple = (OutputTuple) input
+		CombinedTuple outputTuple = (CombinedTuple) input
 				.getValueByField(SpatioTextualConstants.output);
 		// get Original Text from outputTuple
 				if(outputTuple!=null&&outputTuple.getDataObject()!=null&&dataSource.equals(outputTuple.getDataObject().getSrcId())){

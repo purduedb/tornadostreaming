@@ -30,13 +30,13 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.messages.Control;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.DataObjectList;
-import edu.purdue.cs.tornado.messages.OutputTuple;
+import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.messages.ResultSetChange;
 import edu.purdue.cs.tornado.serializer.ControlSerializer;
 import edu.purdue.cs.tornado.serializer.DataObjectListSerializer;
 import edu.purdue.cs.tornado.serializer.DataObjectSerializer;
-import edu.purdue.cs.tornado.serializer.OutputTupleSerializer;
+import edu.purdue.cs.tornado.serializer.CombinedTupleSerializer;
 import edu.purdue.cs.tornado.serializer.PointSerializer;
 import edu.purdue.cs.tornado.serializer.QuerySerializer;
 import edu.purdue.cs.tornado.serializer.RectangleSerializer;
@@ -59,7 +59,7 @@ public class SpatioTextualLocalCluster extends LocalCluster{
 		((Config)conf).registerSerialization(Control.class, ControlSerializer.class);
 		((Config)conf).registerSerialization(Point.class, PointSerializer.class);
 		((Config)conf).registerSerialization(Rectangle.class, RectangleSerializer.class);
-		((Config)conf).registerSerialization(OutputTuple.class, OutputTupleSerializer.class);
+		((Config)conf).registerSerialization(CombinedTuple.class, CombinedTupleSerializer.class);
 		((Config)conf).registerSerialization(ResultSetChange.class, ResultSetChangeSerializer.class);
 		super.submitTopology(topologyName, conf, topology);
 		
@@ -74,7 +74,7 @@ public class SpatioTextualLocalCluster extends LocalCluster{
 		((Config)conf).registerSerialization(Control.class, ControlSerializer.class);
 		((Config)conf).registerSerialization(Point.class, PointSerializer.class);
 		((Config)conf).registerSerialization(Rectangle.class, RectangleSerializer.class);
-		((Config)conf).registerSerialization(OutputTuple.class, OutputTupleSerializer.class);
+		((Config)conf).registerSerialization(CombinedTuple.class, CombinedTupleSerializer.class);
 		((Config)conf).registerSerialization(ResultSetChange.class, ResultSetChangeSerializer.class);
 		super.submitTopologyWithOpts(topologyName, conf, topology,submitOpts);
 		

@@ -26,6 +26,7 @@ import edu.purdue.cs.tornado.experimental.DataAndQueriesSources;
 import edu.purdue.cs.tornado.experimental.TornadoClusterTest;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.performance.ClusterInformationExtractor;
+import edu.purdue.cs.tornado.spouts.DummyTweetGenerator;
 import edu.purdue.cs.tornado.spouts.FileSpout;
 import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
 import edu.purdue.cs.tornado.spouts.TweetsFSSpout;
@@ -52,9 +53,10 @@ public class BaselineTopology {
 		String POISource="POI_Data";
 		String querySource= "Querysource";
 		
-		DataAndQueriesSources.addHDFSTweetsSpout(tweetsSource, builder, properties, 1, 0);
-	//	DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 50.0, 10000, 5, 0);
-		DataAndQueriesSources.addJoinQueries(tweetsSource,POISource, querySource, builder, properties, 1, 50.0, 1000, 5, 20.0, 0);
+	//	DataAndQueriesSources.addHDFSTweetsSpout(tweetsSource, builder, properties, 100, 0,1000,200);
+		builder.setSpout(tweetsSource, new DummyTweetGenerator(10),40);
+		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 50.0, 1000, 5, 0,0,FileSpout.LFS);
+	//	DataAndQueriesSources.addJoinQueries(tweetsSource,POISource, querySource, builder, properties, 1, 50.0, 1000, 5, 20.0, 0);
 		
 		
 		
@@ -63,13 +65,13 @@ public class BaselineTopology {
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(POIHDFSSource.HDFS_POI_FOLDER_PATH, properties.getProperty(POIHDFSSource.HDFS_POI_FOLDER_PATH));
 		staticSourceConf.put(POIHDFSSource.CORE_FILE_PATH, properties.getProperty("CORE_FILE_PATH"));
-		builder.setBolt("BaseLineEvaluator", new  BaselineEvaluator(), 25).shuffleGrouping(tweetsSource).allGrouping(querySource).allGrouping("BaseLineEvaluator","sharedData");
+		builder.setBolt("BaseLineEvaluator", new  BaselineEvaluator(), 64).shuffleGrouping(tweetsSource).allGrouping(querySource).allGrouping("BaseLineEvaluator","sharedData");
 		
 		String topologyName = "TornadoBaseline";
 		Config conf = new Config();
 		conf.setDebug(false);
 		conf.setNumWorkers(4);
-		conf.setNumAckers(20);
+		conf.setNumAckers(0);
 		conf.put(Config.TOPOLOGY_DEBUG, false);
 		conf.put(POIHDFSSource.HDFS_POI_FOLDER_PATH, properties.getProperty(POIHDFSSource.HDFS_POI_FOLDER_PATH));
 		conf.put(POIHDFSSource.CORE_FILE_PATH, properties.getProperty("CORE_FILE_PATH"));
@@ -89,7 +91,7 @@ public class BaselineTopology {
 			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
 			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
 			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
-			conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS)));
+			conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS).trim()));
 			System.setProperty("storm.jar", properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
 			
 			try {

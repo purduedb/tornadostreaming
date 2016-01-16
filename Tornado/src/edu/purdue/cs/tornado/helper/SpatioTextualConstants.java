@@ -77,16 +77,20 @@ public class SpatioTextualConstants {
 	
 
 	//Data constants 
-		public static final Double minLat = -90.0;
-		public static final Double minLong = -180.0;
-		public static final Double maxLat = 90.0;
-		public static final Double maxLong =180.0;//	48.491158, -61.327106
-//	public static final Double minLat = 20.0;
-//	public static final Double minLong = -130.0;
-//	public static final Double maxLat = 50.0;
-//	public static final Double maxLong = -60.0;
-
+//	public static final Double minLat = -90.0;
+//	public static final Double minLong = -180.0;
+//	public static final Double maxLat = 90.0;
+//	public static final Double maxLong =180.0;//	48.491158, -61.327106
 	
+	public static final Double usaMinLat = 20.0;
+	public static final Double usaMinLong = -130.0;
+	public static final Double usaMaxLat = 50.0;
+	public static final Double usaMaxLong = -60.0;
+
+	public static final Double minLat = usaMinLat;
+	public static final Double minLong =usaMinLong;
+	public static final Double maxLat = usaMaxLat;
+	public static final Double maxLong =usaMaxLong;//	48.491158, -61.327106
 
 	//Control message types 
 	public static final String control = "control";
@@ -192,33 +196,42 @@ public class SpatioTextualConstants {
 	public static final String STORM_NUMBER_OF_WORKERS = "STORM_NUMBER_OF_WORKERS";
 	public static final String STORM_ZOOKEEPER_SERVERS = "STORM_ZOOKEEPER_SERVERS";
 
-	public static String getVolatilePropertyKey(String componentId) {
-		return (SpatioTextualConstants.VOLATILECLEANSTATE + "_" + componentId);
-	}
-
-	public static String getVolatilePropertyKey(String componentId, String streamId) {
-		return (SpatioTextualConstants.VOLATILECLEANSTATE + "_" + componentId + "_" + streamId);
-	}
-	public static String getIndexBoltDataStreamId(String id) {
-		return (id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data);
-	}
 	public static String getBoltBoltControlStreamId(String id) {
 		return (id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control);
 	}
+
 	public static String getBoltIndexControlStreamId(String id) {
 		return (id + SpatioTextualConstants.Bolt_Index_STreamIDExtension_Control);
 	}
 	public static String getIndexBoltControlStreamId(String id) {
-		return (id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control);
+		return (id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control);
+	}
+	public static String getIndexBoltQueryStreamId(String id) {
+		return (id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query);
+	}
+	public static String getIndexBoltDataStreamId(String id) {
+		return (id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data);
 	}
 	public static String getIndexIndexControlStreamId(String id) {
 		return (id + SpatioTextualConstants.Index_Index_STreamIDExtension_Control);
 	}
-	public static Boolean isDataStreamSource(String sourceType) {
-		return sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data) || sourceType.contains(SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data);
+	public static String getIndexIndexDataStreamId(String id) {
+		return (id + SpatioTextualConstants.Index_Index_STreamIDExtension_Data);
+	}
+	public static String getIndexIndexQueryStreamId(String id) {
+		return (id + SpatioTextualConstants.Index_Index_STreamIDExtension_Query);
+	}
+	public static String getVolatilePropertyKey(String componentId) {
+		return (SpatioTextualConstants.VOLATILECLEANSTATE + "_" + componentId);
+	}
+	public static String getVolatilePropertyKey(String componentId, String streamId) {
+		return (SpatioTextualConstants.VOLATILECLEANSTATE + "_" + componentId + "_" + streamId);
 	}
 	public static Boolean isControlStreamSource(String sourceType) {
 		return sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control) || sourceType.contains(SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control);
+	}
+	public static Boolean isDataStreamSource(String sourceType) {
+		return sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data) || sourceType.contains(SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data);
 	}
 	
 }
