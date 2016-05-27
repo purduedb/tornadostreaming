@@ -64,7 +64,7 @@ public class TestStaticDataSource  extends AbstractStaticDataSource{
 		textList = TextHelpers.sortTextArrayList(textList);
 		DataObject dataObject = new DataObject();
 		dataObject.setLocation(new Point(x, y));
-		dataObject.setObjectId(""+id);
+		dataObject.setObjectId(id);
 		dataObject.setObjectText(textList);
 		dataObject.setSrcId(sourceId);
 		dataObject.setTimeStamp(date.getTime());

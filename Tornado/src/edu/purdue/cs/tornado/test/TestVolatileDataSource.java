@@ -23,12 +23,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
+
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
@@ -65,7 +67,7 @@ public class TestVolatileDataSource extends BaseRichSpout {
 			return ;
 		Date date = new Date();
 		this.collector.emit(new Values(dataObjects.get(i).getObjectId(), dataObjects.get(i).getLocation().getX(), dataObjects.get(i).getLocation().getY(), dataObjects.get(i).getObjectText().get(0), date
-				.getTime(),SpatioTextualConstants.addCommand));
+				.getTime(),Command.addCommand));
 		i++;
 		
 
@@ -101,7 +103,7 @@ public class TestVolatileDataSource extends BaseRichSpout {
 		textList = TextHelpers.sortTextArrayList(textList);
 		DataObject dataObject = new DataObject();
 		dataObject.setLocation(new Point(x, y));
-		dataObject.setObjectId(""+id);
+		dataObject.setObjectId(id);
 		dataObject.setObjectText(textList);
 		dataObject.setTimeStamp(date.getTime());
 		return dataObject;

@@ -1,3 +1,8 @@
+/**
+ *  
+ * @author Anas Daghistani <anas@purdue.edu>
+ *
+ */
 package edu.purdue.cs.tornado.loadbalance;
 
 
@@ -11,7 +16,8 @@ public class SplitMergeInfo {
 	public Partition mergeChild1;
 	public Partition mergeChild0;
 	
-	public int newAuxiliaryIndex;
+	public Integer newAuxiliaryIndex;
+	public Boolean delegateFindingBestSplit;
 
 
 }

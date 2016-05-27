@@ -25,16 +25,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
-import backtype.storm.utils.Utils;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import twitter4j.FilterQuery;
 import twitter4j.StallWarning;
@@ -135,7 +134,12 @@ public final class TwitterFireHoseSpout extends BaseRichSpout {
 		final Status status = _queue.poll();
 		if (null == status) {
 			//If _queue is empty sleep the spout thread so it doesn't consume resources.
-			Utils.sleep(500);
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         } else {
 			//Emit the complete tweet to the Bolt.
 			this._outputCollector.emit(new Values(status));

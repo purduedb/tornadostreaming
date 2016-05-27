@@ -42,9 +42,9 @@ public class PartitionPOISfile {
 		BufferedReader br = new BufferedReader(new InputStreamReader(mainFileStream));
 
 		ArrayList<ArrayList<FileWriter>> fwList = new ArrayList<ArrayList<FileWriter>>();
-		for (int i = 0; i < SpatioTextualConstants.fineGridGranularityX; i++){
+		for (int i = 0; i < SpatioTextualConstants.defaultFineGridGranularityX; i++){
 			ArrayList<FileWriter> jfwList = new ArrayList<FileWriter>();
-			for(int j = 0; j < SpatioTextualConstants.fineGridGranularityY; j++) {
+			for(int j = 0; j < SpatioTextualConstants.defaultFineGridGranularityX; j++) {
 				jfwList.add(new FileWriter("/home/ahmed/Downloads/partitionedPOIsusa/" + i +"_"+j+ ".csv"));
 			}
 			fwList.add(jfwList);
@@ -80,15 +80,15 @@ public class PartitionPOISfile {
 
 		}
 
-		for (int i = 0; i < SpatioTextualConstants.fineGridGranularityX;i++)
-			for(int j=0;j<SpatioTextualConstants.fineGridGranularityY; j++)
+		for (int i = 0; i < SpatioTextualConstants.defaultFineGridGranularityX;i++)
+			for(int j=0;j<SpatioTextualConstants.defaultFineGridGranularityY; j++)
 			fwList.get(i).get(j).close();
 		br.close();
 		System.out.println("done");
 	}
 	private static IndexCellCoordinates mapDataPointToEvaluatorTask(Double x, Double y) {
-		Double xStep = SpatioTextualConstants.xMaxRange/SpatioTextualConstants.fineGridGranularityX;
-		Double yStep = SpatioTextualConstants.yMaxRange/SpatioTextualConstants.fineGridGranularityY;
+		Double xStep = SpatioTextualConstants.xMaxRange/SpatioTextualConstants.defaultFineGridGranularityX;
+		Double yStep = SpatioTextualConstants.yMaxRange/SpatioTextualConstants.defaultFineGridGranularityY;
 	
 		
 		Integer xCell = (int) (x / xStep);

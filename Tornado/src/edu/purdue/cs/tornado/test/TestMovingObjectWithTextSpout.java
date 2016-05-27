@@ -23,12 +23,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
+
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.messages.DataObject;
@@ -75,7 +77,7 @@ public class TestMovingObjectWithTextSpout extends BaseRichSpout {
 				dataObjects.get(j).get(i).getLocation().getY(),
 				dataObjects.get(j).get(i).getOriginalText(), 
 				date.getTime(),
-				SpatioTextualConstants.addCommand));
+				Command.addCommand));
 		i++;
 		
 
@@ -104,22 +106,22 @@ public class TestMovingObjectWithTextSpout extends BaseRichSpout {
 		/**********************************************************************************/
 		/************Test case1, get KNN for snapshot queries *****************************/
 		
-		dataObjects1.add(getDataObject(1000.0,6000.0,text1,0,SpatioTextualConstants.addCommand));
-		dataObjects1.add(getDataObject(3001.0,7501.0,text2,1,SpatioTextualConstants.addCommand));
-		dataObjects1.add(getDataObject(200.0,1502.0,text3,2,SpatioTextualConstants.addCommand));
-		dataObjects1.add(getDataObject(8503.0,103.0,text4,3,SpatioTextualConstants.addCommand));
-		dataObjects1.add(getDataObject(4.0,504.0,text5,4,SpatioTextualConstants.addCommand));
+		dataObjects1.add(getDataObject(1000.0,6000.0,text1,0,Command.addCommand));
+		dataObjects1.add(getDataObject(3001.0,7501.0,text2,1,Command.addCommand));
+		dataObjects1.add(getDataObject(200.0,1502.0,text3,2,Command.addCommand));
+		dataObjects1.add(getDataObject(8503.0,103.0,text4,3,Command.addCommand));
+		dataObjects1.add(getDataObject(4.0,504.0,text5,4,Command.addCommand));
 		/**********************************************************************************/
 		/************Test case2, checkKNN expansion *****************************/
-		dataObjects2.add(getDataObject(1050.0,6050.0,text2,0,SpatioTextualConstants.updateCommand));
-		dataObjects2.add(getDataObject(3601.0,6501.0,text2,1,SpatioTextualConstants.updateCommand));
-		dataObjects2.add(getDataObject(300.0,2502.0,text3,2,SpatioTextualConstants.updateCommand));
-		dataObjects2.add(getDataObject(8403.0,123.0,text1,3,SpatioTextualConstants.updateCommand));
-		dataObjects2.add(getDataObject(10.0,1004.0,text5,4,SpatioTextualConstants.updateCommand));
+		dataObjects2.add(getDataObject(1050.0,6050.0,text2,0,Command.updateCommand));
+		dataObjects2.add(getDataObject(3601.0,6501.0,text2,1,Command.updateCommand));
+		dataObjects2.add(getDataObject(300.0,2502.0,text3,2,Command.updateCommand));
+		dataObjects2.add(getDataObject(8403.0,123.0,text1,3,Command.updateCommand));
+		dataObjects2.add(getDataObject(10.0,1004.0,text5,4,Command.updateCommand));
 	
 		/**********************************************************************************/
 		/************Test case3, checkKNN shrinking *****************************/
-		dataObjects3.add(getDataObject(1001.0,5502.0,text1,7,SpatioTextualConstants.updateCommand));
+		dataObjects3.add(getDataObject(1001.0,5502.0,text1,7,Command.updateCommand));
 
 		dataObjects.add(dataObjects1);
 		dataObjects.add(dataObjects2);
@@ -133,12 +135,12 @@ public class TestMovingObjectWithTextSpout extends BaseRichSpout {
 		}
 		
 	}
-	DataObject getDataObject(Double x,Double y, String textList,Integer id,String command){
+	DataObject getDataObject(Double x,Double y, String textList,Integer id,Command command){
 		Date date = new Date();
 		
 		DataObject dataObject = new DataObject();
 		dataObject.setLocation(new Point(x, y));
-		dataObject.setObjectId(""+id);
+		dataObject.setObjectId(id);
 		dataObject.setOriginalText(textList);
 		dataObject.setTimeStamp(date.getTime());
 		dataObject.setCommand(command);

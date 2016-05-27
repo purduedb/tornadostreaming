@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 
 //import ch.qos.logback.classic.Level;
 import edu.purdue.cs.tornado.helper.IndexCell;
@@ -146,7 +148,7 @@ public class LocalQuadTree extends LocalHybridIndex {
 			}
 		}
 
-		ArrayList<Query> queries = currentIndexCell.getQueries();
+		List<Query> queries = currentIndexCell.getQueries();
 
 		if (queries != null)
 			for (Query query : queries) {
@@ -352,7 +354,7 @@ public class LocalQuadTree extends LocalHybridIndex {
 			for (IndexCell indexCell : relevantIndexCells) {
 				if (indexCell == null)
 					continue;
-				ArrayList<Query> queries = indexCell.getQueries();
+				List<Query> queries = indexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -364,7 +366,7 @@ public class LocalQuadTree extends LocalHybridIndex {
 			//for (IndexCell indexCell : relevantIndexCells) {
 			if (indexCell != null && indexCell.getQueries() != null) {
 
-				ArrayList<Query> queries = indexCell.getQueries();
+				List<Query> queries = indexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -398,6 +400,24 @@ public class LocalQuadTree extends LocalHybridIndex {
 	public Boolean updateContinousQuery(Query oldQuery, Query query) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ArrayList< List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getUpdatedTextSummery() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void cleanUp() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

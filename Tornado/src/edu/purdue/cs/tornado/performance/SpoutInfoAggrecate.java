@@ -8,6 +8,7 @@ public class SpoutInfoAggrecate {
 	Long acked;
 	Double completeLatency;
 	int numOfExecuters;
+	String uptime;
 	
 	public SpoutInfoAggrecate(String id){
 		this.id = id;
@@ -17,15 +18,17 @@ public class SpoutInfoAggrecate {
 		completeLatency =0.0;
 		numOfExecuters=0;
 		acked=(long) 0;
+		uptime="";
 	}
 
-	public void addSpoutStats(Long transferred,Long emitted,Long acked,	Long failed, Double completeLatency){
+	public void addSpoutStats(Long transferred,Long emitted,Long acked,	Long failed, Double completeLatency, int upTime){
 		this.numOfExecuters ++;
 		this.transferred+=(transferred==null?0:transferred);
 		this.emitted+=(emitted==null?0:emitted);
 		this.failed += (failed==null?0:failed);
 		this.acked +=(acked==null?0:acked);
 		this.completeLatency +=(completeLatency==null?0:completeLatency);
+		this.uptime +=(upTime+"_");
 	}
 	public Long getAcked() {
 		return acked;
@@ -38,7 +41,7 @@ public class SpoutInfoAggrecate {
 	@Override
 	public String toString()
 	{
-		return "Spout id:"+id+" , transferred:"+transferred+" , emitted:"+emitted+" , acked:"+acked+" , failed:"+failed+" , completeLatency:"+completeLatency;
+		return "Spid,"+id+" , emitt,"+emitted+" , ack,"+acked+" , failed,"+failed+" , completeLatency,"+completeLatency/numOfExecuters+", upTime,"+uptime+",";
 	}
 	public String getId() {
 		return id;

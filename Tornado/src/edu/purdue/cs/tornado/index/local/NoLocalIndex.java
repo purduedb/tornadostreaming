@@ -2,11 +2,12 @@ package edu.purdue.cs.tornado.index.local;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
-import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
@@ -25,12 +26,13 @@ public class NoLocalIndex extends LocalHybridIndex {
 	DataSourceInformation dataSourcesInformation;
 	private Integer allDataCount;
 	private ArrayList<Query> globalKNNQueries;
+
 	public NoLocalIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation) {
 		super();
 		this.allDataCount = 0;
 		this.dataSourcesInformation = dataSourcesInformation;
 		this.selfBounds = selfBounds;
-	
+
 		singleIndexCell = new IndexCell(selfBounds, false, 0);
 		globalKNNQueries = new ArrayList<Query>();
 
@@ -128,7 +130,7 @@ public class NoLocalIndex extends LocalHybridIndex {
 		if (fromNeighbour) {
 			relevantIndexCells = getOverlappingIndexCells(dataObject.getRelevantArea());
 			for (IndexCell indexCell : relevantIndexCells) {
-				ArrayList<Query> queries = indexCell.getQueries();
+				List<Query> queries = indexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -137,7 +139,7 @@ public class NoLocalIndex extends LocalHybridIndex {
 			}
 		} else {
 			IndexCell indexCell = getOverlappingIndexCells(dataObject.getLocation());
-			ArrayList<Query> queries = indexCell.getQueries();
+			List<Query> queries = indexCell.getQueries();
 			for (Query q : queries) {
 				String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 				if (!queriesMap.containsKey(unqQueryId))
@@ -168,6 +170,37 @@ public class NoLocalIndex extends LocalHybridIndex {
 	@Override
 	public Boolean updateContinousQuery(Query oldQuery, Query query) {
 		return true;
+	}
+
+	@Override
+	public ArrayList<List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
+		//this hashmap is based on query source id , query id itself
+		HashMap<String, List<Query>> queriesMap = new HashMap<String, List<Query>>();
+		IndexCell indexCell = getOverlappingIndexCells(dataObject.getLocation());
+//		HashMap<String, List<Query>> queriesList = indexCell.getTextualOverlappingQueries(dataObject.getObjectText());
+//		Iterator <List<Query>>itr = queriesList.values().iterator();
+//		while (itr.hasNext()) {
+//			List<Query> queries = itr.next();
+//			for (Query q : queries) {
+//				if (!queriesMap.containsKey(q.getSrcId()))
+//					queriesMap.put(q.getSrcId(), new ArrayList<Query>());
+//				queriesMap.get(q.getSrcId()).add(q);
+//			}
+//		}
+//		ArrayList<List<Query>> result = new ArrayList<List<Query>>(queriesMap.values());
+		return indexCell.geSpatiotTextualOverlappingQueries(dataObject.getLocation(),dataObject.getObjectText());
+
+	}
+
+	@Override
+	public Set<String> getUpdatedTextSummery() {
+		return null;
+	}
+
+	@Override
+	public void cleanUp() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

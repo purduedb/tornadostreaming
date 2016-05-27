@@ -16,6 +16,8 @@ import com.google.common.base.Stopwatch;
 import edu.purdue.cs.tornado.evaluator.Operator;
 import edu.purdue.cs.tornado.evaluator.Query2;
 import edu.purdue.cs.tornado.evaluator.SpatioTextualEvaluatorBolt;
+import edu.purdue.cs.tornado.helper.Command;
+import edu.purdue.cs.tornado.helper.DataSourceType;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
@@ -32,7 +34,7 @@ import edu.purdue.cs.tornado.index.local.LocalTextInvertedListIndex;
 import edu.purdue.cs.tornado.loadbalance.Partition;
 import edu.purdue.cs.tornado.messages.DataObject;
 public class TestBuildingBlocksEvaluator {
-
+	static Integer fineGridGran=64;
 	
 	public static void main(String[] args) throws IOException {
 		Query2 query = new Query2("Queries","query1",true);
@@ -47,10 +49,10 @@ public class TestBuildingBlocksEvaluator {
 		keywords.add("sale");
 		query.addDataSrcOperator(Operator.getTextContainOperator("Tweets", keywords));
 		
-		SpatioTextualEvaluatorBolt textualEvaluatorBolt = new SpatioTextualEvaluatorBolt("evalautor",LocalIndexType.HYBRID_GRID,GlobalIndexType.GRID,null);
-		DataSourceInformation tweetsSataSourceInformation  = new DataSourceInformation(new Rectangle(new Point(0.0,0.0), new Point(10000.0,10000.0)),"Tweets", SpatioTextualConstants.Data_Source, SpatioTextualConstants.persistentPersistenceState, SpatioTextualConstants.NOTCLEAN,true ,null);
+		SpatioTextualEvaluatorBolt textualEvaluatorBolt = new SpatioTextualEvaluatorBolt("evalautor",LocalIndexType.HYBRID_GRID,GlobalIndexType.GRID,null,SpatioTextualConstants.defaultFineGridGranularityX);
+		DataSourceInformation tweetsSataSourceInformation  = new DataSourceInformation(new Rectangle(new Point(0.0,0.0), new Point(10000.0,10000.0)),"Tweets", DataSourceType.DATA_SOURCE, SpatioTextualConstants.persistentPersistenceState, SpatioTextualConstants.NOTCLEAN,true ,null,SpatioTextualConstants.defaultFineGridGranularityX);
 		
-		LocalHybridIndex  localGridIndex = new LocalHybridGridIndex(new Rectangle(new Point(0.0,0.0), new Point(10000.0,10000.0)), tweetsSataSourceInformation); 
+		LocalHybridIndex  localGridIndex = new LocalHybridGridIndex(new Rectangle(new Point(0.0,0.0), new Point(10000.0,10000.0)), tweetsSataSourceInformation,fineGridGran); 
 		HashMap<String, LocalHybridIndex> localDataSpatioTextualIndex = new HashMap<String, LocalHybridIndex>();
 		localDataSpatioTextualIndex.put("Tweets", localGridIndex) ;
 		
@@ -73,10 +75,10 @@ public class TestBuildingBlocksEvaluator {
 	static void testIndexingTime(ArrayList<DataObject> allObjects,DataSourceInformation dataSourcesInformation){
 		LocalTextInvertedListIndex localTextInvertedListIndex = new LocalTextInvertedListIndex();
 		Rectangle entireSpace = new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange));
-		LocalHybridGridIndex spatialGridIndex = new LocalHybridGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.fineGridGranularityX, SpatioTextualConstants.fineGridGranularityY, true, 0);
-		LocalHybridGridIndex hybridGridIndex = new LocalHybridGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.fineGridGranularityX, SpatioTextualConstants.fineGridGranularityY, false, 0);
-		LocalHybridMultiGridIndex spatialMultiLevelGridIndex = new LocalHybridMultiGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.fineGridGranularityX, SpatioTextualConstants.fineGridGranularityY, true);
-		LocalHybridMultiGridIndex hybridMultiLevelGridIndex = new LocalHybridMultiGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.fineGridGranularityX, SpatioTextualConstants.fineGridGranularityY, false);
+		LocalHybridGridIndex spatialGridIndex = new LocalHybridGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, true, 0);
+		LocalHybridGridIndex hybridGridIndex = new LocalHybridGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, false, 0);
+		LocalHybridMultiGridIndex spatialMultiLevelGridIndex = new LocalHybridMultiGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, true);
+		LocalHybridMultiGridIndex hybridMultiLevelGridIndex = new LocalHybridMultiGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, false);
 		System.gc();
 		System.gc();
 		System.out.println("-------------Begin indexing files----------------");
@@ -136,6 +138,7 @@ public class TestBuildingBlocksEvaluator {
 		BufferedReader br ;
 		String tweet="";
 		Integer i=0;
+		Integer countId=0;
 		try {
 			fstream = new FileInputStream(filePath);
 			br = new BufferedReader(new InputStreamReader(fstream));
@@ -143,8 +146,9 @@ public class TestBuildingBlocksEvaluator {
 			while((tweet = br.readLine()) != null) {
 				StringTokenizer stringTokenizer = new StringTokenizer(tweet, ",");
 
-				String id = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
-
+				//String id = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
+				Integer id = countId++;//tweetParts[0];
+				if(countId>=Integer.MAX_VALUE)countId=0;
 				String dateString = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
 				//dateString = stringTokenizer.hasMoreTokens()?stringTokenizer.nextToken():"";
 
@@ -169,7 +173,7 @@ public class TestBuildingBlocksEvaluator {
 				while (stringTokenizer.hasMoreTokens())
 					textContent = textContent + stringTokenizer.nextToken() + " ";
 				
-				DataObject obj = new DataObject(id, xy, textContent,( new Date()).getTime(), SpatioTextualConstants.addCommand);
+				DataObject obj = new DataObject(id, xy, textContent,( new Date()).getTime(), Command.addCommand);
 				dataObjects.add(obj);
 				
 				

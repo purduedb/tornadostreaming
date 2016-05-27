@@ -5,19 +5,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
-import backtype.storm.Config;
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import edu.purdue.cs.tornado.helper.RandomGenerator;
-import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import org.apache.storm.Config;
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
 
 public class FileSpout extends BaseRichSpout {
 	public static final String FILE_PATH = "FILE_PATH";
@@ -29,15 +25,17 @@ public class FileSpout extends BaseRichSpout {
 	public static final long serialVersionUID = 1L;
 	public Integer initialSleepDuration;
 	public SpoutOutputCollector collector;
-	Integer selfTaskId;
-	Boolean reliable;
+	 Integer selfTaskId;
+	 Integer selfTaskIndex;
+	 Boolean reliable;
+	 int count;
 
 	//public Map conf;
-	public BufferedReader br;
-	public Configuration hdfsconf;
-	public FileInputStream fstream;
-	public String filePath;
-	public String corePath;
+	public  BufferedReader br;
+	public  Configuration hdfsconf;
+	public  FileInputStream fstream;
+	public  String filePath;
+	public  String corePath;
 	public Path pt;
 	public String fileSystemType;
 	public Integer sleepDurationMicroSec;
@@ -66,6 +64,7 @@ public class FileSpout extends BaseRichSpout {
 		//this.conf = conf;
 		this.collector = collector;
 		this.selfTaskId = context.getThisTaskId();
+		this.selfTaskIndex = context.getThisTaskIndex();
 		if (conf != null)
 			this.reliable = ((Long) conf.get(Config.TOPOLOGY_ACKER_EXECUTORS)) > 0;
 		else
@@ -81,6 +80,7 @@ public class FileSpout extends BaseRichSpout {
 			hdfsconf.addResource(new Path(corePath));
 			pt = new Path(filePath);
 		}
+		count=0;
 		connectToFS();
 		try {
 			Thread.sleep(initialSleepDuration);
@@ -102,7 +102,7 @@ public class FileSpout extends BaseRichSpout {
 		if (sleepDurationMicroSec != 0) {
 			try {
 				//TimeUnit.NANOSECONDS.sleep(sleepDurationNanoSec);
-				Thread.sleep(sleepDurationMicroSec);
+				Thread.sleep(0,sleepDurationMicroSec);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -131,6 +131,15 @@ public class FileSpout extends BaseRichSpout {
 
 	@Override
 	public void nextTuple() {
+		if(count>=100000){
+			count=0;
+			try {
+				Thread.sleep(3);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		count++;
 	}
 
 	@Override

@@ -20,6 +20,9 @@
 package edu.purdue.cs.tornado.messages;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import edu.purdue.cs.tornado.helper.Command;
 
 public class CombinedTuple {
 	public DataObject dataObject;
@@ -27,9 +30,30 @@ public class CombinedTuple {
 	public ArrayList<DataObject> dataObjectList;
 	public ArrayList<DataObject> dataObject2List;
 	
-	public String dataObjectCommand;
-	public String dataObject2Command;
+	public Command dataObjectCommand;
+	public Command dataObject2Command;
 	public Query query;
+	public ArrayList<Integer>  queriesIdList;
+	public String queryListSrcId;
+	
+	public ArrayList<DataObject> getDataObjectList() {
+		return dataObjectList;
+	}
+	public void setDataObjectList(ArrayList<DataObject> dataObjectList) {
+		this.dataObjectList = dataObjectList;
+	}
+	public String getQueryListSrcId() {
+		return queryListSrcId;
+	}
+	public void setQueryListSrcId(String queryListSrcId) {
+		this.queryListSrcId = queryListSrcId;
+	}
+	public ArrayList<Integer> getQueriesIdList() {
+		return queriesIdList;
+	}
+	public void setQueriesIdList(ArrayList<Integer> queriesIdList) {
+		this.queriesIdList = queriesIdList;
+	}
 	public ArrayList<DataObject> getDataObject2List() {
 		return dataObject2List;
 	}
@@ -54,16 +78,16 @@ public class CombinedTuple {
 	public void setDataObject2(DataObject dataObject2) {
 		this.dataObject2 = dataObject2;
 	}
-	public String getDataObjectCommand() {
+	public Command getDataObjectCommand() {
 		return dataObjectCommand;
 	}
-	public void setDataObjectCommand(String dataObjectCommand) {
+	public void setDataObjectCommand(Command dataObjectCommand) {
 		this.dataObjectCommand = dataObjectCommand;
 	}
-	public String getDataObject2Command() {
+	public Command getDataObject2Command() {
 		return dataObject2Command;
 	}
-	public void setDataObject2Command(String dataObject2Command) {
+	public void setDataObject2Command(Command dataObject2Command) {
 		this.dataObject2Command = dataObject2Command;
 	}
 	@Override 

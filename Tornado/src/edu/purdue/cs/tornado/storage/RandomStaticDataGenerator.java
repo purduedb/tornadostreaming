@@ -77,7 +77,7 @@ public class RandomStaticDataGenerator extends AbstractStaticDataSource{
 
 			DataObject dataObject = new DataObject();
 			dataObject.setLocation(new Point(xCoord, yCoord));
-			dataObject.setObjectId(""+count);
+			dataObject.setObjectId(count);
 			dataObject.setObjectText(textContent);
 			dataObject.setSrcId(sourceId);
 			dataObject.setTimeStamp(date.getTime());

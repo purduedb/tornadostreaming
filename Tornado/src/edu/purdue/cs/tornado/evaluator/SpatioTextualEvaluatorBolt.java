@@ -23,36 +23,44 @@ import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichBolt;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Tuple;
-import backtype.storm.tuple.Values;
+import org.apache.storm.Constants;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichBolt;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Tuple;
+import org.apache.storm.tuple.Values;
+
 import edu.purdue.cs.tornado.cleaning.Deduplication;
+import edu.purdue.cs.tornado.helper.Command;
+import edu.purdue.cs.tornado.helper.DataSourceType;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
+import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
+import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.index.global.GlobalGridIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndexIterator;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndex;
-import edu.purdue.cs.tornado.index.global.GlobalStaticPartitionedIndex;
+import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedTextAwareIndex;
+import edu.purdue.cs.tornado.index.local.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
-import edu.purdue.cs.tornado.loadbalance.Partition;
+import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.Control;
 import edu.purdue.cs.tornado.messages.DataObject;
@@ -68,36 +76,44 @@ import edu.purdue.cs.tornado.storage.AbstractStaticDataSource;
  *
  */
 public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
+	public static final long serialVersionUID = 1L;
+
 	/**
 	 * 
 	 */
-	public static final long serialVersionUID = 1L;
+	//transient CountMetric _inputDataCountMetric;
 	String id; //given spatio-textual component id
+	int count;
 	public String selfComponentId;
 	public Integer selfTaskId;
 	public Integer selfTaskIndex;
 	public Integer outputTuplesCount;
 	public Integer visitedDataObjectCount;
+	public Integer fineGridGran;
+	public Double step;
+	public Long cleaningStartTime;
+
 	//*******************************************************************************
 	//local index attributes 
 	public Rectangle selfBounds;
 	//public  HashMap<String, LocalHybridIndex> localDataSpatioTextualIndex;//source to spatial index cells
 
-	public HashMap<String, HashMap<String, Query>> queryInformationHashMap; //source to query id to index cellqueyr
+	public HashMap<String, HashMap<Integer, Query>> queryInformationHashMap; //source to query id to index cellqueyr
 
 	//outer TOP-K queries, these are Top-K queries that come from other evaluators and need to 
 	//reevaluated for incoming data
-	public HashMap<String, HashMap<String, Query>> externalTopKMap; //source to query id to index cellqueyr
+	public HashMap<String, HashMap<Integer, Query>> externalTopKMap; //source to query id to index cellqueyr
 	//*******************************************************************************************************
 	public HashMap<String, Deduplication> cleaningMap; //source to query id to index cellqueyr
 
 	//**************** Evaluator bolts attributes **********************
 	public List<Integer> evaluatorBoltTasks; //this keeps track of the evaluator bolts ids 
+	public List<Integer> indexBoltTasks; //this keeps track of the evaluator bolts ids 
 	public HashMap<String, DataSourceInformation> sourcesInformations; //this keeps track of the type of every input source 
 
 	//******************Global Grid  parameters ********************************
-	IndexCellCoordinates globalIndexSelfcoordinates;
-	GlobalIndex globalIndex;
+	public IndexCellCoordinates globalIndexSelfcoordinates;
+	public GlobalIndex globalIndex;
 
 	//*******************Storm specific attributes *********************
 	public Map stormConf; //configuration
@@ -105,77 +121,224 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	public OutputCollector collector;
 	public LocalIndexType localIndexType;
 	public GlobalIndexType globalIndexType;
-	public ArrayList<Partition> partitions;
+	public ArrayList<Cell> partitions;
+	public Cell myPartition = null;
+	public Integer numberOfEvaluatorTasks;
 
-	public SpatioTextualEvaluatorBolt(String id, LocalIndexType localIndexType, GlobalIndexType globalIndexType, ArrayList<Partition> partitions) {
+	public SpatioTextualEvaluatorBolt(String id, LocalIndexType localIndexType, GlobalIndexType globalIndexType, ArrayList<Cell> partitions, Integer fineGridGran) {
 		this.id = id;
 		this.outputTuplesCount = 0;
 		this.visitedDataObjectCount = 0;
 		this.localIndexType = localIndexType;
 		this.partitions = partitions;
 		this.globalIndexType = globalIndexType;
+		this.fineGridGran = fineGridGran;
+		this.step = SpatioTextualConstants.xMaxRange / fineGridGran;
+
+	}
+
+	public IndexCell addAndIndexADataObject(DataObject dataObject) {
+		String sourceId = dataObject.getSrcId();
+		IndexCell indexCell = sourcesInformations.get(sourceId).getLocalHybridIndex().addDataObject(dataObject);
+		//	sourcesInformations.get(sourceId).getLocalTextIndex().addDataObject(dataObject);
+		return indexCell;
+
+	}
+
+	public void addAndIndexPersistentWindowDataObject(DataObject dataObject) {
+		String sourceId = dataObject.getSrcId();
+
+		sourcesInformations.get(sourceId).addDataObject(dataObject);
+
+	}
+
+	public void addIndexesPerSource(String sourceId, DataSourceType sourceType, DataSourceInformation dataSourcesInformation) {
+		if (sourceType.equals(DataSourceType.DATA_SOURCE)) {
+			externalTopKMap.put(sourceId, new HashMap<Integer, Query>());
+			if (dataSourcesInformation.isClean()) {
+				cleaningMap.put(sourceId, new Deduplication());
+			}
+		} else if (sourceType.equals(DataSourceType.QUERY_SOURCE)) {
+			queryInformationHashMap.put(sourceId, new HashMap<Integer, Query>());
+
+		}
+	}
+
+	public Boolean checkExternalKNNqueryReusltDone(Query query) {
+		Double farthestDistance = query.getFarthestDistance();
+		Integer knnSizelist = query.getKNNlistSize();
+		if (knnSizelist >= query.getK()) {
+			Double minDistOfNextIteration = query.getGlobalKNNIterator().getMinDistOfNextIteration();
+			if (minDistOfNextIteration == null || farthestDistance < minDistOfNextIteration)
+				return true;
+
+		}
+		return false;
+
+	}
+
+	public ArrayList<ResultSetChange> checkIfKNNQueryRequiresExtensionsOrShriniking(ArrayList<Query> affectedQueries) {
+		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
+		for (Query query : affectedQueries) {
+			if (!SpatialHelper.checkKNNQueryDoneWithinLocalBounds(query, selfBounds) && query.getGlobalKNNIterator() == null) {
+				GlobalIndexIterator globalit = globalIndex.globalKNNIterator(query.getFocalPoint());
+				query.setGlobalKNNIterator(globalit);
+				expandSnapShotKNNPredicateToSurroundingEvaluators(query);
+			} else if (query.getGlobalKNNIterator() != null && !checkExternalKNNqueryReusltDone(query))
+				expandSnapShotKNNPredicateToSurroundingEvaluators(query);
+		}
+		return changes;
 	}
 
 	@Override
-	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		try {
-			this.context = context;
-			this.collector = collector;
-			this.stormConf = stormConf;
-			this.evaluatorBoltTasks = context.getComponentTasks(id);
-
-			//**************************************************************************************
-			//preparing local and global indexes
-			prepareLocalAndGlobalIndexes();
-			//**************************************************************************************
-			//preparing data sources information 
-			prepareDataAndQuerySourceInfo();
-			//**************************************************************************************
-			//read static data congfiguration and data 
-			prepareStaticData();
+			//These are the streams for interaction with other bolts 
+			declarer.declareStream(id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Query, new Fields(SpatioTextualConstants.query));
+			declarer.declareStream(id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data, new Fields(SpatioTextualConstants.data));
+			declarer.declareStream(SpatioTextualConstants.getBoltBoltControlStreamId(id), new Fields(SpatioTextualConstants.control));
+			declarer.declareStream(id + SpatioTextualConstants.Bolt_Index_STreamIDExtension_Query, new Fields(SpatioTextualConstants.query));
+			declarer.declareStream(id + SpatioTextualConstants.Bolt_Index_STreamIDExtension_Data, new Fields(SpatioTextualConstants.data));
+			declarer.declareStream(id + SpatioTextualConstants.Bolt_Index_STreamIDExtension_Control, new Fields(SpatioTextualConstants.control));
+			//This is the final output 
+			declarer.declareStream(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Fields(SpatioTextualConstants.output));
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
-
 	}
+	//***********************************************************************************************
+	//************getters and setters
 
 	/**
-	 * This function reads
+	 * This function data object
+	 * 
+	 * @param input
 	 */
-	public void prepareStaticData() {
-		Iterator it = sourcesInformations.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry pair = (Map.Entry) it.next();
-			//We should not read entire static data at once, we should use the a cache based method
-			if (((DataSourceInformation) pair.getValue()).isStatic())
-				readStaticData(((DataSourceInformation) pair.getValue()).getDataSourceId());
-		}
-
+	DataObject dropCurrnetDataObject(DataObject dataObject) {
+		ArrayList<ResultSetChange> changes = null;
+		if (sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().containsKey(dataObject.getObjectId())) {
+			IndexCell indexCell = sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().get(dataObject.getObjectId());
+			DataObject removedDataObject = indexCell.dropDataObject(dataObject.getObjectId());
+			sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().remove(dataObject.getObjectId());
+			sourcesInformations.get(dataObject.getSrcId()).getLocalTextIndex().dropDataObject(dataObject);
+			return removedDataObject;
+		} else
+			return null;//object not found and hence cannot be removed //TODO maybe throw an exception
 	}
 
-	/**
-	 * This function reads data based on self bounds
-	 */
-	public void readStaticData(String sourceId) {
-		String sourceClassName = (String) this.stormConf.get(SpatioTextualConstants.Static_Source_Class_Name + "_" + sourceId);
-		Map<String, String> staticSourceConfig = (Map<String, String>) this.stormConf.get(SpatioTextualConstants.Static_Source_Class_Config + "_" + sourceId);
+	@Override
+	public void execute(Tuple input) {
+
 		try {
-			Class<?> dataSourceClass = Class.forName(sourceClassName);
-			Constructor<?> constructor = dataSourceClass.getConstructor(Rectangle.class, Map.class, String.class, Integer.class, Integer.class);
-			AbstractStaticDataSource staticDataSource = (AbstractStaticDataSource) constructor.newInstance(selfBounds, staticSourceConfig, sourceId, this.selfTaskId, this.selfTaskIndex);
-
-			while (staticDataSource.hasNext()) {
-				DataObject dataObject = staticDataSource.getNext();
-				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), selfBounds)) {
-					addAndIndexADataObject(dataObject);
-				} else {
-					System.err.println("Data object is outside the scope this evluator :" + dataObject.toString() + " : bounds " + selfBounds.toString());
-				}
+			//			if(count >=100000){
+			//				count=0;
+			//				Thread.sleep(10);
+			//			}
+			//			count++;
+			String sourceType = input.getSourceStreamId();
+			if (SpatioTextualConstants.isDataStreamSource(sourceType)) {
+				boolean ack = handleDataObject(input);
+				//	if(ack)collector.ack(input);
+			} else if (sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query)) {
+				handleQuery(input);
+				//	collector.ack(input);
+			} else if (SpatioTextualConstants.isControlStreamSource(sourceType)) {
+				handleControlMessage(input);
+				//	collector.ack(input);
+			} else if (isTickTuple(input)) {
+					handleTickTuple(input);
+				//collector.ack(input);
 			}
-			staticDataSource.close();
+
 		} catch (Exception e) {
-			e.printStackTrace();
+			e.printStackTrace(System.err);
 		}
+	}
+
+	public void handleTickTuple(Tuple tuple) {
+
+//		Iterator<Entry<String, DataSourceInformation>> itr = sourcesInformations.entrySet().iterator();
+//		while (itr.hasNext()) {
+//			DataSourceInformation sourceInfo = itr.next().getValue();
+//			if (DataSourceType.DATA_SOURCE.equals(sourceInfo.dataSourceType)) {
+//				((LocalHybridGridIndex) sourceInfo.localHybridIndex).cleanUp();
+//				if (globalIndex.isTextAware()) {
+//					String sourceId = sourceInfo.dataSourceId;
+//					HashSet<String> textSummery = ((LocalHybridGridIndex) sourceInfo.localHybridIndex).getUpdatedTextSummery();
+//
+//					for (int indexBoltId : indexBoltTasks) {
+//						Control control = new Control();
+//						control.setTextSummery(textSummery);
+//						control.setControlMessageType(Control.TEXT_SUMMERY);
+//						control.textSummaryTimeStamp = ((LocalHybridGridIndex) sourceInfo.localHybridIndex).beginCleanUpTime;
+//						ArrayList<Integer> taskIdlist = new ArrayList<Integer>();
+//						taskIdlist.add(this.selfTaskId);
+//						control.setTextSummeryTaskIdList(taskIdlist);
+//						collector.emitDirect(indexBoltId, SpatioTextualConstants.getBoltIndexControlStreamId(id), new Values(control));
+//					}
+//
+//				}
+//			}
+//		}
+
+	}
+
+	public static boolean isTickTuple(Tuple tuple) {
+		return tuple.getSourceComponent().equals(Constants.SYSTEM_COMPONENT_ID) && tuple.getSourceStreamId().equals(Constants.SYSTEM_TICK_STREAM_ID);
+	}
+
+	/**
+	 * This function progessivly increases the range of the KNN query to find
+	 * the complete KNN resultset
+	 * 
+	 * @param query
+	 * @return
+	 */
+	public ArrayList<ResultSetChange> expandKNNQueryToAdjustResultLocally(Query query) {
+		LocalIndexKNNIterator it = query.getLocalKnnIterator();
+		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
+		while (it.hasNext()) {
+			ArrayList<IndexCell> indexCellList = it.next();
+			for (IndexCell indexCell : indexCellList) {
+				if (TextHelpers.evaluateTextualPredicate(indexCell.getAllDataTextInCell(), query.getQueryText(), query.getTextualPredicate())) {//indexCell.cellOverlapsTextually(query.getQueryText())) {
+					HashMap<Integer, DataObject> indexedDataObjectsMap = indexCell.getStoredObjects();
+					Iterator dataObjectIterator = indexedDataObjectsMap.entrySet().iterator();
+					while (dataObjectIterator.hasNext()) {
+						Map.Entry entry = (Map.Entry) dataObjectIterator.next();
+						DataObject dataObject = (DataObject) entry.getValue();
+						if (TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate())) {
+							changes.addAll(query.processDataObject(dataObject));
+						}
+					}
+				}
+				if (query.getContinousQuery())
+					indexCell.addQuery(query);
+			}
+			if (query.getKNNlistSize() >= query.getK()) {
+				break;
+			}
+
+		}
+		return changes;
+	}
+
+	public void expandSnapShotKNNPredicateToSurroundingEvaluators(Query query) {
+		GlobalIndexIterator it = query.getGlobalKNNIterator();
+		ArrayList<Integer> surroundingEvaluators = new ArrayList<Integer>();
+		if (it.hasNext()) {
+			surroundingEvaluators = it.next();
+			query.setPendingKNNTaskIds(surroundingEvaluators);
+			Control message = new Control();
+			message.setControlMessageType(Control.REQUEST_KNN_PREDICATE);
+			ArrayList<Query> querieslist = new ArrayList<Query>();
+			querieslist.add(query);
+			message.setQueriesList(querieslist);
+			//TODO make this smarter and restrict your self to only relevant global index cells 
+			for (Integer i : surroundingEvaluators) {
+				collector.emitDirect(i, SpatioTextualConstants.getBoltBoltControlStreamId(id), new Values(message));
+			}
+		}
+
 	}
 
 	public void fetchStaticDataPortion(String sourceId, Rectangle bounds) {
@@ -200,156 +363,87 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		}
 	}
 
-	public IndexCell addAndIndexADataObject(DataObject dataObject) {
-		String sourceId = dataObject.getSrcId();
-		IndexCell indexCell = sourcesInformations.get(sourceId).getLocalHybridIndex().addDataObject(dataObject);
-		//	sourcesInformations.get(sourceId).getLocalTextIndex().addDataObject(dataObject);
-		return indexCell;
-
+	void generateOutput(ArrayList<Integer> queriesIdList, String srcId, DataObject obj, Command command) {
+		//		System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
+		this.outputTuplesCount += queriesIdList.size();
+		CombinedTuple outputTuple = new CombinedTuple();
+		outputTuple.setDataObject(obj);
+		outputTuple.setQueriesIdList(queriesIdList);
+		outputTuple.setQueryListSrcId(srcId);
+		outputTuple.setDataObjectCommand(command);
+			collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
 	}
 
-	public void addAndIndexPersistentWindowDataObject(DataObject dataObject) {
-		String sourceId = dataObject.getSrcId();
-
-		sourcesInformations.get(sourceId).addDataObject(dataObject);
-
+	void generateOutput(Query q, ArrayList<DataObject> objList, Command command) {
+		//	System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
+		this.outputTuplesCount += objList.size();
+		CombinedTuple outputTuple = new CombinedTuple();
+		outputTuple.dataObjectList = objList;
+		Query miniQuery = new Query();
+		miniQuery.setQueryId(q.getQueryId());
+		miniQuery.setSrcId(q.getSrcId());
+		miniQuery.setDataSrc(q.getDataSrc());
+		outputTuple.setQuery(miniQuery);
+		outputTuple.setDataObjectCommand(command);
+		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
 	}
 
-	/**
-	 * This function initialized the global and local indexes information
-	 */
-	public void prepareLocalAndGlobalIndexes() {
-		numberOfEvaluatorTasks = this.evaluatorBoltTasks.size();
-		selfComponentId = context.getThisComponentId();
-		selfTaskId = context.getThisTaskId();
-		selfTaskIndex = context.getThisTaskIndex();
-		//**************************************************************************************
-		//global index information
-		if (globalIndexType == GlobalIndexType.PARTITIONED)
-			//globalIndex = new GlobalStaticPartitionedIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions);
-			globalIndex = new GlobalOptimizedPartitionedIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions);
-		else
-			globalIndex = new GlobalGridIndex(numberOfEvaluatorTasks, evaluatorBoltTasks);
-		//**************************************************************************************
-		//local index information
-		//identifying evaluator cell bounds 
-		selfBounds = globalIndex.getBoundsForTaskIndex(selfTaskIndex);
-
+	void generateOutput(Query q, DataObject obj, ArrayList<DataObject> obj2List, Command obj1Command, Command obj2Command) {
+		//	System.out.println("[Output: command  "+obj1Command+" query:"  + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
+		this.outputTuplesCount++;
+		CombinedTuple outputTuple = new CombinedTuple();
+		outputTuple.setDataObject(obj);
+		outputTuple.setDataObject2List(obj2List);
+		Query miniQuery = new Query();
+		miniQuery.setQueryId(q.getQueryId());
+		miniQuery.setSrcId(q.getSrcId());
+		miniQuery.setDataSrc(q.getDataSrc());
+		miniQuery.setDataSrc2(q.getDataSrc2());
+		outputTuple.setQuery(miniQuery);
+		outputTuple.setDataObjectCommand(obj1Command);
+		outputTuple.setDataObject2Command(obj2Command);
+			collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
 	}
 
-	public void prepareDataAndQuerySourceInfo() {
-		System.out.println("***************************Printing Bolt configuration*******************");
-		Iterator it = stormConf.entrySet().iterator();
-		sourcesInformations = new HashMap<String, DataSourceInformation>();
-		//**************************************************************************************
-		//initializing the local variables
-		//localDataSpatioTextualIndex = new HashMap<String, LocalHybridIndex>();
-		queryInformationHashMap = new HashMap<String, HashMap<String, Query>>();
-		externalTopKMap = new HashMap<String, HashMap<String, Query>>();
-		cleaningMap = new HashMap<String, Deduplication>();
+	void generateOutput(Query q, DataObject obj, Command command) {
+		//		System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
+		this.outputTuplesCount++;
+		CombinedTuple outputTuple = new CombinedTuple();
+		outputTuple.setDataObject(obj);
+		Query miniQuery = new Query();
+		miniQuery.setQueryId(q.getQueryId());
+		miniQuery.setSrcId(q.getSrcId());
+		miniQuery.setDataSrc(q.getDataSrc());
+		outputTuple.setQuery(miniQuery);
+		outputTuple.setDataObjectCommand(command);
+			collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
+	}
 
-		String sourceId = "";
-		String sourceType = "";
-		String persistenceState = "";
-		while (it.hasNext()) {
-			persistenceState = "";
-			Map.Entry pair = (Map.Entry) it.next();
+	void generateOutput(Query q, DataObject obj, DataObject obj2, Command obj1Command, Command obj2Command) {
+		//			System.out.println("[Output: command  "+obj1Command+" query:"  + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
+		this.outputTuplesCount++;
+		CombinedTuple outputTuple = new CombinedTuple();
+		outputTuple.setDataObject(obj);
+		outputTuple.setDataObject2(obj2);
+		Query miniQuery = new Query();
+		miniQuery.setQueryId(q.getQueryId());
+		miniQuery.setSrcId(q.getSrcId());
+		miniQuery.setDataSrc(q.getDataSrc());
+		miniQuery.setDataSrc2(q.getDataSrc2());
+		outputTuple.setQuery(miniQuery);
+		outputTuple.setDataObjectCommand(obj1Command);
+		outputTuple.setDataObject2Command(obj2Command);
+			collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
+	}
 
-			String key = "" + (String) pair.getKey();
-			if (key.startsWith(SpatioTextualConstants.Data_Source)) {
-				sourceType = SpatioTextualConstants.Data_Source;
-				sourceId = key.substring(SpatioTextualConstants.Data_Source.length() + 1);
-
-			} else if (key.startsWith(SpatioTextualConstants.Query_Source)) {
-				sourceType = SpatioTextualConstants.Query_Source;
-				sourceId = key.substring(SpatioTextualConstants.Query_Source.length() + 1);
-			} else
-				continue;
-
-			String value = "" + (String) pair.getValue();
-			if (value.contains(SpatioTextualConstants.Volatile))
-				persistenceState = SpatioTextualConstants.volatilePersistenceState;
-			else if (value.contains(SpatioTextualConstants.Continuous))
-				persistenceState = SpatioTextualConstants.continuousPersistenceState;
-			else if (value.contains(SpatioTextualConstants.Static)) {
-				persistenceState = SpatioTextualConstants.staticPersistenceState;
-			} else if (value.contains(SpatioTextualConstants.Persistent))
-				persistenceState = SpatioTextualConstants.persistentPersistenceState;
-			else if (value.contains(SpatioTextualConstants.Current))
-				persistenceState = SpatioTextualConstants.currentPersistenceState;
-
-			String cleanState = SpatioTextualConstants.NOTCLEAN;
-			if (stormConf.containsKey(SpatioTextualConstants.getVolatilePropertyKey(sourceId)))
-				cleanState = (String) stormConf.get(SpatioTextualConstants.getVolatilePropertyKey(sourceId));
-			DataSourceInformation dataSourcesInformation = new DataSourceInformation(this.selfBounds, sourceId, sourceType, persistenceState, cleanState, true, localIndexType);
-			addIndexesPerSource(sourceId, sourceType, dataSourcesInformation);
-			sourcesInformations.put(sourceId, dataSourcesInformation);
-			System.out.println(key + " = " + value);
-
+	public void generateOutputForResultChange(ArrayList<ResultSetChange> changes) {
+		for (ResultSetChange change : changes) {
+			generateOutput(change.getQuery(), change.getDataObject(), change.getChangeType());
 		}
 	}
 
-	public void addIndexesPerSource(String sourceId, String sourceType, DataSourceInformation dataSourcesInformation) {
-		if (sourceType.equals(SpatioTextualConstants.Data_Source)) {
-			externalTopKMap.put(sourceId, new HashMap<String, Query>());
-			if (dataSourcesInformation.isClean()) {
-				cleaningMap.put(sourceId, new Deduplication());
-			}
-		} else if (sourceType.equals(SpatioTextualConstants.Query_Source)) {
-			queryInformationHashMap.put(sourceId, new HashMap<String, Query>());
-
-		}
-	}
-
-	@Override
-	public void execute(Tuple input) {
-		//	collector.ack(input);
-		try {
-			String sourceType = input.getSourceStreamId();
-			if (sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query)) {
-				handleQuery(input);
-			} else if (SpatioTextualConstants.isDataStreamSource(sourceType)) {
-				handleDataObject(input);
-			} else if (SpatioTextualConstants.isControlStreamSource(sourceType)) {
-				handleControlMessage(input);
-			}
-		} catch (Exception e) {
-			e.printStackTrace(System.err);
-		}
-
-	}
-
-	/**
-	 * This function processes the query input
-	 * 
-	 * @param input
-	 */
-	public void handleQuery(Tuple input) {
-		Query query = (Query) input.getValueByField(SpatioTextualConstants.query);
-		//System.out.println("Evaluator:"+selfTaskId+" receieved query "+query.toString());
-		if (sourcesInformations.get(query.getSrcId()).isContinuous()) {
-			query.setContinousQuery(new Boolean(true));
-			handleContinousQuery(query);
-		} else if (sourcesInformations.get(query.getSrcId()).isVolatile()) {
-			query.setContinousQuery(new Boolean(false));
-			handleSnapShotQuery(query);
-		}
-
-	}
-
-	/**
-	 * This function processes a snapshot query input
-	 * 
-	 * @param input
-	 */
-	public void handleSnapShotQuery(Query query) {
-		if (query.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
-			handleSnapShotTextualRangeQuery(query);
-		} else if (query.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
-			handleSnapShotTextualKNNQuery(query);
-		} else if (query.getQueryType().equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
-			handleSnapShotTextualJoinQuery(query);
-		}
+	public HashMap<String, DataSourceInformation> getSourcesInformations() {
+		return sourcesInformations;
 	}
 
 	/**
@@ -359,10 +453,10 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 */
 	public void handleContinousQuery(Query query) {
 
-		if (query.getCommand().equals(SpatioTextualConstants.addCommand)) {
+		if (query.getCommand().equals(Command.addCommand)) {
 			if (!sourcesInformations.containsKey(query.getDataSrc())) {
 				System.err.println("Data Source not found: " + query.getDataSrc());
-				return; 
+				return;
 
 			}
 			queryInformationHashMap.get(query.getSrcId()).put(query.getQueryId(), query);
@@ -375,7 +469,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().addContinousQuery(query);
 			if (query.getDataSrc2() != null)
 				sourcesInformations.get(query.getDataSrc2()).getLocalHybridIndex().addContinousQuery(query);
-		} else if (query.getCommand().equals(SpatioTextualConstants.updateCommand)) {
+		} else if (query.getCommand().equals(Command.updateCommand)) {
 			if (!sourcesInformations.containsKey(query.getDataSrc())) {
 				System.err.println("Data Source not found: " + query.getDataSrc());
 				return;
@@ -386,7 +480,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().updateContinousQuery(queryInfo, query);
 			if (query.getDataSrc2() != null)
 				sourcesInformations.get(query.getDataSrc2()).getLocalHybridIndex().updateContinousQuery(queryInfo, query);
-		} else if (query.getCommand().equals(SpatioTextualConstants.dropCommand)) {
+		} else if (query.getCommand().equals(Command.dropCommand)) {
 			//only getting information from oldStored Query as the new query may not have all information and it may contain source and query ids
 			Query oldQuery = queryInformationHashMap.get(query.getSrcId()).get(query.getQueryId());
 			sourcesInformations.get(oldQuery.getDataSrc()).getLocalHybridIndex().dropContinousQuery(oldQuery);
@@ -397,53 +491,187 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 
 	}
 
-	public void handleSnapShotTextualRangeQuery(Query query) {
-		ArrayList<DataObject> outputObjects = new ArrayList<DataObject>();
-		ArrayList<IndexCell> relevantIndexCells = sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().getOverlappingIndexCellWithData(query.getSpatialRange(), query.getQueryText());
-		if (relevantIndexCells != null)
-			for (IndexCell indexCell : relevantIndexCells) {
-				Collection<DataObject> allIndexCellDataObjects = indexCell.getStoredObjects().values();
-				for (DataObject dataObject : allIndexCellDataObjects) {
-					this.visitedDataObjectCount++;
-					if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), query.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate()))
-						outputObjects.add(dataObject);
-
-				}
-			}
-		if (!outputObjects.isEmpty())
-			generateOutput(query, outputObjects, SpatioTextualConstants.addCommand);
+	/**
+	 * This function processes a control message
+	 * 
+	 * @param input
+	 * @throws Exception
+	 */
+	void handleControlMessage(Tuple input) throws Exception {
+		Control controlMessage = (Control) input.getValueByField(SpatioTextualConstants.control);
+		if (Control.ANSWER_SNAPSHOT_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
+			handleExternalSnapshotKNNQueryAnswer(controlMessage, input.getSourceTask());
+		} else if (Control.REQUEST_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
+			handleExternalKNNQueryRequest(controlMessage);
+		} else if (Control.DROP_CONTININOUS_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
+			handleDropُExternalKNNQueryRequest(controlMessage);
+		} else if (Control.UPDATE_CONTININOUS_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
+			//This is an update 
+			//TODO 
+			//TODO
+			//TODO
+			handleUpdateExternalKNNQueryRequest(controlMessage);
+		} else if (Control.CHANGES_SET_CONTINOUS_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
+			handleExternalKNNPredicateResultSetChange(controlMessage);
+		}
 	}
 
 	/**
-	 * This method process a query on an existing dataset of objects
+	 * This function processes a current data object
 	 * 
-	 * @param query
+	 * @param input
+	 * @throws Exception
 	 */
-	public void handleSnapShotTextualKNNQuery(Query query) {
-		query.resetKNNStructures();
-		//TODO consider generating a class for the localIndex and have the query 
-		//initiate an iterator on the index 
-		LocalIndexKNNIterator it = sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().LocalKNNIterator(query.getFocalPoint());
-		query.setLocalKnnIterator(it);
-		//this is one way of evaluating the textual KNN query 
-		//first apply the spatial predicate the locate the query in a cell index 
-		//then apply the textual predicate 
-		//then evaluate the KNN predicate 
-		//TODO consider other alternatives that first consider a textual index first 
-		//TODO consider choose the arbitrating the alternatives based on the selectivity of the predicate
-		//TODO consider applying the other textual predicates
-		expandKNNQueryToAdjustResultLocally(query);
-		if (SpatialHelper.checkKNNQueryDoneWithinLocalBounds(query, selfBounds)) {
-			ArrayList<DataObject> knnList = query.getKNNList();
-			for (DataObject obj : knnList) {
+	public void handleCurrentDataObject(DataObject dataObject) throws Exception {
 
-				generateOutput(query, obj, SpatioTextualConstants.addCommand);
+		ArrayList<Query> affectedKNNQueries = new ArrayList<Query>();
+		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
+		IndexCell previousCell = sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().get(dataObject.getObjectId());
+		if (Command.dropCommand.equals(dataObject.getCommand()) && previousCell != null) {
+			//This removes the object from this cell all together 
+			DataObject removedDataObject = dropCurrnetDataObject(dataObject);
+			removedDataObject.setCommand(Command.dropCommand);
+			processDataObjectForExternalKNNPredicates(removedDataObject);
+			changes.addAll(processDataObjectUpdateForContinousQueries(removedDataObject, previousCell.getQueries()));
+			affectedKNNQueries.addAll(previousCell.getQueries());
+
+		} else if (previousCell != null && Command.updateCommand.equals(dataObject.getCommand())) {
+			processDataObjectForExternalKNNPredicates(dataObject);
+			//Check if the data object in the same cell
+			//if yes update the data object 
+			//if no drop the data object from the old cell adjust queries accordingly
+			//then add the query to the new index cell and adjust the relevant queries accordingly
+			IndexCell newIndexCell = sourcesInformations.get(dataObject.getSrcId()).getLocalHybridIndex().mapDataObjectToIndexCell(dataObject);
+			DataObject previousDataObject = previousCell.getDataObject(dataObject.getObjectId());
+			//TODO this function needs optimization by finding out common text between the previous object and the new object 
+			//and reflect this change in the textual index within the grid cell
+			if (!previousCell.equals(newIndexCell) || !previousDataObject.getOriginalText().equals(dataObject.getOriginalText())) {
+				previousDataObject.setCommand(Command.updateDropCommand);
+				DataObject removedDataObject = dropCurrnetDataObject(previousDataObject);
+				dataObject.setCommand(Command.updateCommand);
+				addAndIndexADataObject(dataObject);
+				List<Query> previousCellQueries = previousCell.getQueries();
+				List<Query> newCellQueries = newIndexCell.getQueries();
+				List<Query> toRemoveFrom = new ArrayList<Query>();
+				for (Query q : previousCellQueries) {
+					if (!newCellQueries.contains(q)) {
+						toRemoveFrom.add(q);
+						//the query is contained in both cells 
+
+					}
+				}
+				removedDataObject.setCommand(Command.updateDropCommand);
+				changes.addAll(processDataObjectUpdateForContinousQueries(dataObject, toRemoveFrom));
+				affectedKNNQueries.addAll(toRemoveFrom);
+				dataObject.setCommand(Command.updateCommand);
+				changes.addAll(processDataObjectUpdateForContinousQueries(dataObject, newCellQueries));
+				affectedKNNQueries.addAll(newCellQueries);
+			} else {
+				//no need to remove the data object just adjust the KNN list of all relevant queries 
+				//make sure that the object did not change its text
+				previousDataObject.setTimeStamp(dataObject.getTimeStamp());
+				if (!dataObject.getLocation().equals(previousDataObject.getLocation())) {
+					previousDataObject.setLocation(dataObject.getLocation());
+					dataObject.setCommand(Command.updateCommand);
+					changes.addAll(processDataObjectUpdateForContinousQueries(dataObject, newIndexCell.getQueries()));
+					affectedKNNQueries.addAll(newIndexCell.getQueries());
+				}
 			}
+		} else {// if(SpatioTextualConstants.addCommand.equals( dataObject.getCommand())){
+			IndexCell indexcell = addAndIndexADataObject(dataObject);
+			dataObject.setCommand(Command.addCommand);
+			processDataObjectForExternalKNNPredicates(dataObject);
+			changes.addAll(processDataObjectUpdateForContinousQueries(dataObject, indexcell.getQueries()));
+			affectedKNNQueries.addAll(indexcell.getQueries());
+		}
+		changes.addAll(checkIfKNNQueryRequiresExtensionsOrShriniking(affectedKNNQueries));
+		generateOutputForResultChange(changes);
+	}
 
-		} else {
-			GlobalIndexIterator globalit = globalIndex.globalKNNIterator(query.getFocalPoint());
-			query.setGlobalKNNIterator(globalit);
-			expandSnapShotKNNPredicateToSurroundingEvaluators(query);
+	/**
+	 * This function processes a data object
+	 * 
+	 * @param input
+	 * @throws Exception
+	 */
+	boolean handleDataObject(Tuple input) throws Exception {
+
+		//	DataObjectList dataObjectList = (DataObjectList) input.getValueByField(SpatioTextualConstants.data);
+		DataObject dataObject = (DataObject) input.getValueByField(SpatioTextualConstants.data);
+		//Boolean ack= dataObject.getObjectId()%10==0;
+		boolean ack = false;
+		//		if (!SpatialHelper.overlapsSpatially(dataObject.getLocation(), selfBounds))
+		//			return;
+		String source = "";
+		//for (int i = 0; i < dataObjectList.getDataObjects().size(); i++) {
+		//dataObject = dataObjectList.getDataObjects().get(i);
+
+		source = dataObject.getSrcId();
+		if (sourcesInformations.get(source).isPersistent())
+			handlePersisentDataObject(dataObject);
+		if (sourcesInformations.get(source).isCurrent())
+			handleCurrentDataObject(dataObject);
+		else if (sourcesInformations.get(source).isVolatile())
+			handleVolatileDataObject(dataObject);
+
+		//_inputDataCountMetric.incr();
+		return ack;
+		//}
+	}
+
+	public void handleDropُExternalKNNQueryRequest(Control controlMessage) {
+		Query outSideQuery = controlMessage.getQueriesList().get(0);
+		this.externalTopKMap.get(outSideQuery.getDataSrc()).remove(outSideQuery.getQueryId());
+	}
+
+	public void handleExternalKNNPredicateResultSetChange(Control controlMessage) {
+		//this object is assumed to qualify for the textual predicate of the KNN query 
+		ArrayList<ResultSetChange> resultSetChanges = controlMessage.getResultSetChanges();
+		ArrayList<ResultSetChange> internalResultSetChanges = new ArrayList<ResultSetChange>();
+		for (ResultSetChange resultSetChange : resultSetChanges) {
+			Query externalQuery = resultSetChange.getQuery();
+			Query internalQuery = queryInformationHashMap.get(externalQuery.getSrcId()).get(externalQuery.getQueryId());
+			DataObject dataObject = resultSetChange.getDataObject();
+			//			Command changeType = resultSetChange.getChangeType();
+			dataObject.setCommand(resultSetChange.getChangeType());
+			//			if (Command.addCommand.equals(changeType)) {
+			//				dataObject.setCommand(SpatioTextualConstants.addCommand);
+			//			} else if (ResultSetChange.Update.equals(changeType)) {
+			//				dataObject.setCommand(SpatioTextualConstants.updateCommand);
+			//			} else if (ResultSetChange.Remove.equals(changeType)) {
+			//				dataObject.setCommand(SpatioTextualConstants.dropCommand);
+			//			}
+			internalResultSetChanges.addAll(internalQuery.processDataObject(dataObject));
+			if (!checkExternalKNNqueryReusltDone(internalQuery))
+				expandSnapShotKNNPredicateToSurroundingEvaluators(internalQuery);
+		}
+		generateOutputForResultChange(internalResultSetChanges);
+	}
+
+	public void handleExternalKNNQueryRequest(Control controlMessage) throws Exception {
+		ArrayList<Query> queriesList = controlMessage.getQueriesList();
+		for (Query q : queriesList) {
+			//initilize an iterator for this 
+			handleExternalSnapShotTextualKNNQuery(q);
+		}
+	}
+
+	public void handleExternalSnapshotKNNQueryAnswer(Control controlMessage, Integer taskId) {
+		Query outSideQuery = controlMessage.getQueriesList().get(0);
+
+		Query internalQuery = queryInformationHashMap.get(outSideQuery.getSrcId()).get(outSideQuery.getQueryId());
+		Integer taskIdIndex = internalQuery.getPendingKNNTaskIds().indexOf(taskId);
+		if (taskIdIndex != null)
+			internalQuery.getPendingKNNTaskIds().remove(taskId);
+		ArrayList<DataObject> responseDataObjects = controlMessage.getDataObjects();
+		if (responseDataObjects != null && responseDataObjects.size() != 0)
+			for (DataObject obj : responseDataObjects) {
+				//initilize an iterator for this 
+				internalQuery.processDataObject(obj);
+			}
+		if (internalQuery.getPendingKNNTaskIds().size() == 0) {
+			if (!checkExternalKNNqueryReusltDone(internalQuery))
+				expandSnapShotKNNPredicateToSurroundingEvaluators(internalQuery);
 		}
 
 	}
@@ -488,26 +716,50 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		//this registers the external continous query if it is originally continous
 		if (continousQuery)
 			this.externalTopKMap.get(query.getDataSrc()).put(query.getQueryId(), query);
+	}
+
+	/**
+	 * This function processes a persistent data object
+	 * 
+	 * @param input
+	 */
+	public void handlePersisentDataObject(DataObject dataObject) {
+
+		addAndIndexPersistentWindowDataObject(dataObject);
+		handleVolatileDataObject(dataObject);
+	}
+
+	/**
+	 * This function processes the query input
+	 * 
+	 * @param input
+	 */
+	public void handleQuery(Tuple input) {
+		Query query = (Query) input.getValueByField(SpatioTextualConstants.query);
+		//System.out.println("Evaluator:"+selfTaskId+" receieved query "+query.toString());
+		if (sourcesInformations.get(query.getSrcId()).isContinuous()) {
+			query.setContinousQuery(new Boolean(true));
+			handleContinousQuery(query);
+		} else if (sourcesInformations.get(query.getSrcId()).isVolatile()) {
+			query.setContinousQuery(new Boolean(false));
+			handleSnapShotQuery(query);
+		}
 
 	}
 
-	public void expandSnapShotKNNPredicateToSurroundingEvaluators(Query query) {
-		GlobalIndexIterator it = query.getGlobalKNNIterator();
-		ArrayList<Integer> surroundingEvaluators = new ArrayList<Integer>();
-		if (it.hasNext()) {
-			surroundingEvaluators = it.next();
-			query.setPendingKNNTaskIds(surroundingEvaluators);
-			Control message = new Control();
-			message.setControlMessageType(Control.REQUEST_KNN_PREDICATE);
-			ArrayList<Query> querieslist = new ArrayList<Query>();
-			querieslist.add(query);
-			message.setQueriesList(querieslist);
-			//TODO make this smarter and restrict your self to only relevant global index cells 
-			for (Integer i : surroundingEvaluators) {
-				collector.emitDirect(i, SpatioTextualConstants.getBoltBoltControlStreamId(id), new Values(message));
-			}
+	/**
+	 * This function processes a snapshot query input
+	 * 
+	 * @param input
+	 */
+	public void handleSnapShotQuery(Query query) {
+		if (query.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
+			handleSnapShotTextualRangeQuery(query);
+		} else if (query.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
+			handleSnapShotTextualKNNQuery(query);
+		} else if (query.getQueryType().equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
+			handleSnapShotTextualJoinQuery(query);
 		}
-
 	}
 
 	/**
@@ -538,12 +790,12 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 						joinedTuples = new ArrayList<DataObject>();
 						for (DataObject dataObject : allIndexCellDataObjects) {
 							for (DataObject dataObject2 : allIndexCellDataObjects2) {
-								if(SpatialHelper.getDistanceInBetween(dataObject.getLocation(), dataObject2.getLocation())<=query.getDistance()&&
-										TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), dataObject2.getObjectText(), query.getJoinTextualPredicate()))
+								if (SpatialHelper.getDistanceInBetween(dataObject.getLocation(), dataObject2.getLocation()) <= query.getDistance()
+										&& TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), dataObject2.getObjectText(), query.getJoinTextualPredicate()))
 									joinedTuples.add(dataObject2);
 							}
-							if(!joinedTuples.isEmpty())
-								generateOutput(query, dataObject, joinedTuples,SpatioTextualConstants.addCommand, SpatioTextualConstants.addCommand);
+							if (!joinedTuples.isEmpty())
+								generateOutput(query, dataObject, joinedTuples, Command.addCommand, Command.addCommand);
 						}
 					}
 				}
@@ -553,113 +805,54 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	/**
-	 * This function progessivly increases the range of the KNN query to find
-	 * the complete KNN resultset
+	 * This method process a query on an existing dataset of objects
 	 * 
 	 * @param query
-	 * @return
 	 */
-	public ArrayList<ResultSetChange> expandKNNQueryToAdjustResultLocally(Query query) {
-		LocalIndexKNNIterator it = query.getLocalKnnIterator();
-		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
-		while (it.hasNext()) {
-			ArrayList<IndexCell> indexCellList = it.next();
-			for (IndexCell indexCell : indexCellList) {
-				if (TextHelpers.evaluateTextualPredicate(indexCell.getAllDataTextInCell(), query.getQueryText(), query.getTextualPredicate())) {//indexCell.cellOverlapsTextually(query.getQueryText())) {
-					HashMap<String, DataObject> indexedDataObjectsMap = indexCell.getStoredObjects();
-					Iterator dataObjectIterator = indexedDataObjectsMap.entrySet().iterator();
-					while (dataObjectIterator.hasNext()) {
-						Map.Entry entry = (Map.Entry) dataObjectIterator.next();
-						DataObject dataObject = (DataObject) entry.getValue();
-						if (TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate())) {
-							changes.addAll(query.processDataObject(dataObject));
-						}
-					}
+	public void handleSnapShotTextualKNNQuery(Query query) {
+		query.resetKNNStructures();
+		//TODO consider generating a class for the localIndex and have the query 
+		//initiate an iterator on the index 
+		LocalIndexKNNIterator it = sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().LocalKNNIterator(query.getFocalPoint());
+		query.setLocalKnnIterator(it);
+		//this is one way of evaluating the textual KNN query 
+		//first apply the spatial predicate the locate the query in a cell index 
+		//then apply the textual predicate 
+		//then evaluate the KNN predicate 
+		//TODO consider other alternatives that first consider a textual index first 
+		//TODO consider choose the arbitrating the alternatives based on the selectivity of the predicate
+		//TODO consider applying the other textual predicates
+		expandKNNQueryToAdjustResultLocally(query);
+		if (SpatialHelper.checkKNNQueryDoneWithinLocalBounds(query, selfBounds)) {
+			ArrayList<DataObject> knnList = query.getKNNList();
+			for (DataObject obj : knnList) {
+
+				generateOutput(query, obj, Command.addCommand);
+			}
+
+		} else {
+			GlobalIndexIterator globalit = globalIndex.globalKNNIterator(query.getFocalPoint());
+			query.setGlobalKNNIterator(globalit);
+			expandSnapShotKNNPredicateToSurroundingEvaluators(query);
+		}
+
+	}
+
+	public void handleSnapShotTextualRangeQuery(Query query) {
+		ArrayList<DataObject> outputObjects = new ArrayList<DataObject>();
+		ArrayList<IndexCell> relevantIndexCells = sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().getOverlappingIndexCellWithData(query.getSpatialRange(), query.getQueryText());
+		if (relevantIndexCells != null)
+			for (IndexCell indexCell : relevantIndexCells) {
+				Collection<DataObject> allIndexCellDataObjects = indexCell.getStoredObjects().values();
+				for (DataObject dataObject : allIndexCellDataObjects) {
+					this.visitedDataObjectCount++;
+					if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), query.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate()))
+						outputObjects.add(dataObject);
+
 				}
-				if (query.getContinousQuery())
-					indexCell.addQuery(query);
 			}
-			if (query.getKNNlistSize() >= query.getK()) {
-				break;
-			}
-
-		}
-		return changes;
-	}
-
-	/**
-	 * This function processes a data object
-	 * 
-	 * @param input
-	 * @throws Exception
-	 */
-	void handleDataObject(Tuple input) throws Exception {
-
-		//	DataObjectList dataObjectList = (DataObjectList) input.getValueByField(SpatioTextualConstants.data);
-		DataObject dataObject = (DataObject) input.getValueByField(SpatioTextualConstants.data);
-		if (!SpatialHelper.overlapsSpatially(dataObject.getLocation(), selfBounds))
-			return;
-		String source = "";
-		//for (int i = 0; i < dataObjectList.getDataObjects().size(); i++) {
-		//dataObject = dataObjectList.getDataObjects().get(i);
-
-		source = dataObject.getSrcId();
-		if (sourcesInformations.get(source).isPersistent())
-			handlePersisentDataObject(dataObject);
-		if (sourcesInformations.get(source).isCurrent())
-			handleCurrentDataObject(dataObject);
-		else if (sourcesInformations.get(source).isVolatile())
-			handleVolatileDataObject(dataObject);
-
-		//}
-	}
-
-	/**
-	 * This function processes a control message
-	 * 
-	 * @param input
-	 * @throws Exception
-	 */
-	void handleControlMessage(Tuple input) throws Exception {
-		Control controlMessage = (Control) input.getValueByField(SpatioTextualConstants.control);
-		if (Control.ANSWER_SNAPSHOT_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
-			handleExternalSnapshotKNNQueryAnswer(controlMessage, input.getSourceTask());
-		} else if (Control.REQUEST_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
-			handleExternalKNNQueryRequest(controlMessage);
-		} else if (Control.DROP_CONTININOUS_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
-			handleDropُExternalKNNQueryRequest(controlMessage);
-		} else if (Control.UPDATE_CONTININOUS_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
-			//This is an update 
-			//TODO 
-			//TODO
-			//TODO
-			handleUpdateExternalKNNQueryRequest(controlMessage);
-		} else if (Control.CHANGES_SET_CONTINOUS_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
-			handleExternalKNNPredicateResultSetChange(controlMessage);
-		}
-	}
-
-	public void handleExternalKNNPredicateResultSetChange(Control controlMessage) {
-		//this object is assumed to qualify for the textual predicate of the KNN query 
-		ArrayList<ResultSetChange> resultSetChanges = controlMessage.getResultSetChanges();
-		ArrayList<ResultSetChange> internalResultSetChanges = new ArrayList<ResultSetChange>();
-		for (ResultSetChange resultSetChange : resultSetChanges) {
-			Query externalQuery = resultSetChange.getQuery();
-			Query internalQuery = queryInformationHashMap.get(externalQuery.getSrcId()).get(externalQuery.getQueryId());
-			DataObject dataObject = resultSetChange.getDataObject();
-			String changeType = resultSetChange.getChangeType();
-			if (ResultSetChange.Add.equals(changeType)) {
-				dataObject.setCommand(SpatioTextualConstants.addCommand);
-			} else if (ResultSetChange.Update.equals(changeType)) {
-				dataObject.setCommand(SpatioTextualConstants.updateCommand);
-			} else if (ResultSetChange.Remove.equals(changeType)) {
-				dataObject.setCommand(SpatioTextualConstants.dropCommand);
-			}
-			internalResultSetChanges.addAll(internalQuery.processDataObject(dataObject));
-			if (!checkExternalKNNqueryReusltDone(internalQuery))
-				expandSnapShotKNNPredicateToSurroundingEvaluators(internalQuery);
-		}
-		generateOutputForResultChange(internalResultSetChanges);
+		if (!outputObjects.isEmpty())
+			generateOutput(query, outputObjects, Command.addCommand);
 	}
 
 	public void handleUpdateExternalKNNQueryRequest(Control controlMessage) {
@@ -669,154 +862,219 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		//TODO
 	}
 
-	public void handleDropُExternalKNNQueryRequest(Control controlMessage) {
-		Query outSideQuery = controlMessage.getQueriesList().get(0);
-		this.externalTopKMap.get(outSideQuery.getDataSrc()).remove(outSideQuery.getQueryId());
-	}
-
-	public void handleExternalKNNQueryRequest(Control controlMessage) throws Exception {
-		ArrayList<Query> queriesList = controlMessage.getQueriesList();
-		for (Query q : queriesList) {
-			//initilize an iterator for this 
-			handleExternalSnapShotTextualKNNQuery(q);
-		}
-	}
-
-	public void handleExternalSnapshotKNNQueryAnswer(Control controlMessage, Integer taskId) {
-		Query outSideQuery = controlMessage.getQueriesList().get(0);
-
-		Query internalQuery = queryInformationHashMap.get(outSideQuery.getSrcId()).get(outSideQuery.getQueryId());
-		Integer taskIdIndex = internalQuery.getPendingKNNTaskIds().indexOf(taskId);
-		if (taskIdIndex != null)
-			internalQuery.getPendingKNNTaskIds().remove(taskId);
-		ArrayList<DataObject> responseDataObjects = controlMessage.getDataObjects();
-		if (responseDataObjects != null && responseDataObjects.size() != 0)
-			for (DataObject obj : responseDataObjects) {
-				//initilize an iterator for this 
-				internalQuery.processDataObject(obj);
-			}
-		if (internalQuery.getPendingKNNTaskIds().size() == 0) {
-			if (!checkExternalKNNqueryReusltDone(internalQuery))
-				expandSnapShotKNNPredicateToSurroundingEvaluators(internalQuery);
-		}
-
-	}
-
-	public Boolean checkExternalKNNqueryReusltDone(Query query) {
-		Double farthestDistance = query.getFarthestDistance();
-		Integer knnSizelist = query.getKNNlistSize();
-		if (knnSizelist >= query.getK()) {
-			Double minDistOfNextIteration = query.getGlobalKNNIterator().getMinDistOfNextIteration();
-			if (minDistOfNextIteration == null || farthestDistance < minDistOfNextIteration)
-				return true;
-			//TODO we need to consider shrink the iterations of the global iterator
-
-		}
-		return false;
-
-	}
-
 	/**
-	 * This function processes a persistent data object
+	 * This function processes a volatile data object
 	 * 
 	 * @param input
 	 */
-	public void handlePersisentDataObject(DataObject dataObject) {
+	public void handleVolatileDataObject(DataObject dataObject) {
+		boolean fromNeighbour = false;
+		//		if (!SpatialHelper.overlapsSpatially(dataObject.getLocation(), selfBounds)) {
+		//			fromNeighbour = true;
+		//			//		System.out.println("Data object "+dataObject+" is outSide the range of this bolt"+this.selfTaskId+" self Bounds:"+selfBounds);
+		//		} else {
+		//			fromNeighbour = false;
+		//		}
+		//		if (!fromNeighbour) 
+		ArrayList<List<Query>> queries = sourcesInformations.get(dataObject.getSrcId()).getLocalHybridIndex().getReleventSpatialKeywordRangeQueries(dataObject, fromNeighbour);
+		if (queries == null)
+			return;
+		//for every source 
+		for (List<Query> srcQueryList : queries) {
+			ArrayList<Integer> qualifiedQueriesIds = new ArrayList<Integer>();
+			String queryScrId = null;
+			if (srcQueryList.size() > 0) {
+				queryScrId = srcQueryList.get(0).getSrcId();
+				for (Query q : srcQueryList) {
+					if (TextualPredicate.OVERlAPS.equals(q.getTextualPredicate()) || TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
+						qualifiedQueriesIds.add(q.getQueryId());
+				}
+				if (qualifiedQueriesIds.size() > 0)
+					generateOutput(qualifiedQueriesIds, queryScrId, dataObject, Command.addCommand);
+			}
+		}
+		//	}
+	}
 
-		addAndIndexPersistentWindowDataObject(dataObject);
-		handleVolatileDataObject(dataObject);
+	public void handleVolatileDataObjectOld(DataObject dataObject) {
+		boolean fromNeighbour = false;
+		if (!SpatialHelper.overlapsSpatially(dataObject.getLocation(), selfBounds)) {
+			fromNeighbour = true;
+			//		System.out.println("Data object "+dataObject+" is outSide the range of this bolt"+this.selfTaskId+" self Bounds:"+selfBounds);
+		} else {
+			fromNeighbour = false;
+
+		}
+
+		Map<String, Query> queriesMap = sourcesInformations.get(dataObject.getSrcId()).getLocalHybridIndex().getReleventQueries(dataObject, fromNeighbour);
+
+		Iterator queriesIterator = queriesMap.entrySet().iterator();
+		while (queriesIterator.hasNext()) {
+			Map.Entry entry = (Map.Entry) queriesIterator.next();
+			Query q = (Query) entry.getValue();
+
+			if (!fromNeighbour && q.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
+				//apply spatial predicate then textual predicate 
+				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate())) {
+					generateOutput(q, dataObject, Command.addCommand);
+
+				}
+			} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
+				//apply spatial predicate 
+				//apply textual predicate 
+				//apply KNN predicate 
+				processVolatileDataObjectForTextualKNNQuery(dataObject, q, fromNeighbour);
+
+			} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
+				processVolatileDataObjectForTextualSpatialJoinQuery(dataObject, q, fromNeighbour);
+			}
+		}
+
+		//check if the data object needs to be send to other partitions
+		DataObjectList dataObjectList = new DataObjectList();
+		dataObjectList.addDataObject(dataObject);
+		if (!fromNeighbour && dataObject.getRelevantArea() != null) {
+			ArrayList<Integer> relevantTaskIds = globalIndex.getTaskIDsOverlappingRecangle(dataObject.getRelevantArea());
+			for (Integer taskId : relevantTaskIds) {
+				if (taskId != selfTaskId)
+					collector.emitDirect(taskId, id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data, new Values(dataObjectList));
+			}
+		}
+	}
+
+	@Override
+	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+		try {
+			this.count = 0;
+			this.context = context;
+			this.collector = collector;
+			this.stormConf = stormConf;
+			this.evaluatorBoltTasks = context.getComponentTasks(id);
+			this.indexBoltTasks = context.getComponentTasks(SpatioTextualConstants.getIndexId(id));
+			//			_inputDataCountMetric = new CountMetric();
+			//			context.registerMetric("Executed_Object_counter", _inputDataCountMetric, 20);
+			//**************************************************************************************
+			//preparing local and global indexes
+			prepareLocalAndGlobalIndexes();
+			//**************************************************************************************
+			//preparing data sources information 
+			prepareDataAndQuerySourceInfo();
+			//**************************************************************************************
+			//read static data congfiguration and data 
+			prepareStaticData();
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+
+	}
+
+	public void prepareDataAndQuerySourceInfo() {
+		System.out.println("***************************Printing Bolt configuration*******************");
+		Iterator it = stormConf.entrySet().iterator();
+		sourcesInformations = new HashMap<String, DataSourceInformation>();
+		//**************************************************************************************
+		//initializing the local variables
+		//localDataSpatioTextualIndex = new HashMap<String, LocalHybridIndex>();
+		queryInformationHashMap = new HashMap<String, HashMap<Integer, Query>>();
+		externalTopKMap = new HashMap<String, HashMap<Integer, Query>>();
+		cleaningMap = new HashMap<String, Deduplication>();
+
+		String sourceId = "";
+		DataSourceType sourceType;
+		String persistenceState = "";
+		while (it.hasNext()) {
+			persistenceState = "";
+			Map.Entry pair = (Map.Entry) it.next();
+
+			String key = "" + (String) pair.getKey();
+			if (key.startsWith(DataSourceType.DATA_SOURCE.name())) {
+				sourceType = DataSourceType.DATA_SOURCE;
+				sourceId = key.substring(DataSourceType.DATA_SOURCE.name().length() + 1);
+
+			} else if (key.startsWith(DataSourceType.QUERY_SOURCE.name())) {
+				sourceType = DataSourceType.QUERY_SOURCE;
+				sourceId = key.substring(DataSourceType.QUERY_SOURCE.name().length() + 1);
+			} else
+				continue;
+
+			String value = "" + (String) pair.getValue();
+			if (value.contains(SpatioTextualConstants.Volatile))
+				persistenceState = SpatioTextualConstants.volatilePersistenceState;
+			else if (value.contains(SpatioTextualConstants.Continuous))
+				persistenceState = SpatioTextualConstants.continuousPersistenceState;
+			else if (value.contains(SpatioTextualConstants.Static)) {
+				persistenceState = SpatioTextualConstants.staticPersistenceState;
+			} else if (value.contains(SpatioTextualConstants.Persistent))
+				persistenceState = SpatioTextualConstants.persistentPersistenceState;
+			else if (value.contains(SpatioTextualConstants.Current))
+				persistenceState = SpatioTextualConstants.currentPersistenceState;
+
+			String cleanState = SpatioTextualConstants.NOTCLEAN;
+			if (stormConf.containsKey(SpatioTextualConstants.getVolatilePropertyKey(sourceId)))
+				cleanState = (String) stormConf.get(SpatioTextualConstants.getVolatilePropertyKey(sourceId));
+			DataSourceInformation dataSourcesInformation = new DataSourceInformation(this.selfBounds, sourceId, sourceType, persistenceState, cleanState, true, localIndexType, fineGridGran);
+			addIndexesPerSource(sourceId, sourceType, dataSourcesInformation);
+			sourcesInformations.put(sourceId, dataSourcesInformation);
+			System.out.println(key + " = " + value);
+
+		}
 	}
 
 	/**
-	 * This function processes a current data object
-	 * 
-	 * @param input
-	 * @throws Exception
+	 * This function initialized the global and local indexes information
 	 */
-	public void handleCurrentDataObject(DataObject dataObject) throws Exception {
+	public void prepareLocalAndGlobalIndexes() {
+		numberOfEvaluatorTasks = this.evaluatorBoltTasks.size();
+		selfComponentId = context.getThisComponentId();
+		selfTaskId = context.getThisTaskId();
+		selfTaskIndex = context.getThisTaskIndex();
+		//**************************************************************************************
+		//global index information
+		this.myPartition = new Cell(0, 0, 0, 0);
+		if (partitions == null) {
+			this.partitions = getInitialPartitions();
 
-		ArrayList<Query> affectedKNNQueries = new ArrayList<Query>();
-		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
-		IndexCell previousCell = sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().get(dataObject.getObjectId());
-		if (SpatioTextualConstants.dropCommand.equals(dataObject.getCommand()) && previousCell != null) {
-			//This removes the object from this cell all together 
-			DataObject removedDataObject = dropCurrnetDataObject(dataObject);
-			removedDataObject.setCommand(SpatioTextualConstants.dropCommand);
-			processDataObjectForExternalKNNPredicates(removedDataObject);
-			changes.addAll(processDataObjectUpdateForContinousQueries(removedDataObject, previousCell.getQueries()));
-			affectedKNNQueries.addAll(previousCell.getQueries());
-
-		} else if (previousCell != null && SpatioTextualConstants.updateCommand.equals(dataObject.getCommand())) {
-			processDataObjectForExternalKNNPredicates(dataObject);
-			//Check if the data object in the same cell
-			//if yes update the data object 
-			//if no drop the data object from the old cell adjust queries accordingly
-			//then add the query to the new index cell and adjust the relevant queries accordingly
-			IndexCell newIndexCell = sourcesInformations.get(dataObject.getSrcId()).getLocalHybridIndex().mapDataObjectToIndexCell(dataObject);
-			DataObject previousDataObject = previousCell.getDataObject(dataObject.getObjectId());
-			//TODO this function needs optimization by finding out common text between the previous object and the new object 
-			//and reflect this change in the textual index within the grid cell
-			if (!previousCell.equals(newIndexCell) || !previousDataObject.getOriginalText().equals(dataObject.getOriginalText())) {
-				previousDataObject.setCommand(SpatioTextualConstants.updateDropCommand);
-				DataObject removedDataObject = dropCurrnetDataObject(previousDataObject);
-				dataObject.setCommand(SpatioTextualConstants.updateCommand);
-				addAndIndexADataObject(dataObject);
-				ArrayList<Query> previousCellQueries = previousCell.getQueries();
-				ArrayList<Query> newCellQueries = newIndexCell.getQueries();
-				ArrayList<Query> toRemoveFrom = new ArrayList<Query>();
-				for (Query q : previousCellQueries) {
-					if (!newCellQueries.contains(q)) {
-						toRemoveFrom.add(q);
-						//the query is contained in both cells 
-
-					}
-				}
-				removedDataObject.setCommand(SpatioTextualConstants.updateDropCommand);
-				changes.addAll(processDataObjectUpdateForContinousQueries(dataObject, toRemoveFrom));
-				affectedKNNQueries.addAll(toRemoveFrom);
-				dataObject.setCommand(SpatioTextualConstants.updateCommand);
-				changes.addAll(processDataObjectUpdateForContinousQueries(dataObject, newCellQueries));
-				affectedKNNQueries.addAll(newCellQueries);
-			} else {
-				//no need to remove the data object just adjust the KNN list of all relevant queries 
-				//make sure that the object did not change its text
-				previousDataObject.setTimeStamp(dataObject.getTimeStamp());
-				if (!dataObject.getLocation().equals(previousDataObject.getLocation())) {
-					previousDataObject.setLocation(dataObject.getLocation());
-					dataObject.setCommand(SpatioTextualConstants.updateCommand);
-					changes.addAll(processDataObjectUpdateForContinousQueries(dataObject, newIndexCell.getQueries()));
-					affectedKNNQueries.addAll(newIndexCell.getQueries());
-				}
-			}
-		} else {// if(SpatioTextualConstants.addCommand.equals( dataObject.getCommand())){
-			IndexCell indexcell = addAndIndexADataObject(dataObject);
-			dataObject.setCommand(SpatioTextualConstants.addCommand);
-			processDataObjectForExternalKNNPredicates(dataObject);
-			changes.addAll(processDataObjectUpdateForContinousQueries(dataObject, indexcell.getQueries()));
-			affectedKNNQueries.addAll(indexcell.getQueries());
 		}
-		changes.addAll(checkIfKNNQueryRequiresExtensionsOrShriniking(affectedKNNQueries));
-		generateOutputForResultChange(changes);
+		for (Cell c : partitions)
+			if (c.index == selfTaskIndex)
+				this.myPartition = c;
+		if (globalIndexType == GlobalIndexType.PARTITIONED)
+			globalIndex = new GlobalOptimizedPartitionedIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
+		else if (globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE)
+			globalIndex = new GlobalOptimizedPartitionedTextAwareIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
+
+		else
+			globalIndex = new GlobalGridIndex(numberOfEvaluatorTasks, evaluatorBoltTasks);
+		//**************************************************************************************
+		//local index information
+		//identifying evaluator cell bounds 
+		selfBounds = globalIndex.getBoundsForTaskIndex(selfTaskIndex);
+
 	}
 
-	public ArrayList<ResultSetChange> checkIfKNNQueryRequiresExtensionsOrShriniking(ArrayList<Query> affectedQueries) {
-		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
-		for (Query query : affectedQueries) {
-			if (!SpatialHelper.checkKNNQueryDoneWithinLocalBounds(query, selfBounds) && query.getGlobalKNNIterator() == null) {
-				GlobalIndexIterator globalit = globalIndex.globalKNNIterator(query.getFocalPoint());
-				query.setGlobalKNNIterator(globalit);
-				expandSnapShotKNNPredicateToSurroundingEvaluators(query);
-			} else if (query.getGlobalKNNIterator() != null && !checkExternalKNNqueryReusltDone(query))
-				expandSnapShotKNNPredicateToSurroundingEvaluators(query);
+	public ArrayList<Cell> getInitialPartitions() {
+		return PartitionsHelper.getGridBasedParitions(numberOfEvaluatorTasks - 1, fineGridGran, fineGridGran);
+	}
+
+	/**
+	 * This function reads
+	 */
+	public void prepareStaticData() {
+		Iterator it = sourcesInformations.entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry pair = (Map.Entry) it.next();
+			//We should not read entire static data at once, we should use the a cache based method
+			if (((DataSourceInformation) pair.getValue()).isStatic())
+				readStaticData(((DataSourceInformation) pair.getValue()).getDataSourceId());
 		}
-		return changes;
+
 	}
 
 	public void processDataObjectForExternalKNNPredicates(DataObject obj) throws Exception {
 		String source = obj.getSrcId();
-		Map<String, Query> externalPredicates = externalTopKMap.get(source);
+		Map<Integer, Query> externalPredicates = externalTopKMap.get(source);
 		if (externalPredicates != null) {
-			Iterator<Entry<String, Query>> queriesIterator = externalPredicates.entrySet().iterator();
+			Iterator<Entry<Integer, Query>> queriesIterator = externalPredicates.entrySet().iterator();
 			while (queriesIterator.hasNext()) {
 				Query externalQuery = queriesIterator.next().getValue();
 				ArrayList<ResultSetChange> resultSetChanges = externalQuery.processDataObject(obj);
@@ -831,13 +1089,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		}
 	}
 
-	public void generateOutputForResultChange(ArrayList<ResultSetChange> changes) {
-		for (ResultSetChange change : changes) {
-			generateOutput(change.getQuery(), change.getDataObject(), change.getChangeType());
-		}
-	}
-
-	public ArrayList<ResultSetChange> processDataObjectUpdateForContinousQueries(DataObject dataObject, ArrayList<Query> queries) {
+	public ArrayList<ResultSetChange> processDataObjectUpdateForContinousQueries(DataObject dataObject, List<Query> queries) {
 		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
 		//To avoid concurrent modification problem processing a query list and then maybe remove a query from it while iteratoing 
 		//create a copy of the arrya list 
@@ -875,73 +1127,6 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			}
 		}
 		return changes;
-	}
-
-	/**
-	 * This function data object
-	 * 
-	 * @param input
-	 */
-	DataObject dropCurrnetDataObject(DataObject dataObject) {
-		ArrayList<ResultSetChange> changes = null;
-		if (sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().containsKey(dataObject.getObjectId())) {
-			IndexCell indexCell = sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().get(dataObject.getObjectId());
-			DataObject removedDataObject = indexCell.dropDataObject(dataObject.getObjectId());
-			sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().remove(dataObject.getObjectId());
-			sourcesInformations.get(dataObject.getSrcId()).getLocalTextIndex().dropDataObject(dataObject);
-			return removedDataObject;
-		} else
-			return null;//object not found and hence cannot be removed //TODO maybe throw an exception
-	}
-
-	/**
-	 * This function processes a volatile data object
-	 * 
-	 * @param input
-	 */
-	public void handleVolatileDataObject(DataObject dataObject) {
-		boolean fromNeighbour = false;
-		if (!SpatialHelper.overlapsSpatially(dataObject.getLocation(), selfBounds)) {
-			fromNeighbour = true;
-		} else {
-			fromNeighbour = false;
-		}
-		//check if the incomming data object is duplicate 
-		//		if (!fromNeighbour && cleaningMap.containsKey(dataObject.getSrcId()) && ((Deduplication) cleaningMap.get(dataObject.getSrcId())).isDuplicate(dataObject))
-		//			return; //this object does not need to be processed			
-
-		HashMap<String, Query> queriesMap = sourcesInformations.get(dataObject.getSrcId()).getLocalHybridIndex().getReleventQueries(dataObject, fromNeighbour);
-
-		Iterator queriesIterator = queriesMap.entrySet().iterator();
-		while (queriesIterator.hasNext()) {
-			Map.Entry entry = (Map.Entry) queriesIterator.next();
-			Query q = (Query) entry.getValue();
-
-			if (!fromNeighbour && q.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
-				//apply spatial predicate then textual predicate 
-				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
-					generateOutput(q, dataObject, SpatioTextualConstants.addCommand);
-			} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
-				//apply spatial predicate 
-				//apply textual predicate 
-				//apply KNN predicate 
-				processVolatileDataObjectForTextualKNNQuery(dataObject, q, fromNeighbour);
-
-			} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
-				processVolatileDataObjectForTextualSpatialJoinQuery(dataObject, q, fromNeighbour);
-			}
-		}
-
-		//check if the data object needs to be send to other partitions
-		DataObjectList dataObjectList = new DataObjectList();
-		dataObjectList.addDataObject(dataObject);
-		if (!fromNeighbour && dataObject.getRelevantArea() != null) {
-			ArrayList<Integer> relevantTaskIds = globalIndex.getTaskIDsOverlappingRecangle(dataObject.getRelevantArea());
-			for (Integer taskId : relevantTaskIds) {
-				if (taskId != selfTaskId)
-					collector.emitDirect(taskId, id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data, new Values(dataObjectList));
-			}
-		}
 	}
 
 	/**
@@ -994,7 +1179,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 				//this cell contains data that is relevant to the incoming data object 
 				//iterate over all data objects to find matching 
 				//this is the the theta join operator 
-				HashMap<String, DataObject> storedObjects = indexCell.getStoredObjects();
+				HashMap<Integer, DataObject> storedObjects = indexCell.getStoredObjects();
 				Iterator it = storedObjects.entrySet().iterator();
 				while (it.hasNext()) {
 					Map.Entry entry = (Map.Entry) it.next();
@@ -1007,7 +1192,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 
 					&& SpatialHelper.overlapsSpatially(storedDataObject.getLocation(), q.getSpatialRange()))
 
-						generateOutput(q, dataObject, storedDataObject, SpatioTextualConstants.addCommand, SpatioTextualConstants.addCommand);
+						generateOutput(q, dataObject, storedDataObject, Command.addCommand, Command.addCommand);
 
 				}
 			}
@@ -1015,91 +1200,29 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 
 	}
 
-	void generateOutput(Query q, DataObject obj, String command) {
-		//	System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
-		this.outputTuplesCount++;
-		CombinedTuple outputTuple = new CombinedTuple();
-		outputTuple.setDataObject(obj);
-		Query miniQuery = new Query();
-		miniQuery.setQueryId(q.getQueryId());
-		miniQuery.setSrcId(q.getSrcId());
-		miniQuery.setDataSrc(q.getDataSrc());
-		outputTuple.setQuery(miniQuery);
-		outputTuple.setDataObjectCommand(command);
-		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
-	}
-
-	void generateOutput(Query q, ArrayList<DataObject> objList, String command) {
-		//	System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
-		this.outputTuplesCount += objList.size();
-		CombinedTuple outputTuple = new CombinedTuple();
-		outputTuple.dataObjectList = objList;
-		Query miniQuery = new Query();
-		miniQuery.setQueryId(q.getQueryId());
-		miniQuery.setSrcId(q.getSrcId());
-		miniQuery.setDataSrc(q.getDataSrc());
-		outputTuple.setQuery(miniQuery);
-		outputTuple.setDataObjectCommand(command);
-		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
-	}
-
-	void generateOutput(Query q, DataObject obj, DataObject obj2, String obj1Command, String obj2Command) {
-		//	System.out.println("[Output: command  "+obj1Command+" query:"  + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
-		this.outputTuplesCount++;
-		CombinedTuple outputTuple = new CombinedTuple();
-		outputTuple.setDataObject(obj);
-		outputTuple.setDataObject2(obj2);
-		Query miniQuery = new Query();
-		miniQuery.setQueryId(q.getQueryId());
-		miniQuery.setSrcId(q.getSrcId());
-		miniQuery.setDataSrc(q.getDataSrc());
-		miniQuery.setDataSrc2(q.getDataSrc2());
-		outputTuple.setQuery(miniQuery);
-		outputTuple.setDataObjectCommand(obj1Command);
-		outputTuple.setDataObject2Command(obj2Command);
-		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
-	}
-
-	void generateOutput(Query q, DataObject obj, ArrayList<DataObject> obj2List, String obj1Command, String obj2Command) {
-		//	System.out.println("[Output: command  "+obj1Command+" query:"  + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
-		this.outputTuplesCount++;
-		CombinedTuple outputTuple = new CombinedTuple();
-		outputTuple.setDataObject(obj);
-		outputTuple.setDataObject2List(obj2List);
-		Query miniQuery = new Query();
-		miniQuery.setQueryId(q.getQueryId());
-		miniQuery.setSrcId(q.getSrcId());
-		miniQuery.setDataSrc(q.getDataSrc());
-		miniQuery.setDataSrc2(q.getDataSrc2());
-		outputTuple.setQuery(miniQuery);
-		outputTuple.setDataObjectCommand(obj1Command);
-		outputTuple.setDataObject2Command(obj2Command);
-		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
-	}
-
-	@Override
-	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+	/**
+	 * This function reads data based on self bounds
+	 */
+	public void readStaticData(String sourceId) {
+		String sourceClassName = (String) this.stormConf.get(SpatioTextualConstants.Static_Source_Class_Name + "_" + sourceId);
+		Map<String, String> staticSourceConfig = (Map<String, String>) this.stormConf.get(SpatioTextualConstants.Static_Source_Class_Config + "_" + sourceId);
 		try {
-			//These are the streams for interaction with other bolts 
-			declarer.declareStream(id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Query, new Fields(SpatioTextualConstants.query));
-			declarer.declareStream(id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data, new Fields(SpatioTextualConstants.data));
-			declarer.declareStream(SpatioTextualConstants.getBoltBoltControlStreamId(id), new Fields(SpatioTextualConstants.control));
-			declarer.declareStream(id + SpatioTextualConstants.Bolt_Index_STreamIDExtension_Query, new Fields(SpatioTextualConstants.query));
-			declarer.declareStream(id + SpatioTextualConstants.Bolt_Index_STreamIDExtension_Data, new Fields(SpatioTextualConstants.data));
-			declarer.declareStream(id + SpatioTextualConstants.Bolt_Index_STreamIDExtension_Control, new Fields(SpatioTextualConstants.control));
-			//This is the final output 
-			declarer.declareStream(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Fields(SpatioTextualConstants.output));
+			Class<?> dataSourceClass = Class.forName(sourceClassName);
+			Constructor<?> constructor = dataSourceClass.getConstructor(Rectangle.class, Map.class, String.class, Integer.class, Integer.class);
+			AbstractStaticDataSource staticDataSource = (AbstractStaticDataSource) constructor.newInstance(selfBounds, staticSourceConfig, sourceId, this.selfTaskId, this.selfTaskIndex);
+
+			while (staticDataSource.hasNext()) {
+				DataObject dataObject = staticDataSource.getNext();
+				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), selfBounds)) {
+					addAndIndexADataObject(dataObject);
+				} else {
+					System.err.println("Data object is outside the scope this evluator :" + dataObject.toString() + " : bounds " + selfBounds.toString());
+				}
+			}
+			staticDataSource.close();
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			e.printStackTrace();
 		}
-	}
-	//***********************************************************************************************
-	//************getters and setters
-
-	public Integer numberOfEvaluatorTasks;
-
-	public HashMap<String, DataSourceInformation> getSourcesInformations() {
-		return sourcesInformations;
 	}
 
 	public void setSourcesInformations(HashMap<String, DataSourceInformation> sourcesInformations) {

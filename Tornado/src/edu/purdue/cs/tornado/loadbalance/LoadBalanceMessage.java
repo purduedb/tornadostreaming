@@ -1,3 +1,8 @@
+/**
+ *  
+ * @author Anas Daghistani <anas@purdue.edu>
+ *
+ */
 package edu.purdue.cs.tornado.loadbalance;
 
 import java.util.ArrayList;
@@ -9,6 +14,7 @@ public class LoadBalanceMessage {
 	public static final String PARTITION = "Partition";
 	public static final String MERGE = "Merge";
 	public static final String SPLIT = "Split";
+	public static final String SHIFT = "shift";
 	public static final String ENTER_BARRIER = "EnterBarrier";
 	public static final String GOIING_TO_BARRIER = "GoingToBarrier";
 	public static final String SEND_TO = "Send_To";
@@ -25,7 +31,7 @@ public class LoadBalanceMessage {
 
 	
 
-	
+	//all fields are TBD
 	Partition parition;
 	Integer sendTo;
 	Partition newCell, auxCell;
@@ -34,6 +40,7 @@ public class LoadBalanceMessage {
 	ArrayList<Cell> newPartitions;
 	String loadBalanceMessageType;
 	String type;
+	Integer planNumber;
 
 	public String getType() {
 		return type;
@@ -59,6 +66,15 @@ public class LoadBalanceMessage {
 		newExecuterTasks = null;
 		newAuxiliaryExecutorTask = null;
 		newPartitions = null;
+		planNumber=null;
+	}
+
+	public Integer getPlanNumber() {
+		return planNumber;
+	}
+
+	public void setPlanNumber(Integer planNumber) {
+		this.planNumber = planNumber;
 	}
 
 	public Partition getParition() {

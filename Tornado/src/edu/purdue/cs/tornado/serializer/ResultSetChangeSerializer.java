@@ -23,6 +23,7 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.messages.ResultSetChange;
@@ -36,7 +37,7 @@ public class ResultSetChangeSerializer  extends  com.esotericsoftware.kryo.Seria
 	@Override
 	public void write(Kryo kryo, Output output, ResultSetChange object) {
 		kryo.writeObjectOrNull(output,object.getDataObject(),DataObject.class);
-		kryo.writeObjectOrNull(output,object.getChangeType(),String.class);
+		kryo.writeObjectOrNull(output,object.getChangeType(),Command.class);
 		kryo.writeObjectOrNull(output,object.getQuery(),Query.class);
 	}
 
@@ -44,7 +45,7 @@ public class ResultSetChangeSerializer  extends  com.esotericsoftware.kryo.Seria
 	public ResultSetChange read(Kryo kryo, Input input, Class<ResultSetChange> type) {
 	    ResultSetChange change = new ResultSetChange(
 	    		kryo.readObjectOrNull(input,DataObject.class),
-	    		kryo.readObjectOrNull(input,String.class),
+	    		kryo.readObjectOrNull(input,Command.class),
 	    		kryo.readObjectOrNull(input,Query.class));
 		return change;
 	}

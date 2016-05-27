@@ -81,7 +81,7 @@ public class TestPOIsStaticDataSource extends AbstractStaticDataSource{
 
 					
 					dataObject.setLocation(point);
-					dataObject.setObjectId(""+(count++));//
+					dataObject.setObjectId((count++));//
 					;
 					dataObject.setObjectText(textContent);
 					dataObject.setSrcId(sourceId);

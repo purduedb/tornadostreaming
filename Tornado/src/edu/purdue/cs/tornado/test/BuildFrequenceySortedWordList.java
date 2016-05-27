@@ -24,13 +24,15 @@ import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
 
 public class BuildFrequenceySortedWordList {
 	static HashMap<String, Integer> wordsMap = new HashMap<String, Integer>();
+	static int maxNumberOFTweets=5000000;
 	public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
-		String tweetsFile = "/home/ahmed/Downloads/sample_usa_tweets.csv";
+		String tweetsFile ="/media/D/datasets/tweetsForQueries.csv";
 		String poiFIle = "/home/ahmed/Downloads/output.txt";
-		String outputfilePath="/home/ahmed/Downloads/soredTweetskeywords.txt";
+		String outputfilePath="/media/D/googleDrive/walid research/datasets/querykeywordssorted/sortedTweetskeywords.txt";
 		readTweets(tweetsFile);
 	//	readPOIs(poiFIle);
 		
@@ -70,12 +72,15 @@ public class BuildFrequenceySortedWordList {
 		
 		String tweet="";
 		ArrayList<String> keywords;
+		int i =0;
 		try {
 			FileInputStream fstream = new FileInputStream(fileName);
 			BufferedReader 	br = new BufferedReader(new InputStreamReader(fstream));
-			while ((tweet = br.readLine()) != null) {
-				keywords = parseTweet( tweet);
+			while ((tweet = br.readLine()) != null&&i<maxNumberOFTweets) {
+				keywords =parseTweet(tweet);
+				
 				addFrequentWords(keywords);
+				i++;
 
 			}
 			br.close();

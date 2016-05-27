@@ -21,22 +21,33 @@ package edu.purdue.cs.tornado;
 
 import java.util.Map;
 
-import backtype.storm.Config;
-import backtype.storm.LocalCluster;
-import backtype.storm.generated.StormTopology;
-import backtype.storm.generated.SubmitOptions;
+import org.apache.storm.Config;
+import org.apache.storm.LocalCluster;
+import org.apache.storm.generated.StormTopology;
+import org.apache.storm.generated.SubmitOptions;
+
+import edu.purdue.cs.tornado.helper.IndexCell;
+import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
+import edu.purdue.cs.tornado.loadbalance.Cell;
+import edu.purdue.cs.tornado.loadbalance.LoadBalanceMessage;
+import edu.purdue.cs.tornado.loadbalance.Partition;
+import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.Control;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.DataObjectList;
-import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.messages.ResultSetChange;
+import edu.purdue.cs.tornado.serializer.CellSerializer;
+import edu.purdue.cs.tornado.serializer.CombinedTupleSerializer;
 import edu.purdue.cs.tornado.serializer.ControlSerializer;
 import edu.purdue.cs.tornado.serializer.DataObjectListSerializer;
 import edu.purdue.cs.tornado.serializer.DataObjectSerializer;
-import edu.purdue.cs.tornado.serializer.CombinedTupleSerializer;
+import edu.purdue.cs.tornado.serializer.IndexCellCoordinatesSerializer;
+import edu.purdue.cs.tornado.serializer.IndexCellSerializer;
+import edu.purdue.cs.tornado.serializer.LoadBalanceMessageSerializer;
+import edu.purdue.cs.tornado.serializer.PartitionSerializer;
 import edu.purdue.cs.tornado.serializer.PointSerializer;
 import edu.purdue.cs.tornado.serializer.QuerySerializer;
 import edu.purdue.cs.tornado.serializer.RectangleSerializer;
@@ -56,11 +67,16 @@ public class SpatioTextualLocalCluster extends LocalCluster{
 		((Config)conf).registerSerialization(Query.class, QuerySerializer.class);
 		((Config)conf).registerSerialization(DataObject.class, DataObjectSerializer.class);
 		((Config)conf).registerSerialization(DataObjectList.class, DataObjectListSerializer.class);
+		((Config)conf).registerSerialization(LoadBalanceMessage.class, LoadBalanceMessageSerializer.class);
 		((Config)conf).registerSerialization(Control.class, ControlSerializer.class);
 		((Config)conf).registerSerialization(Point.class, PointSerializer.class);
 		((Config)conf).registerSerialization(Rectangle.class, RectangleSerializer.class);
 		((Config)conf).registerSerialization(CombinedTuple.class, CombinedTupleSerializer.class);
 		((Config)conf).registerSerialization(ResultSetChange.class, ResultSetChangeSerializer.class);
+		((Config)conf).registerSerialization(Partition.class, PartitionSerializer.class);
+		((Config)conf).registerSerialization(Cell.class, CellSerializer.class);
+		((Config)conf).registerSerialization(IndexCell.class, IndexCellSerializer.class);
+		((Config)conf).registerSerialization(IndexCellCoordinates.class, IndexCellCoordinatesSerializer.class);
 		super.submitTopology(topologyName, conf, topology);
 		
 	}
@@ -71,11 +87,16 @@ public class SpatioTextualLocalCluster extends LocalCluster{
 		((Config)conf).registerSerialization(Query.class, QuerySerializer.class);
 		((Config)conf).registerSerialization(DataObject.class, DataObjectSerializer.class);
 		((Config)conf).registerSerialization(DataObjectList.class, DataObjectListSerializer.class);
+		((Config)conf).registerSerialization(LoadBalanceMessage.class, LoadBalanceMessageSerializer.class);
 		((Config)conf).registerSerialization(Control.class, ControlSerializer.class);
 		((Config)conf).registerSerialization(Point.class, PointSerializer.class);
 		((Config)conf).registerSerialization(Rectangle.class, RectangleSerializer.class);
 		((Config)conf).registerSerialization(CombinedTuple.class, CombinedTupleSerializer.class);
 		((Config)conf).registerSerialization(ResultSetChange.class, ResultSetChangeSerializer.class);
+		((Config)conf).registerSerialization(Partition.class, PartitionSerializer.class);
+		((Config)conf).registerSerialization(Cell.class, CellSerializer.class);
+		((Config)conf).registerSerialization(IndexCell.class, IndexCellSerializer.class);
+		((Config)conf).registerSerialization(IndexCellCoordinates.class, IndexCellCoordinatesSerializer.class);
 		super.submitTopologyWithOpts(topologyName, conf, topology,submitOpts);
 		
 	}

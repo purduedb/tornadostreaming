@@ -136,16 +136,21 @@ public class GlobalGridIndex extends GlobalIndex{
 		int xMaxCell = (int) (rectangle.getMax().getX() / xStep);
 		int yMaxCell = (int) (rectangle.getMax().getY() / yStep);
 		//to handle the case where data is outside the range of the bolts 
-		if(xMaxCell>=SpatioTextualConstants.xMaxRange/xStep)
-			xMaxCell=(int) ((SpatioTextualConstants.xMaxRange/xStep)-1);
-		if(yMaxCell>=SpatioTextualConstants.yMaxRange/xStep)
-			yMaxCell=(int) ((SpatioTextualConstants.yMaxRange/yStep)-1);
-		if(xMinCell<0)
-			xMinCell=0;
-		if(yMinCell<0)
-			yMinCell=0;
+		if (xMaxCell >= SpatioTextualConstants.xMaxRange / xStep)
+			xMaxCell = (int) ((SpatioTextualConstants.xMaxRange / xStep) - 1);
+		if (yMaxCell >= SpatioTextualConstants.yMaxRange / xStep)
+			yMaxCell = (int) ((SpatioTextualConstants.yMaxRange / yStep) - 1);
+		if (xMinCell >= SpatioTextualConstants.xMaxRange / xStep)
+			xMinCell = (int) ((SpatioTextualConstants.xMaxRange / xStep) - 1);
+		else if (xMinCell < 0)
+				xMinCell = 0;
+		if (yMinCell >= SpatioTextualConstants.yMaxRange / xStep)
+			yMinCell = (int) ((SpatioTextualConstants.yMaxRange / yStep) - 1);
+		else if (yMinCell < 0)
+			yMinCell = 0;
 		for (Integer xCell = xMinCell; xCell <= xMaxCell; xCell++)
 			for (Integer yCell = yMinCell; yCell <= yMaxCell; yCell++) {
+			//	if(xCell==0&&yCell==0) continue;
 				Integer partitionNum = xCell * yCellsNum + yCell;
 				if (partitionNum >= evaluatorBoltTasks.size())
 					System.out.println("error in rectangle " + rectangle.getMin().getX() + " , " + rectangle.getMin().getY()
@@ -165,5 +170,21 @@ public class GlobalGridIndex extends GlobalIndex{
 	public GlobalIndexIterator globalKNNIterator(Point p){
 		return new GlobalGridIndexIterator(this,p);
 	}
-
+	@Override
+	public ArrayList<String>  addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text,boolean all,boolean forward) {
+		return null;
+	}
+	@Override
+	public void dropTextFromTaskID(ArrayList<Integer> tasks, ArrayList<String> text) {
+		
+	}
+	@Override
+	public Boolean verifyTextOverlap(Integer task, ArrayList<String> text) {
+		
+		return true;
+	}
+	@Override
+	public Boolean isTextAware() {
+		return false;
+	}
 }

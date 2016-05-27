@@ -6,19 +6,17 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
-import org.apache.thrift7.TException;
+import org.apache.storm.Config;
+import org.apache.storm.LocalCluster;
+import org.apache.storm.generated.AlreadyAliveException;
+import org.apache.storm.generated.InvalidTopologyException;
+import org.apache.storm.generated.NotAliveException;
+import org.apache.storm.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import backtype.storm.Config;
-import backtype.storm.generated.AlreadyAliveException;
-import backtype.storm.generated.InvalidTopologyException;
-import backtype.storm.generated.NotAliveException;
-import backtype.storm.metric.LoggingMetricsConsumer;
-import backtype.storm.topology.TopologyBuilder;
 import edu.purdue.cs.tornado.SpatioTextualLocalCluster;
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
@@ -26,10 +24,7 @@ import edu.purdue.cs.tornado.experimental.DataAndQueriesSources;
 import edu.purdue.cs.tornado.experimental.TornadoClusterTest;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.performance.ClusterInformationExtractor;
-import edu.purdue.cs.tornado.spouts.DummyTweetGenerator;
 import edu.purdue.cs.tornado.spouts.FileSpout;
-import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
-import edu.purdue.cs.tornado.spouts.TweetsFSSpout;
 import edu.purdue.cs.tornado.storage.POIHDFSSource;
 
 public class BaselineTopology {
@@ -47,45 +42,46 @@ public class BaselineTopology {
 			System.exit(1);
 		}
 
-		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
+		SpatioTextualToplogyBuilder  builder = new SpatioTextualToplogyBuilder();
 
-		String tweetsSource="Datasource";
-		String POISource="POI_Data";
-		String querySource= "Querysource";
-		
-	//	DataAndQueriesSources.addHDFSTweetsSpout(tweetsSource, builder, properties, 100, 0,1000,200);
-		builder.setSpout(tweetsSource, new DummyTweetGenerator(10),40);
-		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 50.0, 1000, 5, 0,0,FileSpout.LFS);
-	//	DataAndQueriesSources.addJoinQueries(tweetsSource,POISource, querySource, builder, properties, 1, 50.0, 1000, 5, 20.0, 0);
-		
-		
-		
-		
-		
+		String tweetsSource = "Datasource";
+		String POISource = "POI_Data";
+		String querySource = "Querysource";
+
+		//	DataAndQueriesSources.addHDFSTweetsSpout(tweetsSource, builder, properties, 100, 0,1000,200);
+	//		builder.setSpout(tweetsSource, new DummyTweetGenerator(10),1);
+		DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 0, 0,1);
+		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 50.0,0, 5, 0, 0, FileSpout.LFS);
+		//	DataAndQueriesSources.addJoinQueries(tweetsSource,POISource, querySource, builder, properties, 1, 50.0, 1000, 5, 20.0, 0);
+
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(POIHDFSSource.HDFS_POI_FOLDER_PATH, properties.getProperty(POIHDFSSource.HDFS_POI_FOLDER_PATH));
 		staticSourceConf.put(POIHDFSSource.CORE_FILE_PATH, properties.getProperty("CORE_FILE_PATH"));
-		builder.setBolt("BaseLineEvaluator", new  BaselineEvaluator(), 64).shuffleGrouping(tweetsSource).allGrouping(querySource).allGrouping("BaseLineEvaluator","sharedData");
-		
-		String topologyName = "TornadoBaseline";
+		builder.setBolt("BaseLineEvaluator", new BaselineEvaluator(), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim())).shuffleGrouping(tweetsSource).allGrouping(querySource).allGrouping("BaseLineEvaluator",
+				"sharedData");
+
 		Config conf = new Config();
 		conf.setDebug(false);
-		conf.setNumWorkers(4);
-		conf.setNumAckers(0);
-		conf.put(Config.TOPOLOGY_DEBUG, false);
-		conf.put(POIHDFSSource.HDFS_POI_FOLDER_PATH, properties.getProperty(POIHDFSSource.HDFS_POI_FOLDER_PATH));
-		conf.put(POIHDFSSource.CORE_FILE_PATH, properties.getProperty("CORE_FILE_PATH"));
 		String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
-		Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT));
-
+		Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
+		conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
 		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
 		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
-			SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
-			cluster.submitTopology("TornadoBaseline", conf, builder.createTopology());
+			LocalCluster cluster = new SpatioTextualLocalCluster();
+			cluster.submitTopology("BaselineTornado", conf, builder.createTopology());
 		} else {
-			conf.registerMetricsConsumer(LoggingMetricsConsumer.class, 2);
+
 			conf.put(Config.JAVA_LIBRARY_PATH, "/home/tornadojars/:/usr/local/lib:/opt/local/lib:/usr/lib");
-			conf.put(Config.WORKER_CHILDOPTS, "-Xmx6g");
+//			conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+UseConcMarkSweepGC   -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -verbose:gc -Xloggc:/home/apache-storm-0.10.0/logs/gc-storm-worker-%ID%-"
+//					+ (new Date()).getTime() + ".log -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:GCLogFileSize=50M -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime -XX:HeapDumpPath=/home/apache-storm-0.10.0/logs/heapdump ");
+		//	conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, "-XX:+PrintGCDetails -verbose:gc -Xloggc:/home/apache-storm-0.10.0/logs/gc-storm-worker-%ID%-"+(new Date()).getTime()+".log -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:GCLogFileSize=10M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/apache-storm-0.10.0/logs/heapdump ");
+		//	conf.put(Config.TOPOLOGY_EXECUTOR_RECEIVE_BUFFER_SIZE, new Integer(16384));
+		//	conf.put(Config.TOPOLOGY_EXECUTOR_SEND_BUFFER_SIZE, new Integer(16384));
+		//	conf.put(Config.TOPOLOGY_TRANSFER_BUFFER_SIZE, new Integer(2048));
+			conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS,"-Xmx4g -Xms4g ");//-XX:+UseG1GC");
+			conf.put(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT, 300000);
+			conf.put(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT, 300000);
+
 			conf.put(Config.NIMBUS_HOST, nimbusHost);
 			conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
 			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
@@ -93,9 +89,8 @@ public class BaselineTopology {
 			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
 			conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS).trim()));
 			System.setProperty("storm.jar", properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
-			
 			try {
-				SpatioTextualToplogySubmitter.submitTopology(topologyName, conf, builder.createTopology());
+				SpatioTextualToplogySubmitter.submitTopology("BaselineTornado", conf, builder.createTopology());
 			} catch (AlreadyAliveException e) {
 				LOGGER.error(e.getMessage(), e);
 				e.printStackTrace(System.err);
@@ -109,7 +104,7 @@ public class BaselineTopology {
 		String[] nimbusInfo = new String[2];
 		nimbusInfo[0] = nimbusHost;
 		nimbusInfo[1] = "" + nimbusPort;
-		Integer minutesToStats=Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
+		Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
 		Thread.sleep(1000 * 60 * minutesToStats);
 		ClusterInformationExtractor.main(nimbusInfo);
 		//	KillTopology.killToplogy(topologyName, nimbusHost, nimbusPort);
@@ -118,10 +113,7 @@ public class BaselineTopology {
 		// Utils.sleep(10000);
 		// cluster.killTopology("test");
 		// cluster.shutdown();
-		
+
 	}
 
-	
-
-	
 }

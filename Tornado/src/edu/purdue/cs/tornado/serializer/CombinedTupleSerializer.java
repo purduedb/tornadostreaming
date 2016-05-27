@@ -20,13 +20,15 @@
 package edu.purdue.cs.tornado.serializer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
-import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.messages.CombinedTuple;
+import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class CombinedTupleSerializer  extends  com.esotericsoftware.kryo.Serializer<CombinedTuple>{
@@ -37,9 +39,11 @@ public class CombinedTupleSerializer  extends  com.esotericsoftware.kryo.Seriali
 		outputTuple.setDataObject(kryo.readObjectOrNull(input,DataObject.class));
 		outputTuple.setDataObject2(kryo.readObjectOrNull(input,DataObject.class));
 		outputTuple.setDataObject2List(kryo.readObjectOrNull(input,ArrayList.class));
-		outputTuple.setDataObjectCommand(kryo.readObjectOrNull(input,String.class));
-		outputTuple.setDataObject2Command(kryo.readObjectOrNull(input,String.class));
+		outputTuple.setDataObjectCommand(kryo.readObjectOrNull(input,Command.class));
+		outputTuple.setDataObject2Command(kryo.readObjectOrNull(input,Command.class));
 		outputTuple.setQuery(kryo.readObjectOrNull(input,Query.class));
+		outputTuple.setQueriesIdList(kryo.readObjectOrNull(input,ArrayList.class));
+		outputTuple.setQueryListSrcId(kryo.readObjectOrNull(input,String.class));
 		return outputTuple;
 	}
 
@@ -48,10 +52,11 @@ public class CombinedTupleSerializer  extends  com.esotericsoftware.kryo.Seriali
 		kryo.writeObjectOrNull(output,outputTuple.getDataObject(),DataObject.class);
 		kryo.writeObjectOrNull(output,outputTuple.getDataObject2(),DataObject.class);
 		kryo.writeObjectOrNull(output,outputTuple.getDataObject2List(),ArrayList.class);
-		kryo.writeObjectOrNull(output,outputTuple.getDataObjectCommand(),String.class);
-		kryo.writeObjectOrNull(output,outputTuple.getDataObject2Command(),String.class);
+		kryo.writeObjectOrNull(output,outputTuple.getDataObjectCommand(),Command.class);
+		kryo.writeObjectOrNull(output,outputTuple.getDataObject2Command(),Command.class);
 		kryo.writeObjectOrNull(output,outputTuple.getQuery(),Query.class);
-		
+		kryo.writeObjectOrNull(output,outputTuple.getQueriesIdList(),ArrayList.class);
+		kryo.writeObjectOrNull(output,outputTuple.getQueryListSrcId(),String.class);
 	}
 
 }

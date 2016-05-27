@@ -21,23 +21,21 @@ package edu.purdue.cs.tornado.spouts;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
+
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
-import edu.purdue.cs.tornado.helper.RandomGenerator;
-import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 
@@ -129,7 +127,7 @@ public class BrinkhoffSpout extends BaseRichSpout {
 
 		Date date = new Date();
 
-		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date.getTime(), SpatioTextualConstants.addCommand));
+		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date.getTime(), Command.addCommand));
 		try {
 			Thread.sleep(100);
 		} catch (InterruptedException e) {

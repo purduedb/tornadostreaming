@@ -29,12 +29,13 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
+import org.apache.storm.task.OutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichBolt;
+import org.apache.storm.tuple.Tuple;
 
-import backtype.storm.task.OutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichBolt;
-import backtype.storm.tuple.Tuple;
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.JsonHelper;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
@@ -89,7 +90,7 @@ public class KafakaProducerBolt extends BaseRichBolt {
 				//jsonOutput = convertOutputToJson(outputTuple.getQuery().getQueryId(), lat, lon, outputTuple.getDataObject2().getOriginalText());
 				String json = convertOutputToJsonForJoin(outputTuple);
 			//	fw.write(jsonOutput.toString()+"\n");
-				ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), json);
+				ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId()+"", json);
 				producer.send(producerRecord);
 				
 				
@@ -100,7 +101,7 @@ public class KafakaProducerBolt extends BaseRichBolt {
 			else{
 
 				String json2 = convertOutputToJsonForSingleQuery(outputTuple);
-				ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), json2);
+				ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId()+"", json2);
 				producer.send(producerRecord);
 				fw.write(json2.toString()+"\n");
 			}
@@ -129,11 +130,11 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		outputMap.put("name", outputTuple.getQuery().getQueryId());
 		String tag = "+";
 		if(outputTuple.getDataObjectCommand()!=null){
-			if(SpatioTextualConstants.addCommand.equals(outputTuple.getDataObjectCommand()))
+			if(Command.addCommand.equals(outputTuple.getDataObjectCommand()))
 				tag="+";
-			else if(SpatioTextualConstants.updateCommand.equals(outputTuple.getDataObjectCommand()))
+			else if(Command.updateCommand.equals(outputTuple.getDataObjectCommand()))
 				tag="u";
-			else if(SpatioTextualConstants.dropCommand.equals(outputTuple.getDataObjectCommand()))
+			else if(Command.dropCommand.equals(outputTuple.getDataObjectCommand()))
 				tag="-";
 		}
 		outputMap.put("tag", tag);
@@ -153,11 +154,11 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		outputMap.put("name", outputTuple.getQuery().getQueryId());
 		String tag = "+";
 		if(outputTuple.getDataObjectCommand()!=null){
-			if(SpatioTextualConstants.addCommand.equals(outputTuple.getDataObjectCommand()))
+			if(Command.addCommand.equals(outputTuple.getDataObjectCommand()))
 				tag="+";
-			else if(SpatioTextualConstants.updateCommand.equals(outputTuple.getDataObjectCommand()))
+			else if(Command.updateCommand.equals(outputTuple.getDataObjectCommand()))
 				tag="u";
-			else if(SpatioTextualConstants.dropCommand.equals(outputTuple.getDataObjectCommand()))
+			else if(Command.dropCommand.equals(outputTuple.getDataObjectCommand()))
 				tag="-";
 		}
 		outputMap.put("tag", tag);

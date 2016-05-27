@@ -25,20 +25,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.storm.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import backtype.storm.Config;
 import edu.purdue.cs.tornado.SpatioTextualLocalCluster;
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.spouts.FileSpout;
 import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
-import edu.purdue.cs.tornado.spouts.SampleUSATweetGenerator;
 import edu.purdue.cs.tornado.spouts.TweetsFSSpout;
-import edu.purdue.cs.tornado.storage.POILFSDataSource;
 
 public class TestMain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TestMain.class);
@@ -71,7 +70,7 @@ public class TestMain {
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT,new Integer(5));
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc,"Tweets");
 		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField,SpatioTextualConstants.queryTextualRange);
-		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate,SpatioTextualConstants.overlaps);
+		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate,TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC,new Integer (1000));
 		builder.setSpout("TextualRangeQueryGenerator", new QueriesFileSystemSpout(queriesSpoutConf,100), 1);
 		//builder.setSpout("Tweets", new TweetsHDFSSpout(), 1);
@@ -92,7 +91,7 @@ public class TestMain {
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(TestPOIsStaticDataSource.POIS_PATH, properties.getProperty(TestPOIsStaticDataSource.POIS_PATH));
 	//	staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty(POILFSDataSource.POI_FOLDER_PATH));
-		builder.addSpatioTextualProcessor("spatiotextualcomponent1", 36,36,GlobalIndexType.GRID,LocalIndexType.HYBRID_GRID)
+		builder.addSpatioTextualProcessor("spatiotextualcomponent1", 36,36,GlobalIndexType.GRID,LocalIndexType.HYBRID_GRID,64)
 				.addVolatileSpatioTextualInput("Tweets")
 				//.addCurrentSpatioTextualInput("MovingObjects")
 				//.addCleanVolatileSpatioTextualInput("Tweets")

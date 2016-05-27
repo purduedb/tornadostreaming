@@ -29,12 +29,14 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
 
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
+
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.RandomGenerator;
@@ -144,7 +146,7 @@ public class SampleUSATweetGenerator extends BaseRichSpout {
 
 		Date date = new Date();
 	
-		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date.getTime(), SpatioTextualConstants.addCommand),msgId);
+		this.collector.emit(new Values(id, xCoord, yCoord, textContent, date.getTime(), Command.addCommand),msgId);
 	}
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.collector = collector;

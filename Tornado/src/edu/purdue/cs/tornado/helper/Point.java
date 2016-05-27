@@ -21,14 +21,14 @@ package edu.purdue.cs.tornado.helper;
 
 public class Point 
 {
-	public Double X;
-	public Double Y;
+	public double X;
+	public double Y;
 	public Point(Point other)
 	{
-		this.X = new Double (other.X);
-		this.Y = new Double (other.Y);
+		this.X =other.X;
+		this.Y = other.Y;
 	}
-	public Point(Double x, Double y)
+	public Point(double x, double y)
 	{
 		this.X = x;
 		this.Y = y;
@@ -40,19 +40,19 @@ public class Point
 		this.Y = 0.0;
 	}
 
-	public Double getX() {
+	public double getX() {
 		return X;
 	}
 
-	public void setX(Double x) {
+	public void setX(double x) {
 		X = x;
 	}
 
-	public Double getY() {
+	public double getY() {
 		return Y;
 	}
 
-	public void setY(Double y) {
+	public void setY(double y) {
 		Y = y;
 	}
 	

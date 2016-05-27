@@ -53,6 +53,7 @@ public class POILFSDataSource extends AbstractStaticDataSource {
 	Double xStep;
 	Double yStep;
 	String currentLine = null;
+	Integer countId=0;
 
 	public POILFSDataSource(Rectangle bounds, Map<String, String> config, String sourceId, Integer selfTaskId, Integer selfTaskIdIndex) {
 		super(bounds, config, sourceId, selfTaskId, selfTaskIdIndex);
@@ -60,10 +61,11 @@ public class POILFSDataSource extends AbstractStaticDataSource {
 	}
 
 	public void prepareData() {
+		countId=0;
 		xrange = SpatioTextualConstants.xMaxRange;
 		yrange = SpatioTextualConstants.yMaxRange;
-		xCellsNum = SpatioTextualConstants.fineGridGranularityX;
-		yCellsNum = SpatioTextualConstants.fineGridGranularityY;
+		xCellsNum = SpatioTextualConstants.defaultFineGridGranularityX;
+		yCellsNum = SpatioTextualConstants.defaultFineGridGranularityY;
 		xStep = xrange / xCellsNum;
 		yStep = yrange / yCellsNum;
 		folderPath = config.get(POI_FOLDER_PATH);
@@ -147,6 +149,7 @@ public class POILFSDataSource extends AbstractStaticDataSource {
 	private DataObject mapLineToDataObj(String line) {
 		StringTokenizer stringTokenizer = new StringTokenizer(line, ",");
 		String id = "", text = "";
+		if(countId>=Integer.MAX_VALUE)countId=0;
 		Double lat, lon;
 		if (stringTokenizer.hasMoreTokens()) {
 			id = stringTokenizer.nextToken();
@@ -171,7 +174,7 @@ public class POILFSDataSource extends AbstractStaticDataSource {
 		dataObject.setOriginalText(text);
 		ArrayList<String> textContent = TextHelpers.transformIntoSortedArrayListOfString(text);
 		dataObject.setLocation(point);
-		dataObject.setObjectId(id);
+		dataObject.setObjectId(countId++);
 		dataObject.setObjectText(textContent);
 		dataObject.setSrcId(sourceId);
 		dataObject.setTimeStamp(date.getTime());

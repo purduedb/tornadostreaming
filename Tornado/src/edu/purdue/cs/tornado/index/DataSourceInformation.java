@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.purdue.cs.tornado.helper.DataSourceType;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
@@ -30,13 +31,11 @@ import edu.purdue.cs.tornado.index.local.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
 import edu.purdue.cs.tornado.index.local.LocalHybridMultiGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
-import edu.purdue.cs.tornado.index.local.LocalSpatialGridIndex;
-import edu.purdue.cs.tornado.index.local.LocalSpatialIndex;
 import edu.purdue.cs.tornado.index.local.LocalTextIndex;
 import edu.purdue.cs.tornado.index.local.LocalTextInvertedListIndex;
 import edu.purdue.cs.tornado.index.local.NoLocalIndex;
+import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
-import edu.purdue.cs.tornado.messages.Query;
 
 /**
  * This class keeps track of the data source information
@@ -46,27 +45,24 @@ import edu.purdue.cs.tornado.messages.Query;
  */
 public class DataSourceInformation {
 	public String dataSourceId; // component id of the data source
-	public String dataSourceType; // Query, data source
+	public DataSourceType dataSourceType; // Query, data source
 	public String persisteneceState; // data source
 	public Double timeSlidingWindow; // data source
 	
-	public Double dropTime;
 
 	public String cleanState; // data source
 	public double allDataCount;
 
 	public LocalTextIndex localTextIndex;//text inverted list
 	public HashMap<String, IndexCell> objectToLocalCellIndex;//source to object id to index cell	
-	public LocalHybridIndex localHybridIndex1;
-	public LocalHybridIndex localHybridIndex2;
-	public LocalHybridIndex queryIndex;
-	public LocalSpatialIndex localSpatialIndex;
-	public Map<String, Integer> dataLastBoltTasKInformation;
-	public Map<String, ArrayList<Integer>> queryLastBoltTasKInformation;
+	public LocalHybridIndex localHybridIndex;
+	public Map<Integer, Integer> dataLastBoltTasKInformation;
+	public Map<Integer, ArrayList<Integer>> queryLastBoltTasKInformation;
 
 	public Rectangle selfBounds;
 	LocalIndexType localIndexType;
-	public DataSourceInformation(Rectangle selfBounds, String dataSourceId, String dataSourceType, String persisteneceState, String cleanState, Boolean local,LocalIndexType localIndexType) {
+	public Integer fineGridGran ;
+	public DataSourceInformation(Rectangle selfBounds, String dataSourceId, DataSourceType dataSourceType, String persisteneceState, String cleanState, Boolean local,LocalIndexType localIndexType,Integer fineGridGran) {
 
 		this.dataSourceId = dataSourceId;
 		this.dataSourceType = dataSourceType;
@@ -74,35 +70,25 @@ public class DataSourceInformation {
 		this.cleanState = cleanState;
 		this.selfBounds = selfBounds;
 		this.localIndexType=localIndexType;
+		this.fineGridGran = fineGridGran;
 
 		if (local) {
 			switch (localIndexType) {
 			case NO_LOCAL_INDEX:
-				this.localHybridIndex1 = new NoLocalIndex(selfBounds, this);
-				this.localHybridIndex2 = new NoLocalIndex(selfBounds, this);
-				this.queryIndex 	   = new NoLocalIndex(selfBounds, this);
+				this.localHybridIndex = new NoLocalIndex(selfBounds, this);
 				break;
 			case HYBRID_GRID:
-				this.localHybridIndex1 = new LocalHybridGridIndex(selfBounds, this);
-				this.localHybridIndex2 = new LocalHybridGridIndex(selfBounds, this);
-				this.queryIndex 	   = new LocalHybridGridIndex(selfBounds, this);
+				this.localHybridIndex = new LocalHybridGridIndex(selfBounds, this,fineGridGran);
 				break;
 			case HYBRID_MULTI_LEVEL_GRID:
-				this.localHybridIndex1 = new LocalHybridMultiGridIndex(selfBounds, this);
-				this.localHybridIndex2 = new LocalHybridMultiGridIndex(selfBounds, this);
-				this.queryIndex 	   = new LocalHybridMultiGridIndex(selfBounds, this);
-				
+				this.localHybridIndex = new LocalHybridMultiGridIndex(selfBounds, this,fineGridGran);
 				break;
 			case SPATIAL_GRID:
-				this.localHybridIndex1 = new LocalHybridGridIndex(selfBounds, this,SpatioTextualConstants.fineGridGranularityX,SpatioTextualConstants.fineGridGranularityY,true,0);
-				this.localHybridIndex2 = new LocalHybridGridIndex(selfBounds, this,SpatioTextualConstants.fineGridGranularityX,SpatioTextualConstants.fineGridGranularityY,true,0);
-				this.queryIndex 	   = new LocalHybridGridIndex(selfBounds, this,SpatioTextualConstants.fineGridGranularityX,SpatioTextualConstants.fineGridGranularityY,true,0);
+				this.localHybridIndex = new LocalHybridGridIndex(selfBounds, this,fineGridGran,fineGridGran,true,0);
 				
 				break;
 			case SPATIAL_MULTI_LEVEL_GRID:
-				this.localHybridIndex1 = new LocalHybridMultiGridIndex(selfBounds, this,SpatioTextualConstants.fineGridGranularityX,SpatioTextualConstants.fineGridGranularityY,true);
-				this.localHybridIndex2 = new LocalHybridMultiGridIndex(selfBounds, this,SpatioTextualConstants.fineGridGranularityX,SpatioTextualConstants.fineGridGranularityY,true);
-				this.queryIndex 	   = new LocalHybridMultiGridIndex(selfBounds, this,SpatioTextualConstants.fineGridGranularityX,SpatioTextualConstants.fineGridGranularityY,true);
+				this.localHybridIndex = new LocalHybridMultiGridIndex(selfBounds, this,fineGridGran,fineGridGran,true);
 				
 				break;
 			default:
@@ -110,18 +96,16 @@ public class DataSourceInformation {
 			}
 			
 			this.localTextIndex = new LocalTextInvertedListIndex();
-			this.localSpatialIndex = new LocalSpatialGridIndex();
 			this.objectToLocalCellIndex = new HashMap<String, IndexCell>();
 			this.dataLastBoltTasKInformation =null;
 			this.queryLastBoltTasKInformation =null;
 
 		} else {
-			this.localHybridIndex1 =null;
+			this.localHybridIndex =null;
 			this.localTextIndex = null;
-			this.localSpatialIndex = null;
 			this.objectToLocalCellIndex =null;
-			this.dataLastBoltTasKInformation = new HashMap<String, Integer>();
-			this.queryLastBoltTasKInformation = new HashMap<String, ArrayList<Integer>>();
+			this.dataLastBoltTasKInformation = new HashMap<Integer, Integer>();
+			this.queryLastBoltTasKInformation = new HashMap<Integer, ArrayList<Integer>>();
 		}
 
 		this.allDataCount = 0;
@@ -144,7 +128,7 @@ public class DataSourceInformation {
 			return null;
 	}
 
-	public Map<String, Integer> getDataLastBoltTasKInformation() {
+	public Map<Integer, Integer> getDataLastBoltTasKInformation() {
 		return dataLastBoltTasKInformation;
 	}
 
@@ -152,58 +136,19 @@ public class DataSourceInformation {
 		return dataSourceId;
 	}
 
-	public String getDataSourceType() {
+	public DataSourceType getDataSourceType() {
 		return dataSourceType;
 	}
 
 	public LocalHybridIndex getLocalHybridIndex() {
-		return localHybridIndex1;
+		return localHybridIndex;
 	}
 	public void addDataObject(DataObject dataObject){
-		checkWindowStats(dataObject);
-		localHybridIndex1.addDataObject(dataObject);
-		
+		localHybridIndex.addDataObject(dataObject);
 	}
-	public void addContinousQuery(Query query){
-		queryIndex.addContinousQuery(query);
-	}
-	/**
-	 * This function checks if the window of an index has expired, if yes,
-	 * remove and index and add a new one
-	 * 
-	 * @param dataObject
-	 * @return
-	 */
-	public Boolean checkWindowStats(DataObject dataObject) {
-		if(dataObject.getTimeStamp()>=this.dropTime){
-			this.dropTime+=timeSlidingWindow;
-			this.localHybridIndex2 = this.localHybridIndex1;
-			switch (localIndexType) {
-			case NO_LOCAL_INDEX:
-				this.localHybridIndex1 = new NoLocalIndex(selfBounds, this);
-				break;
-			case HYBRID_GRID:
-				this.localHybridIndex1 = new LocalHybridGridIndex(selfBounds, this);
-				break;
-			case HYBRID_MULTI_LEVEL_GRID:
-				this.localHybridIndex1 = new LocalHybridMultiGridIndex(selfBounds, this);
-				break;
-			case SPATIAL_GRID:
-				this.localHybridIndex1 = new LocalHybridGridIndex(selfBounds, this,SpatioTextualConstants.fineGridGranularityX,SpatioTextualConstants.fineGridGranularityY,true,0);
-				break;
-			case SPATIAL_MULTI_LEVEL_GRID:
-				this.localHybridIndex1 = new LocalHybridMultiGridIndex(selfBounds, this,SpatioTextualConstants.fineGridGranularityX,SpatioTextualConstants.fineGridGranularityY,true);
-				break;
-			default:
-				break;
-			}
-			return true;
-		}
-		return false;
-	}
-	public LocalSpatialIndex getLocalSpatialIndex() {
-		return localSpatialIndex;
-	}
+	
+	
+
 
 	public LocalTextIndex getLocalTextIndex() {
 		return localTextIndex;
@@ -217,7 +162,7 @@ public class DataSourceInformation {
 		return persisteneceState;
 	}
 
-	public Map<String, ArrayList<Integer>> getQueryLastBoltTasKInformation() {
+	public Map<Integer, ArrayList<Integer>> getQueryLastBoltTasKInformation() {
 		return queryLastBoltTasKInformation;
 	}
 
@@ -226,7 +171,7 @@ public class DataSourceInformation {
 	}
 
 	public ArrayList<IndexCell> getOverlappingIndexCellWithData(Rectangle rectangle,ArrayList<String> keywords){
-		return localHybridIndex1.getOverlappingIndexCellWithData(rectangle,keywords);
+		return localHybridIndex.getOverlappingIndexCellWithData(rectangle,keywords);
 	}
 	public boolean isClean() {
 		return SpatioTextualConstants.CLEAN.equals(cleanState);
@@ -261,11 +206,11 @@ public class DataSourceInformation {
 	}
 
 	// **************** Getters and setters *******************
-	public void setDataEvaluatorBoltTaskID(String oid, Integer evaluatorBoltList) {
+	public void setDataEvaluatorBoltTaskID(Integer oid, Integer evaluatorBoltList) {
 		dataLastBoltTasKInformation.put(oid, evaluatorBoltList);
 	}
 
-	public void setDataLastBoltTasKInformation(Map<String, Integer> dataLastBoltTasKInformation) {
+	public void setDataLastBoltTasKInformation(Map<Integer, Integer> dataLastBoltTasKInformation) {
 		this.dataLastBoltTasKInformation = dataLastBoltTasKInformation;
 	}
 
@@ -273,17 +218,14 @@ public class DataSourceInformation {
 		this.dataSourceId = dataSourceId;
 	}
 
-	public void setDataSourceType(String dataSourceType) {
+	public void setDataSourceType(DataSourceType dataSourceType) {
 		this.dataSourceType = dataSourceType;
 	}
 
 	public void setLocalHybridIndex(LocalHybridIndex localHybridIndex) {
-		this.localHybridIndex1 = localHybridIndex;
+		this.localHybridIndex = localHybridIndex;
 	}
 
-	public void setLocalSpatialIndex(LocalSpatialIndex localSpatialIndex) {
-		this.localSpatialIndex = localSpatialIndex;
-	}
 
 	public void setLocalTextIndex(LocalTextIndex localInvertedList) {
 		this.localTextIndex = localInvertedList;
@@ -297,12 +239,13 @@ public class DataSourceInformation {
 		this.persisteneceState = persisteneceState;
 	}
 
-	public void setQueryLastBoltTasKInformation(Map<String, ArrayList<Integer>> queryLastBoltTasKInformation) {
+	public void setQueryLastBoltTasKInformation(Map<Integer, ArrayList<Integer>> queryLastBoltTasKInformation) {
 		this.queryLastBoltTasKInformation = queryLastBoltTasKInformation;
 	}
 
 	public void setSelfBounds(Rectangle selfBounds) {
 		this.selfBounds = selfBounds;
 	}
+	
 
 }

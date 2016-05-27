@@ -128,15 +128,11 @@ public class Optimizer {
 				if (op.geometryType.equals(Geometry.POINT)) {
 					//for now we assume all distances are euculdian, other wise assume other types 
 					Rectangle rect = new Rectangle(new Point(op.focalPoint.X - op.threashold, op.focalPoint.Y - op.threashold), new Point(op.focalPoint.X + op.threashold, op.focalPoint.Y + op.threashold));
-					if (sourceInfo.localSpatialIndex != null || sourceInfo.localHybridIndex1 != null) {
-						if (sourceInfo.localSpatialIndex != null) {
-							selectivity = sourceInfo.localSpatialIndex.getCountPerRec(rect);
-							evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.SPATIAL_INDEX_FETCH));
-
-						}
-						if (sourceInfo.localHybridIndex1 != null) {
-							if (sourceInfo.localHybridIndex1.getCountPerRec(rect) < selectivity) {
-								selectivity = sourceInfo.localHybridIndex1.getCountPerRec(rect);
+					if (sourceInfo.localHybridIndex != null) {
+						
+						if (sourceInfo.localHybridIndex != null) {
+							if (sourceInfo.localHybridIndex.getCountPerRec(rect) < selectivity) {
+								selectivity = sourceInfo.localHybridIndex.getCountPerRec(rect);
 								evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 							}
 						}
@@ -153,15 +149,11 @@ public class Optimizer {
 
 		}
 		if (op.operatorType == OperatorType.SPATIAL_INSIDE) {
-			if (sourceInfo.localSpatialIndex != null || sourceInfo.localHybridIndex1 != null) {
-				if (sourceInfo.localSpatialIndex != null) {
-					selectivity = sourceInfo.localSpatialIndex.getCountPerRec(op.bounds);
-					evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.SPATIAL_INDEX_FETCH));
-
-				}
-				if (sourceInfo.localHybridIndex1 != null) {
-					if (sourceInfo.localHybridIndex1.getCountPerRec(op.bounds) < selectivity) {
-						selectivity = sourceInfo.localHybridIndex1.getCountPerRec(op.bounds);
+			if (sourceInfo.localHybridIndex != null) {
+				
+				if (sourceInfo.localHybridIndex != null) {
+					if (sourceInfo.localHybridIndex.getCountPerRec(op.bounds) < selectivity) {
+						selectivity = sourceInfo.localHybridIndex.getCountPerRec(op.bounds);
 						evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 					}
 				}
@@ -174,15 +166,15 @@ public class Optimizer {
 			//TODO handle this type of operator later 
 		}
 		if (op.operatorType == OperatorType.TEXT_OVERLAP) {
-			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex1 != null) {
+			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex != null) {
 				if (sourceInfo.localTextIndex != null) {
 					selectivity = sourceInfo.localTextIndex.estimateDataObjectCountAny(op.keywords);
 					evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.TEXT_INDEX_FETCH));
 
 				}
-				if (sourceInfo.localHybridIndex1 != null) {
-					if (sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
-						selectivity = sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
+				if (sourceInfo.localHybridIndex != null) {
+					if (sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
+						selectivity = sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
 						evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 					}
 				}
@@ -192,15 +184,15 @@ public class Optimizer {
 			}
 		}
 		if (op.operatorType == OperatorType.TEXT_CONTAINS) {
-			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex1 != null) {
+			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex != null) {
 				if (sourceInfo.localTextIndex != null) {
 					selectivity = sourceInfo.localTextIndex.estimateDataObjectCountAll(op.keywords);
 					evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.TEXT_INDEX_FETCH));
 
 				}
-				if (sourceInfo.localHybridIndex1 != null) {
-					if (sourceInfo.localHybridIndex1.getCountPerKeywrodsAll(op.keywords, sourceInfo.selfBounds) < selectivity) {
-						selectivity = sourceInfo.localHybridIndex1.getCountPerKeywrodsAll(op.keywords, sourceInfo.selfBounds);
+				if (sourceInfo.localHybridIndex != null) {
+					if (sourceInfo.localHybridIndex.getCountPerKeywrodsAll(op.keywords, sourceInfo.selfBounds) < selectivity) {
+						selectivity = sourceInfo.localHybridIndex.getCountPerKeywrodsAll(op.keywords, sourceInfo.selfBounds);
 						evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 					}
 				}
@@ -211,15 +203,15 @@ public class Optimizer {
 		}
 		if (op.operatorType == OperatorType.TEXT_DIST) {
 			//TODO more accurate approximations are needed 
-			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex1 != null) {
+			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex != null) {
 				if (sourceInfo.localTextIndex != null) {
 					selectivity = sourceInfo.localTextIndex.estimateDataObjectCountAny(op.keywords);
 					evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.TEXT_INDEX_FETCH));
 
 				}
-				if (sourceInfo.localHybridIndex1 != null) {
-					if (sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
-						selectivity = sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
+				if (sourceInfo.localHybridIndex != null) {
+					if (sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
+						selectivity = sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
 						evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 					}
 				}
@@ -231,15 +223,15 @@ public class Optimizer {
 		}
 		if (op.operatorType == OperatorType.TEXT_DIST_ANY) {
 			//TODO more accurate approximations are needed 
-			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex1 != null) {
+			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex != null) {
 				if (sourceInfo.localTextIndex != null) {
 					selectivity = sourceInfo.localTextIndex.estimateDataObjectCountAny(op.keywords);
 					evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.TEXT_INDEX_FETCH));
 
 				}
-				if (sourceInfo.localHybridIndex1 != null) {
-					if (sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
-						selectivity = sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
+				if (sourceInfo.localHybridIndex != null) {
+					if (sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
+						selectivity = sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
 						evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 					}
 				}
@@ -250,15 +242,15 @@ public class Optimizer {
 		}
 		if (op.operatorType == OperatorType.TEXT_DIST_ALL) {
 			//TODO more accurate approximations are needed 
-			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex1 != null) {
+			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex != null) {
 				if (sourceInfo.localTextIndex != null) {
 					selectivity = sourceInfo.localTextIndex.estimateDataObjectCountAny(op.keywords);
 					evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.TEXT_INDEX_FETCH));
 
 				}
-				if (sourceInfo.localHybridIndex1 != null) {
-					if (sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
-						selectivity = sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
+				if (sourceInfo.localHybridIndex != null) {
+					if (sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
+						selectivity = sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
 						evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 					}
 				}
@@ -269,15 +261,15 @@ public class Optimizer {
 		}
 		if (op.operatorType == OperatorType.TEXT_SEMANTIC) {
 			//text semantic should be similar to the text overlap with semantic extension and hence we can use text overlap selectivity estimation
-			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex1 != null) {
+			if (sourceInfo.localTextIndex != null || sourceInfo.localHybridIndex != null) {
 				if (sourceInfo.localTextIndex != null) {
 					selectivity = sourceInfo.localTextIndex.estimateDataObjectCountAny(op.keywords);
 					evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.TEXT_INDEX_FETCH));
 
 				}
-				if (sourceInfo.localHybridIndex1 != null) {
-					if (sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
-						selectivity = sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
+				if (sourceInfo.localHybridIndex != null) {
+					if (sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds) < selectivity) {
+						selectivity = sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.keywords, sourceInfo.selfBounds);
 						evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 					}
 				}
@@ -292,8 +284,8 @@ public class Optimizer {
 		}
 		if (op.operatorType == OperatorType.HYBRIBD_FILTER) {
 
-			if (sourceInfo.localHybridIndex1 != null) {
-				selectivity = sourceInfo.localHybridIndex1.getCountPerKeywrodsAny(op.dependantOperator2.keywords, op.dependantOperator1.bounds);
+			if (sourceInfo.localHybridIndex != null) {
+				selectivity = sourceInfo.localHybridIndex.getCountPerKeywrodsAny(op.dependantOperator2.keywords, op.dependantOperator1.bounds);
 				evaluationTechniques.add(new OperatorCost(selectivity, OperatorEvaluationTechnique.HYBRID_INDEX_FETCH));
 			} else {
 				selectivity = sourceInfo.allDataCount;

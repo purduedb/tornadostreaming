@@ -49,8 +49,6 @@ public class SpatioTextualConstants {
 	public static String Current = "current";
 	public static String Static = "static";
 	public static String Continuous = "continuous";
-	public static String Data_Source = "torando.data.source";
-	public static String Query_Source = "tornado.query.source";
 	public static String Static_Source_Class_Name = "tornado.static.source.class.name";
 	public static String Static_Source_Class_Config = "tornado.static.source.class.config";
 	public static String Default = "default";
@@ -69,18 +67,20 @@ public class SpatioTextualConstants {
 	//Data constants 
 	public static final Double xMaxRange = 10000.0;
 	public static final Double yMaxRange = 10000.0;
+	
 	//find grid granuality constansnts
-	public static final Integer fineGridGranularityX = 64;
-	public static final Integer fineGridGranularityY = 64;
-	public static final Double fineGridGranularityXstep = xMaxRange/fineGridGranularityX;
-	public static final Double fineGridGranularityYstep = yMaxRange/fineGridGranularityY;
+	public static final Integer defaultFineGridGranularityX =64;
+	public static final Integer defaultFineGridGranularityY =64;
+	
+	public static final Double defaultFineGridGranularityXstep = xMaxRange/defaultFineGridGranularityX;
+	public static final Double defaultFineGridGranularityYstep = yMaxRange/defaultFineGridGranularityX;
 	
 
 	//Data constants 
 //	public static final Double minLat = -90.0;
 //	public static final Double minLong = -180.0;
 //	public static final Double maxLat = 90.0;
-//	public static final Double maxLong =180.0;//	48.491158, -61.327106
+//	public static final Double maxLong =180.0;
 	
 	public static final Double usaMinLat = 20.0;
 	public static final Double usaMinLong = -130.0;
@@ -94,11 +94,6 @@ public class SpatioTextualConstants {
 
 	//Control message types 
 	public static final String control = "control";
-	public static final String addCommand = "addCommand";
-	public static final String dropCommand = "dropCommand";
-	public static final String updateDropCommand = "updateDropCommand"; //this means do not refect any changes due to deletion as the updated object will be responsible of the making the changes, this is only necessary to inform a remote cluster of a deletion
-	public static final String updateCommand = "updateCommand";
-
 	public static final String query = "query";
 	public static final String data = "data";
 	public static final String output = "output";
@@ -146,7 +141,8 @@ public class SpatioTextualConstants {
 
 	// Distance join Query fields
 	public static final String queryDistance = "distance";
-
+	// HotSpot Paramter
+	public static final String hotSpotRatio = "hotSpotRatio";
 	//Query types 
 	public static final String queryTypeField = "type";
 	public static final String queryTextualKNN = "TextualKNN";
@@ -154,17 +150,17 @@ public class SpatioTextualConstants {
 	public static final String queryTextualSpatialJoin = "TextualSpatialJoin";
 
 	//Text constants
-	public static final String textDelimiter = " ";
-	public static final String queryIdDelimiter = "_";
+	public static final String  textDelimiter = " ";
+	public static final String  queryIdDelimiter = "_";
 	public static final Integer relevenatKeyWordMinSize = 2; //for stopword min length identification
 	public static final Integer relevenatKeyWordMaxSize = 15;//for stopword max length identification
+	
 	public static final String textualPredicate = "textualPredicate";
 	public static final String textualPredicate2 = "textualPredicate2";
 	public static final String joinTextualPredicate = "joinTextualPredicate";
-	public static final String overlaps = "overlaps"; //default textual predicate
-	public static final String contains = "contains";
-	public static final String semantic = "semantic";
-	public static final String none = "none";
+	public static final String removeTime = "removeTime";
+	
+
 	//****************************************************************************
 	//***********************Kafka constants
 	public static final String kafkaZookeeper = "kafkaZookeeper";//"localhost:2181";
@@ -228,10 +224,12 @@ public class SpatioTextualConstants {
 		return (SpatioTextualConstants.VOLATILECLEANSTATE + "_" + componentId + "_" + streamId);
 	}
 	public static Boolean isControlStreamSource(String sourceType) {
-		return sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control) || sourceType.contains(SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control);
+		return sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Control) || sourceType.contains(SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Control)|| sourceType.contains(SpatioTextualConstants.Bolt_Index_STreamIDExtension_Control)|| sourceType.contains(SpatioTextualConstants.Index_Index_STreamIDExtension_Control);
 	}
 	public static Boolean isDataStreamSource(String sourceType) {
 		return sourceType.contains(SpatioTextualConstants.Index_Bolt_STreamIDExtension_Data) || sourceType.contains(SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Data);
 	}
-	
+	public static String getIndexId(String id){
+		return  id + SpatioTextualConstants.IndexIDExtension;
+	}
 }

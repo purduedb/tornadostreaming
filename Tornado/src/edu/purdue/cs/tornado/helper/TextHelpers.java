@@ -80,7 +80,7 @@ public class TextHelpers {
 			"where","wheres","whereafter","whereas","whereby","wherein","whereupon","wherever","whether","which","while","whither",
 			"who","whos","whoever","whole","whom","whose","why","will","willing","wish","with","within","without","wont","wonder",
 			"would","would","wouldnt","woz","wtf","wtv","xoxo","yes","yet","ykyat","yolo","you","youd","youll","youre","youve",
-			"your","yours","yourself","yourselves","yoyo","zero","ztwitt","2moro","2nite" };
+			"your","yours","yourself","yourselves","yoyo","zero","ztwitt","2moro","2nite" /*,"http" ,"https"*/ };
 	protected static final HashSet<String> stop_list= new HashSet<String>(Arrays.asList(SET_VALUES));
 	/**
 	 * This method transforms an string into a distinct sorted keyword list 
@@ -117,8 +117,16 @@ public class TextHelpers {
 	 * @return
 	 */
 	public static boolean overlapsTextually(HashMap<String,Integer> textMap,ArrayList<String> textList){
+		
 		for(String text: textList)
-			if(textMap.containsKey(text)&&textMap.get(text)>0)
+			if(textMap.containsKey(text))
+				return true;
+		return false;
+	}
+	public static boolean overlapsTextuallyWithtime(HashMap<String,Long> textMap,ArrayList<String> textList){
+		
+		for(String text: textList)
+			if(textMap.containsKey(text))
 				return true;
 		return false;
 	}
@@ -132,23 +140,23 @@ public class TextHelpers {
 	 * @param textualPredicate
 	 * @return
 	 */
-	public static boolean evaluateTextualPredicate(ArrayList<String> textList1,ArrayList<String> textList2, String textualPredicate){
+	public static boolean evaluateTextualPredicate(ArrayList<String> textList1,ArrayList<String> textList2, TextualPredicate textualPredicate){
 		
-		if(SpatioTextualConstants.none.equals(textualPredicate))
+		if(TextualPredicate.NONE.equals(textualPredicate))
 			return true;
-		else if(SpatioTextualConstants.contains.equals(textualPredicate))
+		else if(TextualPredicate.CONTAINS.equals(textualPredicate))
 		return 	containsTextually(textList1,textList2);
-		else if (textualPredicate==null || SpatioTextualConstants.overlaps.equals(textualPredicate))
+		else if (textualPredicate==null || TextualPredicate.OVERlAPS.equals(textualPredicate))
 			return overlapsTextually(textList1, textList2);
 		return false;
 		}
-  public static boolean evaluateTextualPredicate(HashMap<String,Integer> textMap,ArrayList<String> textList2, String textualPredicate){
+  public static boolean evaluateTextualPredicate(HashMap<String,Integer> textMap,ArrayList<String> textList2, TextualPredicate textualPredicate){
 		
-		if(SpatioTextualConstants.none.equals(textualPredicate))
+		if(TextualPredicate.NONE.equals(textualPredicate))
 			return true;
-		else if(SpatioTextualConstants.contains.equals(textualPredicate))
+		else if(TextualPredicate.CONTAINS.equals(textualPredicate))
 		return 	containsTextually(textMap,textList2);
-		else if (textualPredicate==null || SpatioTextualConstants.overlaps.equals(textualPredicate))
+		else if (textualPredicate==null || TextualPredicate.OVERlAPS.equals(textualPredicate))
 			return overlapsTextually(textMap, textList2);
 		return false;
 		}

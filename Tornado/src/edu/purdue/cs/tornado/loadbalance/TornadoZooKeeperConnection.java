@@ -1,19 +1,19 @@
 package edu.purdue.cs.tornado.loadbalance;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.Watcher;
-
-import backtype.storm.Config;
+import org.apache.storm.Config;
+import org.apache.storm.shade.org.apache.curator.framework.CuratorFramework;
+import org.apache.storm.shade.org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.storm.shade.org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.storm.shade.org.apache.zookeeper.CreateMode;
+import org.apache.storm.shade.org.apache.zookeeper.KeeperException;
+import org.apache.storm.shade.org.apache.zookeeper.WatchedEvent;
+import org.apache.storm.shade.org.apache.zookeeper.Watcher;
 
 /**
  * 
@@ -22,10 +22,11 @@ import backtype.storm.Config;
  * @author Anas Daghistani <anas@purdue.edu>
  *
  */
-public class ZooKeeperConnection {
+public class TornadoZooKeeperConnection {
 	private final CuratorFramework client;
 	String myId;
 	private final String barrierPath;
+	private final Object lock = new Object();
 	private final Watcher watcher = new Watcher()
 	{
 		@Override
@@ -35,7 +36,7 @@ public class ZooKeeperConnection {
 		}
 	};
 
-	ZooKeeperConnection(Map conf, String myId){
+	public TornadoZooKeeperConnection(Map conf, String myId, boolean isExecutor){
 		this.myId = myId;
 		this.barrierPath = "/barrier";
 
@@ -51,8 +52,9 @@ public class ZooKeeperConnection {
 				.namespace("Tornado")
 				.retryPolicy(new ExponentialBackoffRetry(1000, 3))
 				.build();
+		
 		client.start();
-		if(myId.startsWith("ExecutorBolt")){
+		if(isExecutor){ 
 			//Create a Znode for the ExecutorBolt
 			initializeZnode();
 		}
@@ -85,7 +87,7 @@ public class ZooKeeperConnection {
 	}
 
 	public int[] readDataFrom(String ID){
-		int[] stat = new int[4];
+		int[] stat = new int[9];
 		try {
 			byte[] data = client.getData().forPath("/ExecutorBoltStat/"+ID);
 			ByteBuffer wrapped = ByteBuffer.wrap(data); // big-endian by default
@@ -93,6 +95,12 @@ public class ZooKeeperConnection {
 			stat[1] = wrapped.getInt();
 			stat[2] = wrapped.getInt();
 			stat[3] = wrapped.getInt();
+			stat[4] = wrapped.getInt();
+			stat[5] = wrapped.getInt();
+			stat[6] = wrapped.getInt();
+			stat[7] = wrapped.getInt();
+			stat[8] = wrapped.getInt();
+
 			return stat;
 		} catch (Exception e) {
 			System.out.println("Error reading data from: "+"/ExecutorBoltStat/"+ID);
@@ -100,13 +108,54 @@ public class ZooKeeperConnection {
 		}
 		return null;
 	}
+	public int[] readParitionsFrom(String ID){
+		int[] stat = new int[4];
+		try {
+			byte[] data = client.getData().forPath("/Partitions/"+ID);
+			ByteBuffer wrapped = ByteBuffer.wrap(data); // big-endian by default
+			stat[0] = wrapped.getInt();
+			stat[1] = wrapped.getInt();
+			stat[2] = wrapped.getInt();
+			stat[3] = wrapped.getInt();
+			return stat;
+		} catch (Exception e) {
+			System.out.println("Error reading data from: "+"/Partitions/"+ID);
+			e.printStackTrace();
+		}
+		return null;
+	}
+	public void writeParitionsFrom(int id, int left, int bottom, int right, int top ){
+		ByteBuffer dbuf = ByteBuffer.allocate(36);
+		dbuf.putInt(left);
+		dbuf.putInt(bottom);
+		dbuf.putInt(right);
+		dbuf.putInt(top);
+	
+		byte[] bytes = dbuf.array();
+		try {
+			client.setData().forPath("/Partitions/"+id,bytes);
+		} catch (Exception e) {
+			System.out.println("Error writing data to: "+"/Partitions/"+id);
+			e.printStackTrace();
+		}	
+	}
 
 	public void writeData(int statData, int statQuery, int coord, int axis){
-		ByteBuffer dbuf = ByteBuffer.allocate(16);
+		writeData(statData, statQuery, coord, axis,0,0, 0, 0, 0);
+	}
+	public void writeData(int statData, int statQuery, int coord, int axis,int rightRemainaing, int statQuery2, int coord2, int axis2,int upperRemainining){
+		ByteBuffer dbuf = ByteBuffer.allocate(36);
 		dbuf.putInt(statData);
 		dbuf.putInt(statQuery);
 		dbuf.putInt(coord);
 		dbuf.putInt(axis);
+		dbuf.putInt(rightRemainaing);
+		dbuf.putInt(statQuery2);
+		dbuf.putInt(coord2);
+		dbuf.putInt(axis2);
+		dbuf.putInt(upperRemainining);
+		
+		
 		byte[] bytes = dbuf.array();
 		try {
 			client.setData().forPath("/ExecutorBoltStat/"+myId,bytes);
@@ -115,7 +164,30 @@ public class ZooKeeperConnection {
 			e.printStackTrace();
 		}
 	}
-
+	public void writeData(int statData, int statQuery, int coord, int axis,int rightRemainaing, int statQuery2, int coord2, int axis2,int upperRemainining, ArrayList<Integer>xColumnStat,ArrayList<Integer>yRowStat){
+		ByteBuffer dbuf = ByteBuffer.allocate(36+4*(xColumnStat.size()+yRowStat.size()));
+		dbuf.putInt(statData);
+		dbuf.putInt(statQuery);
+		dbuf.putInt(coord);
+		dbuf.putInt(axis);
+		dbuf.putInt(rightRemainaing);
+		dbuf.putInt(statQuery2);
+		dbuf.putInt(coord2);
+		dbuf.putInt(axis2);
+		dbuf.putInt(upperRemainining);
+		for(Integer i:xColumnStat)
+			dbuf.putInt(i);
+		for(Integer j:yRowStat)
+			dbuf.putInt(j);
+		
+		byte[] bytes = dbuf.array();
+		try {
+			client.setData().forPath("/ExecutorBoltStat/"+myId,bytes);
+		} catch (Exception e) {
+			System.out.println("Error writing data to: "+"/ExecutorBoltStat/"+myId);
+			e.printStackTrace();
+		}
+	}
 	public List<String> getExecutersChildern(){
 		try {
 			List<String> Children = client.getChildren().forPath("/ExecutorBoltStat/");
@@ -130,19 +202,22 @@ public class ZooKeeperConnection {
 	/* --------------------------------------------
 	 *   FROM THIS POINT
 	 * -------------------------------------------
-	 * Copyright 2012 Netflix, Inc.
+	 * Licensed to the Apache Software Foundation (ASF) under one
+	 * or more contributor license agreements.  See the NOTICE file
+	 * distributed with this work for additional information
+	 * regarding copyright ownership.  The ASF licenses this file
+	 * to you under the Apache License, Version 2.0 (the
+	 * "License"); you may not use this file except in compliance
+	 * with the License.  You may obtain a copy of the License at
 	 *
-	 *    Licensed under the Apache License, Version 2.0 (the "License");
-	 *    you may not use this file except in compliance with the License.
-	 *    You may obtain a copy of the License at
+	 *   http://www.apache.org/licenses/LICENSE-2.0
 	 *
-	 *        http://www.apache.org/licenses/LICENSE-2.0
-	 *
-	 *    Unless required by applicable law or agreed to in writing, software
-	 *    distributed under the License is distributed on an "AS IS" BASIS,
-	 *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-	 *    See the License for the specific language governing permissions and
-	 *    limitations under the License.
+	 * Unless required by applicable law or agreed to in writing,
+	 * software distributed under the License is distributed on an
+	 * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+	 * KIND, either express or implied.  See the License for the
+	 * specific language governing permissions and limitations
+	 * under the License.
 	 *    
 	 *    
 	 * Edited by: Anas Daghistani   
@@ -157,13 +232,13 @@ public class ZooKeeperConnection {
 	public synchronized void setBarrier() throws Exception{
 		boolean result;
 		try{
-			for(;;){
+//			for(;;){
 				client.create().creatingParentsIfNeeded().forPath(barrierPath);
-				result = (client.checkExists().forPath(barrierPath) == null);
-				if ( result ){
-					break;
-				}
-			}
+//				result = (client.checkExists().forPath(barrierPath) == null);
+//				if ( result ){
+//					break;
+//				}
+//			}
 		}
 		catch ( KeeperException.NodeExistsException ignore ){
 			// ignore
@@ -211,8 +286,10 @@ public class ZooKeeperConnection {
 
 		boolean result;
 		for(;;){
+			//System.out.println("In zookeaper barrier loop");
 			result = (client.checkExists().usingWatcher(watcher).forPath(barrierPath) == null);
 			if ( result ){
+				System.out.println("breaking from zookeaper barrier loop");
 				break;
 			}
 
@@ -222,17 +299,27 @@ public class ZooKeeperConnection {
 				if ( thisWaitMs <= 0 ){
 					break;
 				}
-				wait(thisWaitMs);
+				synchronized (lock) { 
+					lock.wait(thisWaitMs); 
+				}	
 			}
 			else{
-				wait();
+				//				System.out.println("Before synchronized");
+				synchronized (lock) { 
+					System.out.println("before wait");
+					lock.wait(); 
+					System.out.println("after wait");
+				}
+				//				System.out.println("After synchronized");
 			}
 		}
 		return result;
 	}
 
 	private synchronized void notifyFromWatcher(){
-		notifyAll();
+		System.out.println("Before notifyAll");
+		lock.notifyAll();
+		System.out.println("After notifyAll");
 	}
 
 }

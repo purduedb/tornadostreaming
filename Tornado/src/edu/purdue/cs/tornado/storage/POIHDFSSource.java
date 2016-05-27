@@ -33,6 +33,7 @@ import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
@@ -68,23 +69,26 @@ public class POIHDFSSource extends AbstractStaticDataSource {
 	String currentLine = null;
 	Configuration hdfsconf;
 	FileSystem fs;
+	Integer countId;
 
 	public POIHDFSSource(Rectangle bounds,
 			Map<String, String> config, String sourceId,Integer selfTaskId,Integer selfTaskIdIndex) {
 		super(bounds, config, sourceId,selfTaskId,selfTaskIdIndex);
 		prepareData();
+		
 	}
 
 	ArrayList<DataObject> storedDataObject;
 
 	@Override
 	public void prepareData() {
+		countId=0;
 		corePath = config.get(CORE_FILE_PATH);
 		folderPath = config.get(HDFS_POI_FOLDER_PATH);
 		xrange = SpatioTextualConstants.xMaxRange;
 		yrange = SpatioTextualConstants.yMaxRange;
-		xCellsNum = SpatioTextualConstants.fineGridGranularityX;
-		yCellsNum = SpatioTextualConstants.fineGridGranularityY;
+		xCellsNum = SpatioTextualConstants.defaultFineGridGranularityX;
+		yCellsNum = SpatioTextualConstants.defaultFineGridGranularityY;
 		xStep = xrange / xCellsNum;
 		yStep = yrange / yCellsNum;
 		brArr = new ArrayList<BufferedReader>();
@@ -182,6 +186,7 @@ public class POIHDFSSource extends AbstractStaticDataSource {
 	private DataObject mapLineToDataObj(String line) {
 		StringTokenizer stringTokenizer = new StringTokenizer(line, ",");
 		String id = "", text = "";
+		if(countId>=Integer.MAX_VALUE)countId=0;
 		Double lat, lon;
 		if (stringTokenizer.hasMoreTokens()) {
 			id = stringTokenizer.nextToken();
@@ -206,7 +211,7 @@ public class POIHDFSSource extends AbstractStaticDataSource {
 		dataObject.setOriginalText(text);
 		ArrayList<String> textContent = TextHelpers.transformIntoSortedArrayListOfString(text);
 		dataObject.setLocation(point);
-		dataObject.setObjectId(id);
+		dataObject.setObjectId(countId++);
 		dataObject.setObjectText(textContent);
 		dataObject.setSrcId(sourceId);
 		dataObject.setTimeStamp(date.getTime());

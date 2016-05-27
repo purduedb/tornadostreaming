@@ -2,14 +2,13 @@ package edu.purdue.cs.tornado.index.local;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
+import  java.util.List;
+import java.util.Set;
 
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
-import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
@@ -33,8 +32,8 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex{
 	private Integer allDataCount;
 	Integer level;
 	
-	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation) {
-		this(selfBounds, dataSourcesInformation, SpatioTextualConstants.fineGridGranularityX, SpatioTextualConstants.fineGridGranularityY, false);
+	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation,Integer fineGridGran) {
+		this(selfBounds, dataSourcesInformation, fineGridGran, fineGridGran, false);
 	}
 
 	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity) {
@@ -271,7 +270,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex{
 		if (fromNeighbour) {
 			relevantIndexCells = getOverlappingIndexCells(dataObject.getRelevantArea());
 			for (IndexCell indexCell : relevantIndexCells) {
-				ArrayList<Query> queries = indexCell.getQueries();
+				List<Query> queries = indexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -280,7 +279,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex{
 			}
 		} else {
 			IndexCell indexCell = getOverlappingIndexCells(dataObject.getLocation());
-			ArrayList<Query> queries = indexCell.getQueries();
+			List<Query> queries = indexCell.getQueries();
 			for (Query q : queries) {
 				String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 				if (!queriesMap.containsKey(unqQueryId))
@@ -444,6 +443,24 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex{
 		dropContinousQuery(oldQuery);
 		addContinousQuery(query);
 		return true;
+	}
+
+	@Override
+	public ArrayList< List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getUpdatedTextSummery() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void cleanUp() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

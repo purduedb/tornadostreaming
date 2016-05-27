@@ -23,28 +23,27 @@ public class LatLong {
 	public LatLong(){
 		
 	}
-	public LatLong(Double latitude,Double longitude ) {
+	public LatLong(double latitude,double longitude ) {
 		super();
 		this.latitude = latitude;
 		this.longitude = longitude;
 		
 	}
+	double longitude,latitude;
 
-	Double longitude,latitude;
-
-	public Double getLongitude() {
+	public double getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(Double longitude) {
+	public void setLongitude(double longitude) {
 		this.longitude = longitude;
 	}
 
-	public Double getLatitude() {
+	public double getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(Double latitude) {
+	public void setLatitude(double latitude) {
 		this.latitude = latitude;
 	}
 	@Override

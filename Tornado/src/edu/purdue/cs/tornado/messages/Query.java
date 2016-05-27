@@ -25,23 +25,24 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.DataObjectKNNComparator;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
+import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.global.GlobalIndexIterator;
 import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 
 
 public class Query {
 	private  String srcId;
-	private  String queryId;
-	
-	
-	
-	
+	private  Integer queryId;
+	public Boolean added;
+	public Integer visitied;
+		
 	private  Point focalPoint;
 	private  String  queryType;
 	private  Integer  k;
@@ -51,28 +52,33 @@ public class Query {
 	private  Rectangle spatialRange;
 	private  String dataSrc;
 	private  String dataSrc2; 
-	private  String command; //add , Update , Drop 
-	private  String textualPredicate;
-	private  String textualPredicate2;
-	private  String joinTextualPredicate;
+	private  Long removeTime;  
 	
-	
-	
+	private  Command command; //add , Update , Drop 
+	private  TextualPredicate textualPredicate;
+	private  TextualPredicate textualPredicate2;
+	private  TextualPredicate joinTextualPredicate;
+		
 	private  Double distance ;
-	private Boolean continousQuery;
-	
-	
-	
+	private  Boolean continousQuery;
+		
 	private PriorityQueue<DataObject> topKQueue;  // Priority queue (max-heap).
-	private HashMap<String, Integer> currentRanks;  // Records the current rank of each object in the top-k list.
+	private HashMap<Integer, Integer> currentRanks;  // Records the current rank of each object in the top-k list.
 	private LocalIndexKNNIterator localTopKIterator;
 	private GlobalIndexIterator globalTopKIterator;
 	private ArrayList<Integer> pendingTopKTaskIds ;
 	private Double farthestDistance;
-	private HashMap<String, DataObject> currentObjects;
+	private HashMap<Integer, DataObject> currentObjects;
 	
 	
 	
+	public Long getRemoveTime() {
+		return removeTime;
+	}
+
+	public void setRemoveTime(Long removeTime) {
+		this.removeTime = removeTime;
+	}
 	private static Double maxFarthestDistance=Math.sqrt(SpatioTextualConstants.xMaxRange*SpatioTextualConstants.xMaxRange+
 			SpatioTextualConstants.yMaxRange*SpatioTextualConstants.yMaxRange);//this is the maximum possible space between any two points indexed
 	
@@ -80,25 +86,25 @@ public class Query {
 		this.farthestDistance = farthestDistance;
 	}
 	
-	public String getJoinTextualPredicate() {
+	public TextualPredicate getJoinTextualPredicate() {
 		return joinTextualPredicate;
 	}
 
-	public void setJoinTextualPredicate(String joinTextualPredicate) {
+	public void setJoinTextualPredicate(TextualPredicate joinTextualPredicate) {
 		this.joinTextualPredicate = joinTextualPredicate;
 	}
 
-	public String getTextualPredicate() {
+	public TextualPredicate getTextualPredicate() {
 		return textualPredicate;
 	}
 	
-	public String getTextualPredicate2() {
+	public TextualPredicate getTextualPredicate2() {
 		return textualPredicate2;
 	}
-	public void setTextualPredicate2(String textualPredicate2) {
+	public void setTextualPredicate2(TextualPredicate textualPredicate2) {
 		this.textualPredicate2 = textualPredicate2;
 	}
-	public void setTextualPredicate(String textualPredicate) {
+	public void setTextualPredicate(TextualPredicate textualPredicate) {
 		this.textualPredicate = textualPredicate;
 	}
 	public Boolean getContinousQuery() {
@@ -120,17 +126,42 @@ public class Query {
 		this.localTopKIterator = localKNNIterator;
 	}
 	public Query (){
+		added=false;
+		visitied = 0;
 		focalPoint = new Point();
 		queryText = new ArrayList<String>();
 		spatialRange = new Rectangle(new Point(), new Point());
 		this.farthestDistance = maxFarthestDistance;
+		removeTime = null;
 		resetKNNStructures();
+	}
+	public Query (Query q){
+		added=false;
+		visitied = 0;
+		this.farthestDistance = maxFarthestDistance;
+		this.queryId=q.queryId;
+		this.setCommand(q.command);
+		this.srcId=q.srcId;
+		this.setContinousQuery(q.continousQuery);
+		this.setDataSrc(q.dataSrc);
+		this.setDistance(q.distance);
+		this.setQueryType(q.queryType);
+		this.setTimeStamp(q.timeStamp);
+		this.setSpatialRange(new Rectangle(q.spatialRange.getMin(),q.spatialRange.getMax()));
+		this.setTextualPredicate(q.textualPredicate);
+		this.setQueryText(q.queryText);
+				
+		if (queryType.equals(SpatioTextualConstants.queryTextualKNN)) {
+			q.setFocalPoint(q.focalPoint);
+			q.setK(k);
+		} 
+		
 	}
 	public void resetKNNStructures() {
 		Comparator<DataObject> dataObjectKNNComparator = new DataObjectKNNComparator(this.focalPoint);
 		this.topKQueue = new PriorityQueue<DataObject>(50, dataObjectKNNComparator);
-		this.currentRanks = new HashMap<String, Integer>();
-		this.currentObjects = new HashMap<String, DataObject>();
+		this.currentRanks = new HashMap<Integer, Integer>();
+		this.currentObjects = new HashMap<Integer, DataObject>();
 		
 	}
 	
@@ -160,10 +191,10 @@ public class Query {
 	public void setQueryType(String queryType) {
 		this.queryType = queryType;
 	}
-	public String getQueryId() {
+	public Integer getQueryId() {
 		return queryId;
 	}
-	public void setQueryId(String queryId) {
+	public void setQueryId(Integer queryId) {
 		this.queryId = queryId;
 	}
 	
@@ -226,12 +257,12 @@ public class Query {
 	}
 
 
-	public String getCommand() {
+	public Command getCommand() {
 		return command;
 	}
 
 
-	public void setCommand(String command) {
+	public void setCommand(Command command) {
 		this.command = command;
 	}
 	
@@ -251,7 +282,7 @@ public class Query {
 	
 	
 	
-	public static String getUniqueIDFromQuerySourceAndQueryId(String querySourceId, String queryId)
+	public static String getUniqueIDFromQuerySourceAndQueryId(String querySourceId, Integer queryId)
 	{
 		return querySourceId+SpatioTextualConstants.queryIdDelimiter+queryId;
 	}
@@ -293,7 +324,7 @@ public class Query {
 			// Heapify.
 			
 			ResultSetChange resultSetChange=null;
-			if(SpatioTextualConstants.dropCommand.equals( dataObject.getCommand())||SpatioTextualConstants.updateDropCommand.equals( dataObject.getCommand())){
+			if(Command.dropCommand.equals( dataObject.getCommand())||Command.updateDropCommand.equals( dataObject.getCommand())){
 				//we need to check that the object to be removed from the heap is due to an authentic object in the heap 
 				//of a time stamp equal to the objec to be removed
 				//or if we are make a remove of an object at a later time stamp
@@ -303,14 +334,14 @@ public class Query {
 				}
 			}
 			//what about other objects that may be inside the query area this means the area of stored objects need to extended to include the
-			else if((SpatioTextualConstants.updateCommand.equals( dataObject.getCommand()))&&textualPredicateMatched){
+			else if((Command.updateCommand.equals( dataObject.getCommand()))&&textualPredicateMatched){
 				if(	dataObject.getTimeStamp()>=toBeUpdatedInHeap.getTimeStamp()	){
 					topKQueue.remove(toBeUpdatedInHeap);
 					topKQueue.add(dataObject);
 			  }
 				
 			}
-		} else if (textualPredicateMatched&&(dataObject.getCommand().equals(SpatioTextualConstants.updateCommand)||dataObject.getCommand().equals(SpatioTextualConstants.addCommand))){
+		} else if (textualPredicateMatched&&(dataObject.getCommand().equals(Command.updateCommand)||dataObject.getCommand().equals(Command.addCommand))){
 			// If the current list is small, i.e., has less than k objects, take that object anyway and add it to the topk list.
 			
 			if (currentRanks.size() < this.k) {
@@ -346,10 +377,10 @@ public class Query {
 	private ArrayList<ResultSetChange>  getTopkRanks() {
 		// Calculate the new rank of each object in the top-k list.
 		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
-		HashMap<String, Integer> newRanks = new HashMap<String, Integer>();
+		HashMap<Integer, Integer> newRanks = new HashMap<Integer, Integer>();
 		Comparator<DataObject> maxHeap = new DataObjectKNNComparator(this.focalPoint);
 		PriorityQueue<DataObject> temp = new PriorityQueue<DataObject>(50, maxHeap);
-		HashMap<String, DataObject> newCurrenObjects = new HashMap<String, DataObject>();
+		HashMap<Integer, DataObject> newCurrenObjects = new HashMap<Integer, DataObject>();
 		int rank = 1;	
 		while (!this.topKQueue.isEmpty()) {
 			DataObject l = this.topKQueue.remove();
@@ -358,17 +389,17 @@ public class Query {
 			rank++;
 			newCurrenObjects.put(l.getObjectId(),new DataObject( l));
 		}
-		for (String objectId : newRanks.keySet()) {
+		for (Integer objectId : newRanks.keySet()) {
 			if (!this.currentRanks.containsKey(objectId)) {
-				changes.add(new ResultSetChange(newCurrenObjects.get(objectId), ResultSetChange.Add, this));
+				changes.add(new ResultSetChange(newCurrenObjects.get(objectId), Command.addCommand, this));
 			} else if (!this.currentObjects.get(objectId).equalsLocation( newCurrenObjects.get(objectId))) {
 				
-				changes.add(new ResultSetChange(newCurrenObjects.get(objectId),ResultSetChange.Update, this));
+				changes.add(new ResultSetChange(newCurrenObjects.get(objectId),Command.updateCommand, this));
 			}
 		}
-		for (String objectId : this.currentRanks.keySet()) {
+		for (Integer objectId : this.currentRanks.keySet()) {
 			if (!newRanks.containsKey(objectId)) {
-				changes.add(new ResultSetChange(currentObjects.get(objectId),ResultSetChange.Remove, this));
+				changes.add(new ResultSetChange(currentObjects.get(objectId),Command.dropCommand, this));
 			}
 		}
 		this.topKQueue = temp;

@@ -20,13 +20,17 @@
 package edu.purdue.cs.tornado.serializer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.loadbalance.LoadBalanceMessage;
 import edu.purdue.cs.tornado.messages.Control;
+import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.Query;
 //TODO change to support all null values
 public class ControlSerializer extends  com.esotericsoftware.kryo.Serializer<Control> {
 
@@ -36,8 +40,16 @@ public class ControlSerializer extends  com.esotericsoftware.kryo.Serializer<Con
 		control.setControlMessageType(kryo.readObjectOrNull(input,String.class));
 		control.setDataObjects(kryo.readObjectOrNull(input, ArrayList.class));
 		control.setQueriesList(kryo.readObjectOrNull(input, ArrayList.class));
+		control.setSinglDataObject(kryo.readObjectOrNull(input, DataObject.class));
+		control.setSingleQuery(kryo.readObjectOrNull(input, Query.class));
 		control.setResultSetChanges(kryo.readObjectOrNull(input, ArrayList.class));
 		control.setLeadBalanceMessage(kryo.readObjectOrNull(input, LoadBalanceMessage.class));//kryo.readObjectOrNull(input, LoadBalanceMessage.class));
+		control.setIndexCells(kryo.readObjectOrNull(input, ArrayList.class));
+		control.setIndexCell(kryo.readObjectOrNull(input, IndexCell.class));
+		control.setSrcId(kryo.readObjectOrNull(input,String.class));
+		control.setTextSummery( kryo.readObjectOrNull(input,HashSet.class));
+		control.setTextSummeryTaskIdList(kryo.readObjectOrNull(input,ArrayList.class));
+		control.setTextSummaryTimeStamp(kryo.readObjectOrNull(input,Long.class));
 		return control;
 	}
 
@@ -46,8 +58,16 @@ public class ControlSerializer extends  com.esotericsoftware.kryo.Serializer<Con
 		kryo.writeObjectOrNull(output,control.getControlMessageType(),String.class);
 		kryo.writeObjectOrNull(output,control.getDataObjects(),ArrayList.class);
 		kryo.writeObjectOrNull(output,control.getQueriesList(),ArrayList.class);
+		kryo.writeObjectOrNull(output,control.getSinglDataObject(),DataObject.class);
+		kryo.writeObjectOrNull(output,control.getSingleQuery(),Query.class);
 		kryo.writeObjectOrNull(output,control.getResultSetChanges(),ArrayList.class);
 		kryo.writeObjectOrNull(output,control.getLeadBalanceMessage(),LoadBalanceMessage.class);
+		kryo.writeObjectOrNull(output,control.getIndexCells(),ArrayList.class);
+		kryo.writeObjectOrNull(output,control.getIndexCell(),IndexCell.class);
+		kryo.writeObjectOrNull(output,control.getSrcId(),String.class);
+		kryo.writeObjectOrNull(output,control.getTextSummery(),HashSet.class);
+		kryo.writeObjectOrNull(output,control.getTextSummeryTaskIdList(),ArrayList.class);
+		kryo.writeObjectOrNull(output,control.getTextSummaryTimeStamp(),Long.class);
 	}
 
 	

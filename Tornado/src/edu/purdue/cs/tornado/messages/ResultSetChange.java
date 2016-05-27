@@ -19,14 +19,12 @@
  */
 package edu.purdue.cs.tornado.messages;
 
-import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.messages.DataObject;
-import edu.purdue.cs.tornado.messages.Query;
+import edu.purdue.cs.tornado.helper.Command;
 
 public class ResultSetChange {
 	
 	DataObject dataObject;
-	String changeType;
+	Command changeType;
 	Query query;
 	
 	public Query getQuery() {
@@ -35,22 +33,22 @@ public class ResultSetChange {
 	public void setQuery(Query query) {
 		this.query = query;
 	}
-	public static String Update = SpatioTextualConstants.updateCommand;
-	public static String Add = SpatioTextualConstants.addCommand;
-	public static String Remove =  SpatioTextualConstants.dropCommand;
+//	public static String Update = Command.updateCommand;
+//	public static String Add = Command.addCommand;
+//	public static String Remove =  Command.dropCommand;
 	public DataObject getDataObject() {
 		return dataObject;
 	}
 	public void setDataObject(DataObject dataObject) {
 		this.dataObject = dataObject;
 	}
-	public String getChangeType() {
+	public Command getChangeType() {
 		return changeType;
 	}
-	public void setChangeType(String changeType) {
+	public void setChangeType(Command changeType) {
 		this.changeType = changeType;
 	}
-	public ResultSetChange(DataObject dataObject, String changeType,Query q) {
+	public ResultSetChange(DataObject dataObject, Command changeType,Query q) {
 		super();
 		this.dataObject = dataObject;
 		this.changeType = changeType;

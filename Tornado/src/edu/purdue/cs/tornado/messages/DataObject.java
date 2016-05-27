@@ -21,31 +21,29 @@ package edu.purdue.cs.tornado.messages;
 
 import java.util.ArrayList;
 
-import backtype.storm.tuple.Tuple;
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
-import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 
 public class DataObject {
 	private String srcId;
-	private String objectId;
+	private Integer objectId;
 	private Point location;
 	private String originalText;
 	private ArrayList<String> objectText;
 	private Long timeStamp;
 	private Rectangle relevantArea;
-	private String command;
+	private Command command;
 
 	
 	public DataObject(DataObject other){
 		this.srcId=new String(other.srcId);
-		this.objectId=new String(other.objectId);
+		this.objectId=other.objectId.intValue();
 		this.location=new Point(other.location);
 		this.originalText=new String(other.originalText);
 		this.objectText=(ArrayList<String>) other.objectText.clone();
-	//	this.relevantArea = new Rectangle(new Point(other.relevantArea.getMin()), new Point(other.relevantArea.getMax()));
-		this.command=new String(other.command);
+		this.command=other.command;
 		
 	}
 	@Override
@@ -69,11 +67,11 @@ public class DataObject {
 		objectText = new ArrayList<String>();
 	}
 
-	public String getCommand() {
+	public Command getCommand() {
 		return command;
 	}
 
-	public void setCommand(String command) {
+	public void setCommand(Command command) {
 		this.command = command;
 	}
 
@@ -93,11 +91,11 @@ public class DataObject {
 		this.srcId = srcId;
 	}
 
-	public String getObjectId() {
+	public Integer getObjectId() {
 		return objectId;
 	}
 
-	public void setObjectId(String objectId) {
+	public void setObjectId(Integer objectId) {
 		this.objectId = objectId;
 	}
 
@@ -125,7 +123,7 @@ public class DataObject {
 		this.timeStamp = timeStamp;
 	}
 
-	public DataObject(String objectId, Point location, String originalText, Long timeStamp, String command) {
+	public DataObject(Integer objectId, Point location, String originalText, Long timeStamp, Command command) {
 		super();
 	
 		this.objectId = objectId;

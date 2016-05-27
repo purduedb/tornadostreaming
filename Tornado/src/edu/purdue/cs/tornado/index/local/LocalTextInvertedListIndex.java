@@ -98,7 +98,7 @@ public class LocalTextInvertedListIndex extends LocalTextIndex{
 	}
 
 	public Iterator<DataObject> getDataObjectsContainAny(ArrayList<String> keywords) {
-		HashMap<String, DataObject> result = new HashMap<String, DataObject>();
+		HashMap<Integer, DataObject> result = new HashMap<Integer, DataObject>();
 		Integer sum = 0;
 		for (String keyword : keywords) {
 			if (!dataObjectsIndex.containsKey(keyword)) {
@@ -112,7 +112,7 @@ public class LocalTextInvertedListIndex extends LocalTextIndex{
 	}
 
 	public Iterator<DataObject> getDataObjectsContainAll(ArrayList<String> keywords) {
-		HashMap<String, DataObject> result = new HashMap<String, DataObject>();
+		HashMap<Integer, DataObject> result = new HashMap<Integer, DataObject>();
 		Integer sum = 0;
 		for (String keyword : keywords) {
 			if (!dataObjectsIndex.containsKey(keyword)) {

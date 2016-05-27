@@ -25,8 +25,10 @@ import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import com.esotericsoftware.kryo.io.Output;
 
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
+import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class QuerySerializer extends  com.esotericsoftware.kryo.Serializer<Query> {
@@ -36,7 +38,7 @@ public class QuerySerializer extends  com.esotericsoftware.kryo.Serializer<Query
 		Query query = new Query();
 		query.setSrcId(kryo.readObjectOrNull(input,String.class));
 		query.setQueryType(kryo.readObjectOrNull(input,String.class));
-		query.setQueryId(kryo.readObjectOrNull(input,String.class));
+		query.setQueryId(kryo.readObjectOrNull(input,Integer.class));
 		query.setFocalPoint(kryo.readObjectOrNull(input, Point.class));
 		query.setK(kryo.readObjectOrNull(input,Integer.class));
 		query.setQueryText(kryo.readObjectOrNull(input, ArrayList.class));
@@ -46,12 +48,13 @@ public class QuerySerializer extends  com.esotericsoftware.kryo.Serializer<Query
 		query.setDistance(kryo.readObjectOrNull(input, Double.class));
 		query.setDataSrc(kryo.readObjectOrNull(input, String.class));
 		query.setDataSrc2(kryo.readObjectOrNull(input, String.class));
-		query.setCommand(kryo.readObjectOrNull(input, String.class));
+		query.setCommand(kryo.readObjectOrNull(input, Command.class));
 		query.setContinousQuery(kryo.readObjectOrNull(input, Boolean.class));
-		query.setTextualPredicate(kryo.readObjectOrNull(input, String.class));
-		query.setTextualPredicate2(kryo.readObjectOrNull(input, String.class));
-		query.setJoinTextualPredicate(kryo.readObjectOrNull(input, String.class));
+		query.setTextualPredicate(kryo.readObjectOrNull(input, TextualPredicate.class));
+		query.setTextualPredicate2(kryo.readObjectOrNull(input, TextualPredicate.class));
+		query.setJoinTextualPredicate(kryo.readObjectOrNull(input, TextualPredicate.class));
 		query.setFarthestDistance(kryo.readObjectOrNull(input, Double.class));
+		query.setRemoveTime(kryo.readObjectOrNull(input, Long.class));
 		return query;
 	}
 
@@ -60,7 +63,7 @@ public class QuerySerializer extends  com.esotericsoftware.kryo.Serializer<Query
 		
 		kryo.writeObjectOrNull(output,query.getSrcId(),String.class);
 		kryo.writeObjectOrNull(output,query.getQueryType(),String.class);
-		kryo.writeObjectOrNull(output,query.getQueryId(),String.class);
+		kryo.writeObjectOrNull(output,query.getQueryId(),Integer.class);
 		kryo.writeObjectOrNull(output, query.getFocalPoint(),Point.class);
 		kryo.writeObjectOrNull(output, query.getK(),Integer.class);
 		kryo.writeObjectOrNull(output,query.getQueryText(),ArrayList.class);
@@ -70,13 +73,13 @@ public class QuerySerializer extends  com.esotericsoftware.kryo.Serializer<Query
 		kryo.writeObjectOrNull(output, query.getDistance(),Double.class);
 		kryo.writeObjectOrNull(output, query.getDataSrc(),String.class);
 		kryo.writeObjectOrNull(output, query.getDataSrc2(),String.class);
-		kryo.writeObjectOrNull(output, query.getCommand(),String.class);
+		kryo.writeObjectOrNull(output, query.getCommand(),Command.class);
 		kryo.writeObjectOrNull(output, query.getContinousQuery(),Boolean.class);
-		kryo.writeObjectOrNull(output, query.getTextualPredicate(),String.class);
-		kryo.writeObjectOrNull(output, query.getTextualPredicate2(),String.class);
-		kryo.writeObjectOrNull(output, query.getJoinTextualPredicate(),String.class);
+		kryo.writeObjectOrNull(output, query.getTextualPredicate(),TextualPredicate.class);
+		kryo.writeObjectOrNull(output, query.getTextualPredicate2(),TextualPredicate.class);
+		kryo.writeObjectOrNull(output, query.getJoinTextualPredicate(),TextualPredicate.class);
 		kryo.writeObjectOrNull(output, query.getFarthestDistance(),Double.class);
-		
+		kryo.writeObjectOrNull(output, query.getRemoveTime(),Long.class);
 	}
 
 }

@@ -20,7 +20,13 @@
 package edu.purdue.cs.tornado.index.local;
 
 import java.util.ArrayList;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
@@ -29,27 +35,33 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
+import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class LocalHybridGridIndex extends LocalHybridIndex {
-	private Integer localXcellCount;
-	private Integer localYcellCount;
-	private Double localXstep;
-	private Double localYstep;
-	//ArrayList<ArrayList<IndexCell>> index;
-	HashMap<Integer,HashMap<Integer,IndexCell>> index;
-	private Rectangle selfBounds;
-	DataSourceInformation dataSourcesInformation;
-	private ArrayList<Query> globalKNNQueries;
-	private Integer xGridGranularity;
-	private Integer yGridGranularity;
-	private Boolean spatialOnlyFlag;
-	private Integer allDataCount;
-	Integer level;
+	//	private Integer localXcellCount;
+	//	private Integer localYcellCount;
+	public Double localXstep;
+	public Double localYstep;
 
-	public LocalHybridGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation) {
-		this(selfBounds, dataSourcesInformation, SpatioTextualConstants.fineGridGranularityX, SpatioTextualConstants.fineGridGranularityY, false, 0);
+	public HashMap<Integer, HashMap<Integer, IndexCell>> index;
+	public Rectangle selfBounds;
+	public DataSourceInformation dataSourcesInformation;
+	public ArrayList<Query> globalKNNQueries;
+	public Integer xGridGranularity;
+	public Integer yGridGranularity;
+	public Boolean spatialOnlyFlag;
+	public Integer allDataCount;
+	public Integer level;
+	public Cell myPartition;
+	public Integer fineGridGran;
+
+	public HashMap<String, Integer> overallQueryTextSummery;
+	public boolean textUpdated;
+
+	public LocalHybridGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer fineGridGran) {
+		this(selfBounds, dataSourcesInformation, fineGridGran, fineGridGran, false, 0);
 	}
 
 	public LocalHybridGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity) {
@@ -68,31 +80,18 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		this.yGridGranularity = yGridGranularity;
 		this.localXstep = (globalXrange / this.xGridGranularity);
 		this.localYstep = (globalYrange / this.yGridGranularity);
-		;
-		this.localXcellCount = (int) ((selfBounds.getMax().getX() - selfBounds.getMin().getX()) / localXstep);
-		this.localYcellCount = (int) ((selfBounds.getMax().getY() - selfBounds.getMin().getY()) / localYstep);
-		//this.index = new ArrayList<ArrayList<IndexCell>>();
-		this.index = new HashMap<Integer,HashMap<Integer,IndexCell>>();
+		this.textUpdated = false;
+		//		this.localXcellCount = (int) ((selfBounds.getMax().getX() - selfBounds.getMin().getX()) / localXstep);
+		//		this.localYcellCount = (int) ((selfBounds.getMax().getY() - selfBounds.getMin().getY()) / localYstep);
+		this.index = new HashMap<Integer, HashMap<Integer, IndexCell>>();
 		this.globalKNNQueries = new ArrayList<Query>();
 		this.level = level;
-//		for (int i = 0; i < localXcellCount; i++) {
-
-//			ArrayList<IndexCell> ycellsList = new ArrayList<IndexCell>();
-//
-//			for (int j = 0; j < localYcellCount; j++) {
-//				//				IndexCell indexCell = new IndexCell(getBoundForIndexCell(new IndexCellCoordinates(i, j)), spatialOnlyFlag, level);
-//				//				ycellsList.add(indexCell);
-//				//				ycellsList.set(j,null);
-//				ycellsList.add(null);
-//			}
-			
-//			index.add(ycellsList);
-//			index.add(null);
-//		}
+		overallQueryTextSummery = new HashMap<String, Integer>();
+		this.myPartition = new Cell((int) (selfBounds.getMin().getY() / localYstep), (int) (selfBounds.getMax().getY() / localYstep), (int) (selfBounds.getMin().getX() / localXstep), (int) (selfBounds.getMax().getX() / localXstep));
 	}
 
 	public Boolean addContinousQuery(Query query) {
-
+		Boolean completed = true;
 		if (query.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
 
 			// initially assume that the incomming KKN query for a
@@ -108,21 +107,31 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 
 			IndexCell indexCell = getIndexCellFromCoordinates(indexCellCoordinate);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
 			if (indexCell == null) {
-				indexCell = new IndexCell(getBoundForIndexCell(indexCellCoordinate), spatialOnlyFlag, level);
+				indexCell = new IndexCell(getBoundForIndexCell(indexCellCoordinate), spatialOnlyFlag, level, indexCellCoordinate);
 				addIndexCellFromCoordinates(indexCellCoordinate, indexCell);
 
 			}
-			indexCell.addQuery(query);
+			if (!indexCell.transmitted){
+				indexCell.addQuery(query);
+				for (String s : query.getQueryText()) {
+					if (!overallQueryTextSummery.containsKey(s))
+						overallQueryTextSummery.put(s, 1);
+					else
+						overallQueryTextSummery.put(s, overallQueryTextSummery.get(s) + 1);
+				}
+			}else
 
+				completed = false;
 		}
-		return true;
+		
+		return completed;
 	}
 
 	public IndexCell addDataObject(DataObject dataObject) {
 		IndexCellCoordinates cellCoordinates = mapDataPointToPartition(dataObject.getLocation());
 		IndexCell indexCell = getIndexCellFromCoordinates(cellCoordinates);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
 		if (indexCell == null) {
-			indexCell = new IndexCell(getBoundForIndexCell(cellCoordinates), spatialOnlyFlag, level);
+			indexCell = new IndexCell(getBoundForIndexCell(cellCoordinates), spatialOnlyFlag, level, cellCoordinates);
 
 			addIndexCellFromCoordinates(cellCoordinates, indexCell);
 
@@ -146,16 +155,9 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 	}
 
 	private void addIndexCellFromCoordinates(IndexCellCoordinates indexCellCoordinate, IndexCell indexCell) {
-//		if(index.get(indexCellCoordinate.getX())==null){
-//			ArrayList<IndexCell> yCellList = new ArrayList<IndexCell>();
-//			for(int i =0;i<this.localYcellCount;i++)
-//				yCellList.add(null);
-//			index.set(indexCellCoordinate.getX(),yCellList);
-//		}
-//		index.get(indexCellCoordinate.getX()).set(indexCellCoordinate.getY(), indexCell);
-		if(!index.containsKey(indexCellCoordinate.getX())){
-			HashMap<Integer,IndexCell> yCellList = new HashMap<Integer,IndexCell> ();
-			index.put(indexCellCoordinate.getX(),yCellList);
+		if (!index.containsKey(indexCellCoordinate.getX())) {
+			HashMap<Integer, IndexCell> yCellList = new HashMap<Integer, IndexCell>();
+			index.put(indexCellCoordinate.getX(), yCellList);
 		}
 		index.get(indexCellCoordinate.getX()).put(indexCellCoordinate.getY(), indexCell);
 	}
@@ -181,6 +183,19 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 			if (indexCell == null)
 				continue;
 			index.get(indexCell.getX()).get(indexCell.getY()).dropQuery(query);
+
+		}
+		for (String s : query.getQueryText()) {
+			if (overallQueryTextSummery.containsKey(s)) {
+				int remainingCount = overallQueryTextSummery.get(s) - indexCells.size();
+				if (remainingCount > 0)
+					overallQueryTextSummery.put(s, remainingCount);
+				else if (remainingCount <= 0){
+					overallQueryTextSummery.remove(s);
+					textUpdated = true;
+				}
+
+			}
 
 		}
 		return true;
@@ -231,9 +246,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 			IndexCell indexCell = getIndexCellFromCoordinates(indexCoordinate);
 			if (indexCell == null)
 				continue;
-
 			sum += indexCell.estimateDataObjectCountAny(keywords);
-
 		}
 		return sum;
 	}
@@ -264,19 +277,19 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 
 	}
 
-	public HashMap<Integer,  HashMap<Integer,IndexCell>> getIndex() {
+	public HashMap<Integer, HashMap<Integer, IndexCell>> getIndex() {
 		return index;
 	}
 
-	public IndexCell getIndexCellCreateIfNull(IndexCellCoordinates indexCellCoordinates,Boolean withChildren) {
+	public IndexCell getIndexCellCreateIfNull(IndexCellCoordinates indexCellCoordinates, Boolean withChildren) {
 
 		IndexCell indexCell = getIndexCellFromCoordinates(indexCellCoordinates);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
 		if (indexCell == null) {
-			
-			indexCell = new IndexCell(getBoundForIndexCell(indexCellCoordinates), spatialOnlyFlag, level);
-			if(withChildren){
-				indexCell.children=new IndexCell[4];
-				indexCell.children[0]=indexCell.children[1]=indexCell.children[2]=indexCell.children[3]=null;
+
+			indexCell = new IndexCell(getBoundForIndexCell(indexCellCoordinates), spatialOnlyFlag, level, indexCellCoordinates);
+			if (withChildren) {
+				indexCell.children = new IndexCell[4];
+				indexCell.children[0] = indexCell.children[1] = indexCell.children[2] = indexCell.children[3] = null;
 			}
 			addIndexCellFromCoordinates(indexCellCoordinates, indexCell);
 
@@ -284,30 +297,21 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		return indexCell;
 	}
 
-	public IndexCell getIndexCellCreateIfNull(Point point,Boolean withChildren) {
+	public IndexCell getIndexCellCreateIfNull(Point point, Boolean withChildren) {
 		IndexCellCoordinates indexCellCoordinates = mapDataPointToPartition(point);
-		return getIndexCellCreateIfNull(indexCellCoordinates,withChildren);
-		
+		return getIndexCellCreateIfNull(indexCellCoordinates, withChildren);
+
 	}
 
-	private IndexCell getIndexCellFromCoordinates(IndexCellCoordinates indexCell) {
-		if(index.get(indexCell.getX())==null)
-		{
+	public IndexCell getIndexCellFromCoordinates(IndexCellCoordinates indexCell) {
+		if (index.get(indexCell.getX()) == null) {
 			return null;
 		}
 		return index.get(indexCell.getX()).get(indexCell.getY());
 	}
 
-	public Integer getLocalXcellCount() {
-		return localXcellCount;
-	}
-
 	public Double getLocalXstep() {
 		return localXstep;
-	}
-
-	public Integer getLocalYcellCount() {
-		return localYcellCount;
 	}
 
 	public Double getLocalYstep() {
@@ -386,9 +390,9 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		if (fromNeighbour) {
 			relevantIndexCells = getOverlappingIndexCells(dataObject.getRelevantArea());
 			for (IndexCell indexCell : relevantIndexCells) {
-				if (indexCell == null||indexCell.getQueries()==null)
+				if (indexCell == null || indexCell.getQueries() == null)
 					continue;
-				ArrayList<Query> queries = indexCell.getQueries();
+			    List<Query> queries = indexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -397,8 +401,8 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 			}
 		} else {
 			IndexCell indexCell = getOverlappingIndexCells(dataObject.getLocation());
-			if (indexCell != null&&indexCell.getQueries()!=null) {
-				ArrayList<Query> queries = indexCell.getQueries();
+			if (indexCell != null && indexCell.getQueries() != null) {
+				List<Query> queries = indexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -440,20 +444,17 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		Double x = point.getX();
 		Double y = point.getY();
 
-		//		if ((x < selfBounds.getMin().getX() && !(Math.abs(x - selfBounds.getMin().getX()) < .000001)) || (y < selfBounds.getMin().getY() && !(Math.abs(y - selfBounds.getMin().getY()) < .000001))
-		//				|| (x > selfBounds.getMax().getX() && !(Math.abs(x - selfBounds.getMax().getX()) < .000001)) || (y > selfBounds.getMax().getY() && !(Math.abs(y - selfBounds.getMax().getY()) < .000001))) {
-		//			System.err.println("Error Point: " + x + " , " + y + " is outside the range of this bolt ");
-		//		} else {
-		Integer xCell = (int) ((x - selfBounds.getMin().getX()) / localXstep);
-		Integer yCell = (int) ((y - selfBounds.getMin().getY()) / localYstep);
-		if (xCell >= localXcellCount)
-			xCell = localXcellCount - 1;
-		if (yCell >= localYcellCount)
-			yCell = localYcellCount - 1;
+		//		Integer xCell = (int) ((x - selfBounds.getMin().getX()) / localXstep);
+		//		Integer yCell = (int) ((y - selfBounds.getMin().getY()) / localYstep);
+		Integer xCell = (int) ((x) / localXstep);
+		Integer yCell = (int) ((y) / localYstep);
+		//		if (xCell >= localXcellCount)
+		//			xCell = localXcellCount - 1;
+		//		if (yCell >= localYcellCount)
+		//			yCell = localYcellCount - 1;
 
 		IndexCellCoordinates indexCellCoordinate = new IndexCellCoordinates(xCell, yCell);
 
-		//		}
 		return indexCellCoordinate;
 	}
 
@@ -468,14 +469,13 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 	 */
 	private ArrayList<IndexCellCoordinates> mapQueryToPartitions(Query query) {
 		ArrayList<IndexCellCoordinates> partitions = new ArrayList<IndexCellCoordinates>();
-		double xmin, ymin, xmax, ymax;
 		if (SpatioTextualConstants.queryTextualRange.equals(query.getQueryType()) || SpatioTextualConstants.queryTextualSpatialJoin.equals(query.getQueryType())) {
-			if (query.getSpatialRange().getMin().getX() > selfBounds.getMax().getX() || query.getSpatialRange().getMin().getY() > selfBounds.getMax().getY() || query.getSpatialRange().getMax().getX() < selfBounds.getMin().getX()
-					|| query.getSpatialRange().getMax().getY() < selfBounds.getMin().getY()) {
-				System.err.println("Error query:" + query.getSrcId() + "  is outside the range of this bolt ");
-			} else {
-				partitions = mapRecToIndexCells(query.getSpatialRange());
-			}
+			//			if (query.getSpatialRange().getMin().getX() > selfBounds.getMax().getX() || query.getSpatialRange().getMin().getY() > selfBounds.getMax().getY() || query.getSpatialRange().getMax().getX() < selfBounds.getMin().getX()
+			//					|| query.getSpatialRange().getMax().getY() < selfBounds.getMin().getY()) {
+			//				System.err.println("Error query:" + query.getSrcId() + "  is outside the range of this bolt ");
+			//			} else {
+			partitions = mapRecToIndexCells(query.getSpatialRange());
+			//			}
 		} else if (SpatioTextualConstants.queryTextualKNN.equals(query.getQueryType())) {
 			partitions.add(mapDataPointToPartition(query.getFocalPoint()));
 		}
@@ -486,71 +486,65 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		ArrayList<IndexCellCoordinates> partitions = new ArrayList<IndexCellCoordinates>();
 		double xmin, ymin, xmax, ymax;
 
-		if (rectangle == null || selfBounds == null)
-			return partitions;
+		//		if (rectangle == null || selfBounds == null)
+		//			return partitions;
+		//
+		//		if (rectangle.getMin().getX() < selfBounds.getMin().getX())
+		//			xmin = selfBounds.getMin().getX();
+		//		else
+		//			xmin = rectangle.getMin().getX();
+		//
+		//		if (rectangle.getMin().getY() < selfBounds.getMin().getY())
+		//			ymin = selfBounds.getMin().getY();
+		//		else
+		//			ymin = rectangle.getMin().getY();
+		//
+		//		if (rectangle.getMax().getX() > selfBounds.getMax().getX())
+		//			xmax = selfBounds.getMax().getX();//to prevent exceeding index range
+		//		else
+		//			xmax = rectangle.getMax().getX();
+		//
+		//		if (rectangle.getMax().getY() > selfBounds.getMax().getY())
+		//			ymax = selfBounds.getMax().getY();//to prevent exceeding index range
+		//		else
+		//			ymax = rectangle.getMax().getY();
+		//
+		//		if (xmax == selfBounds.getMax().getX())
+		//			xmax = selfBounds.getMax().getX() - 1;
+		//		if (ymax == selfBounds.getMax().getY())
+		//			ymax = selfBounds.getMax().getY() - 1;
 
-		if (rectangle.getMin().getX() < selfBounds.getMin().getX())
-			xmin = selfBounds.getMin().getX();
-		else
-			xmin = rectangle.getMin().getX();
+		//		xmin -= selfBounds.getMin().getX();
+		//		ymin -= selfBounds.getMin().getY();
+		//		xmax -= selfBounds.getMin().getX();
+		//		ymax -= selfBounds.getMin().getY();
 
-		if (rectangle.getMin().getY() < selfBounds.getMin().getY())
-			ymin = selfBounds.getMin().getY();
-		else
-			ymin = rectangle.getMin().getY();
+		int xMinCell = (int) (rectangle.getMin().getX() / localXstep);
+		int yMinCell = (int) (rectangle.getMin().getY() / localYstep);
+		int xMaxCell = (int) (rectangle.getMax().getX() / localXstep);
+		int yMaxCell = (int) (rectangle.getMax().getY() / localYstep);
 
-		if (rectangle.getMax().getX() > selfBounds.getMax().getX())
-			xmax = selfBounds.getMax().getX();//to prevent exceeding index range
-		else
-			xmax = rectangle.getMax().getX();
+//		for (Integer xCell = Math.max(xMinCell, myPartition.getLeft());  xCell < Math.min(xMaxCell,myPartition.getRight()); xCell++)
+//			for (Integer yCell = Math.max(yMinCell,myPartition.getBottom()); yCell < Math.min(yMaxCell,myPartition.getTop()); yCell++) {
+//				IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
+//				partitions.add(indexCell);
+//			}
 
-		if (rectangle.getMax().getY() > selfBounds.getMax().getY())
-			ymax = selfBounds.getMax().getY();//to prevent exceeding index range
-		else
-			ymax = rectangle.getMax().getY();
-
-		if (xmax == selfBounds.getMax().getX())
-			xmax = selfBounds.getMax().getX() - 1;
-		if (ymax == selfBounds.getMax().getY())
-			ymax = selfBounds.getMax().getY() - 1;
-
-		xmin -= selfBounds.getMin().getX();
-		ymin -= selfBounds.getMin().getY();
-		xmax -= selfBounds.getMin().getX();
-		ymax -= selfBounds.getMin().getY();
-
-		int xMinCell = (int) (xmin / localXstep);
-		int yMinCell = (int) (ymin / localYstep);
-		int xMaxCell = (int) (xmax / localXstep);
-		int yMaxCell = (int) (ymax / localYstep);
-
-		for (Integer xCell = xMinCell; xCell <= xMaxCell; xCell++)
-			for (Integer yCell = yMinCell; yCell <= yMaxCell; yCell++) {
-				IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
-				partitions.add(indexCell);
-			}
-
+		for (Integer xCell = xMinCell;  xCell <= xMaxCell; xCell++)
+		for (Integer yCell = yMinCell ;yCell <= yMaxCell; yCell++) {
+			IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
+			partitions.add(indexCell);
+		}
+		
 		return partitions;
 	}
 
-	public void setIndex( HashMap<Integer,  HashMap<Integer,IndexCell>>  index) {
-		this.index = index;
+	public Integer getLocalXcellCount() {
+		return (int) this.myPartition.dimensions[0];
 	}
 
-	public void setLocalXcellCount(Integer localXcellCount) {
-		this.localXcellCount = localXcellCount;
-	}
-
-	public void setLocalXstep(Double localXstep) {
-		this.localXstep = localXstep;
-	}
-
-	public void setLocalYcellCount(Integer localYcellCount) {
-		this.localYcellCount = localYcellCount;
-	}
-
-	public void setLocalYstep(Double localYstep) {
-		this.localYstep = localYstep;
+	public Integer getLocalYcellCount() {
+		return (int) this.myPartition.dimensions[1];
 	}
 
 	public void setSelfBounds(Rectangle selfBounds) {
@@ -562,6 +556,152 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		dropContinousQuery(oldQuery);
 		addContinousQuery(query);
 		return true;
+	}
+
+	@Override
+	public ArrayList<List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
+
+		IndexCellCoordinates cellCoordinates = mapDataPointToPartition(dataObject.getLocation());
+		IndexCell indexCell = getIndexCellFromCoordinates(cellCoordinates);
+		if (indexCell == null)
+			return null;
+		ArrayList<List<Query>> result = indexCell.geSpatiotTextualOverlappingQueries(dataObject.getLocation(), dataObject.getObjectText());
+
+		return result;
+	}
+
+	public ArrayList<IndexCell> getIndexCellsFromPartition(Cell partition) {
+		ArrayList<IndexCell> result = new ArrayList<IndexCell>();
+		for (int i = partition.getLeft(); i < partition.getRight(); i++)
+			if (index.containsKey(i)) {
+				for (int j = partition.getBottom(); j < partition.getTop(); j++)
+					if (index.get(i).containsKey(j))
+						result.add(index.get(i).get(j));
+			}
+		return result;
+	}
+
+	public void removeIndexCellsFromPartition(Cell partition, boolean textAware) {
+		for (int i = partition.getLeft(); i < partition.getRight(); i++)
+			if (index.containsKey(i)) {
+				for (int j = partition.getBottom(); j < partition.getTop(); j++)
+					if (index.get(i).containsKey(j)) {
+						IndexCell cell = index.get(i).remove(j);
+						if (textAware)
+							removeTextSummeryFromIndexCell(cell);
+					}
+				index.remove(i);
+			}
+	}
+
+	public void addIndexCellsFromPartition(ArrayList<IndexCell> indexCells, boolean textAware) {
+		for (IndexCell indexCell : indexCells) {
+			if (!index.containsKey(indexCell.globalCoordinates.getX()))
+				index.put(indexCell.globalCoordinates.getX(), new HashMap<Integer, IndexCell>());
+			index.get(indexCell.globalCoordinates.getX()).put(indexCell.globalCoordinates.getY(), indexCell);
+			if (textAware)
+				addTextSummeryFromIndexCell(indexCell);
+		}
+	}
+
+	public void addIndexCellsFromPartition(IndexCell indexCell, boolean textAware) {
+
+		if (!index.containsKey(indexCell.globalCoordinates.getX()))
+			index.put(indexCell.globalCoordinates.getX(), new HashMap<Integer, IndexCell>());
+		index.get(indexCell.globalCoordinates.getX()).put(indexCell.globalCoordinates.getY(), indexCell);
+		if (textAware)
+			addTextSummeryFromIndexCell(indexCell);
+
+	}
+
+	@Override
+	public HashSet<String> getUpdatedTextSummery() {
+		if (textUpdated) {
+			textUpdated = false;
+			HashSet<String> s = new HashSet<String>();
+			 s .addAll(overallQueryTextSummery.keySet());
+
+			 return s;
+		}
+		return null;
+	}
+
+	public void removeTextSummeryFromIndexCell(IndexCell cell) {
+		for (Entry<String, HashMap<String,ArrayList<Query>>> e : cell.queriesInvertedList.entrySet()) {
+			Iterator<Entry<String, ArrayList<Query>>> itr = e.getValue().entrySet().iterator();
+			while (itr.hasNext()) {
+				Entry<String, ArrayList<Query>> entry = itr.next();
+				if (overallQueryTextSummery.containsKey(entry.getKey())) {
+					int remainingCount = overallQueryTextSummery.get(entry.getKey()) - entry.getValue().size();
+					if (remainingCount > 0)
+						overallQueryTextSummery.put(entry.getKey(), remainingCount);
+					else  if (remainingCount<= 0){
+						overallQueryTextSummery.remove(entry.getKey());
+						textUpdated = true;
+					}
+
+				}
+			}
+		}
+
+	}
+
+	public void addTextSummeryFromIndexCell(IndexCell cell) {
+		if (cell.queriesInvertedList == null)
+			return;
+		for (Entry<String, HashMap<String, ArrayList<Query>>> e : cell.queriesInvertedList.entrySet()) {
+			Iterator<Entry<String, ArrayList<Query>>> itr = e.getValue().entrySet().iterator();
+			while (itr.hasNext()) {
+				Entry<String, ArrayList<Query>> entry = itr.next();
+				if (!overallQueryTextSummery.containsKey(entry.getKey())) {
+					if( entry.getValue().size()!=0)
+					overallQueryTextSummery.put(entry.getKey(), entry.getValue().size());
+				} else {
+					if(( overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size())!=0)
+					overallQueryTextSummery.put(entry.getKey(), overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size());
+
+				}
+
+			}
+		}
+
+	}
+
+	@Override
+	public void cleanUp() {
+		beginCleanUpTime = (new Date()).getTime();
+		Boolean hasQueries= false;
+		for (int i = myPartition.getLeft(); i < myPartition.getRight(); i++)
+			if (index.containsKey(i)) {
+				for (int j = myPartition.getBottom(); j < myPartition.getTop(); j++)
+					if (index.get(i).containsKey(j)) {
+						IndexCell cell = index.get(i).get(j);
+						ArrayList<Query> expiredQueries = cell.findandRemoveExpriedQueries();
+						if(cell.storedQueries.size()!=0)
+							hasQueries=true;
+						if (expiredQueries != null) {
+							for (Query query : expiredQueries) {
+								for (String s : query.getQueryText()) {
+									if (overallQueryTextSummery.containsKey(s)) {
+										int remainingCount = overallQueryTextSummery.get(s) - 1;
+										if (remainingCount > 0)
+											overallQueryTextSummery.put(s, remainingCount);
+										else if (remainingCount <= 0){
+											overallQueryTextSummery.remove(s);
+											textUpdated = true;
+										}
+
+									}
+
+								}
+							}
+						}
+					}
+
+			}
+//		if(hasQueries==false &&!overallQueryTextSummery.isEmpty())
+//			System.err.println("There is an error in cleaning");
+		
 	}
 
 }

@@ -3,9 +3,9 @@ package edu.purdue.cs.tornado.index.local;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import  java.util.List;
 import java.util.Queue;
-
-import org.omg.CORBA.Bounds;
+import java.util.Set;
 
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
@@ -17,7 +17,6 @@ import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
-import edu.stanford.nlp.util.Index;
 
 /**
  * This index is implemented as a multi level grid similar to a quad tree the
@@ -42,8 +41,8 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 	private Integer yGridGranularity;
 	private Boolean spatialOnlyFlag;
 
-	public LocalHybridMultiGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation) {
-		this(selfBounds, dataSourcesInformation, SpatioTextualConstants.fineGridGranularityX, SpatioTextualConstants.fineGridGranularityY, false);
+	public LocalHybridMultiGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation,Integer fineGridGran) {
+		this(selfBounds, dataSourcesInformation, fineGridGran, fineGridGran, false);
 	}
 
 	public LocalHybridMultiGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity) {
@@ -332,6 +331,24 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 		dropContinousQuery(oldQuery);
 		addContinousQuery(query);
 		return true;
+	}
+
+	@Override
+	public ArrayList<List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<String> getUpdatedTextSummery() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void cleanUp() {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

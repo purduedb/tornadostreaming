@@ -22,14 +22,16 @@ package edu.purdue.cs.tornado.spouts;
 import java.util.Date;
 import java.util.Map;
 
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
+
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.RandomGenerator;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
 
 public class TextualSpatialJoinGenerator extends BaseRichSpout {
 
@@ -77,7 +79,7 @@ public class TextualSpatialJoinGenerator extends BaseRichSpout {
 			textContent += SampleTextualContent.TextArr[randomGenerator.nextInt(SampleTextualContent.TextArr.length - 1)];
 
 			Date date = new Date();
-			this.collector.emit(new Values(SpatioTextualConstants.queryTextualSpatialJoin, i, textContent, xMin, yMin, xMax, yMax, distance, date.getTime(), dataSrc, dataSrc2, SpatioTextualConstants.addCommand));
+			this.collector.emit(new Values(SpatioTextualConstants.queryTextualSpatialJoin, i, textContent, xMin, yMin, xMax, yMax, distance, date.getTime(), dataSrc, dataSrc2, Command.addCommand));
 
 			try {
 				if (SpatioTextualConstants.queryGeneratorDelay != 0)

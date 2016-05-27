@@ -12,10 +12,11 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndex;
 import edu.purdue.cs.tornado.index.global.GlobalStaticPartitionedIndex;
+import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.loadbalance.Partition;
 
 public class TestOptimizedPartitions {
-
+	static Integer fineGridGran = 64;
 	@Test
 	public void testMatchedPointRoutingBetweenOptimzedAndRTreeBasedRouting() throws Exception {
 		ArrayList<Point> pointArray= new ArrayList<Point>();
@@ -35,14 +36,14 @@ public class TestOptimizedPartitions {
 		pointArray.add(new Point(2333.0,2333.0));
 		
 		
-		ArrayList<Partition> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions64.ser");
+		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions64.ser");
 		ArrayList<Integer> evaluators = new ArrayList<Integer>();
 		for(int i =0;i<64;i++){
 			evaluators.add(i);
 		}
-		GlobalStaticPartitionedIndex staticPartitionedIndex = new GlobalStaticPartitionedIndex(64, evaluators, partitions);
+		GlobalStaticPartitionedIndex staticPartitionedIndex = new GlobalStaticPartitionedIndex(64, evaluators, partitions,fineGridGran);
 		
-		GlobalOptimizedPartitionedIndex optimizedPartitionedIndex = new GlobalOptimizedPartitionedIndex(64, evaluators, partitions);
+		GlobalOptimizedPartitionedIndex optimizedPartitionedIndex = new GlobalOptimizedPartitionedIndex(64, evaluators, partitions,fineGridGran);
 		
 		for(Point p:pointArray){
 			Integer routingList1 =staticPartitionedIndex.getTaskIDsContainingPoint(p);
@@ -73,14 +74,14 @@ public class TestOptimizedPartitions {
 		rectArray.add(new Rectangle(new Point(2333.0,2333.0),new Point(7533.0,3333.0)));
 		
 		
-		ArrayList<Partition> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions64.ser");
+		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions64.ser");
 		ArrayList<Integer> evaluators = new ArrayList<Integer>();
 		for(int i =0;i<64;i++){
 			evaluators.add(i);
 		}
-		GlobalStaticPartitionedIndex staticPartitionedIndex = new GlobalStaticPartitionedIndex(64, evaluators, partitions);
+		GlobalStaticPartitionedIndex staticPartitionedIndex = new GlobalStaticPartitionedIndex(64, evaluators, partitions,fineGridGran);
 		
-		GlobalOptimizedPartitionedIndex optimizedPartitionedIndex = new GlobalOptimizedPartitionedIndex(64, evaluators, partitions);
+		GlobalOptimizedPartitionedIndex optimizedPartitionedIndex = new GlobalOptimizedPartitionedIndex(64, evaluators, partitions,fineGridGran);
 		
 		for(Rectangle r:rectArray){
 			ArrayList<Integer> routingList1 =staticPartitionedIndex.getTaskIDsOverlappingRecangle(r);

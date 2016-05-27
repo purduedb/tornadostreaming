@@ -22,13 +22,15 @@ package edu.purdue.cs.tornado.spouts;
 import java.util.Date;
 import java.util.Map;
 
-import backtype.storm.Config;
-import backtype.storm.spout.SpoutOutputCollector;
-import backtype.storm.task.TopologyContext;
-import backtype.storm.topology.OutputFieldsDeclarer;
-import backtype.storm.topology.base.BaseRichSpout;
-import backtype.storm.tuple.Fields;
-import backtype.storm.tuple.Values;
+import org.apache.storm.Config;
+import org.apache.storm.spout.SpoutOutputCollector;
+import org.apache.storm.task.TopologyContext;
+import org.apache.storm.topology.OutputFieldsDeclarer;
+import org.apache.storm.topology.base.BaseRichSpout;
+import org.apache.storm.tuple.Fields;
+import org.apache.storm.tuple.Values;
+
+import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.RandomGenerator;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
@@ -67,7 +69,7 @@ public class DummyTweetGenerator extends BaseRichSpout {
 	public void nextTuple() {
 		if(i>Integer.MAX_VALUE)
 			i=0;
-		String id = ""+randomGenerator
+		Integer id = randomGenerator
 				.nextInt(SpatioTextualConstants.numMovingObjects);
 		Double xCoord = randomGenerator.nextDouble(0,
 				SpatioTextualConstants.xMaxRange);
@@ -85,7 +87,7 @@ public class DummyTweetGenerator extends BaseRichSpout {
 
 
 		DataObject dataObject= new DataObject(id, new Point(xCoord, yCoord), textContent, date
-				.getTime(), SpatioTextualConstants.addCommand);
+				.getTime(), Command.addCommand);
 	///	for(int j=0;j<1000;j++)
 		if (reliable)
 			this.collector.emit(new Values(id,dataObject), "" + selfTaskId + "_" + (i++));

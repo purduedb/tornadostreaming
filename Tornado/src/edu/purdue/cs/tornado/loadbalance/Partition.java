@@ -23,7 +23,10 @@ public class Partition implements Serializable{
 	public void setIndex(int index) {
 		this.index = index;
 	}
-
+	@Override
+ public String toString (){
+		return "Index: "+this.index+", bottom "+getBottom()+", top "+getTop()+", left "+getLeft()+", right "+getRight();
+	}
 	private static final long serialVersionUID = 1L;
 	/* IMPORTANT:
 	 * dimension[0] is x (width)
@@ -36,10 +39,10 @@ public class Partition implements Serializable{
 	 * We use double types for dimensions and coordinates because that's the data type allowed by the RTree we have.
 	 */
 
-	private double[] coords;
-	private double[] dimensions;
+	public double[] coords;
+	public double[] dimensions;
 
-	private double cost;
+	public double cost;
 	public int index;
 
 	public Partition(){

@@ -8,6 +8,7 @@ package edu.purdue.cs.tornado.helper;
 import java.util.ArrayList;
 
 import edu.purdue.cs.tornado.loadbalance.Partition;
+import edu.purdue.cs.tornado.messages.Query;
 
 /**
  * Used in estimating the cost of a given partitioning scheme.
@@ -42,8 +43,8 @@ public class CostEstimator {
 		grid2 = new CountersGrid(gridWidth , gridHeight );
 		for(Point p:points){
 			p = SpatialHelper.mapDataPointToIndexCellCoordinates(p, gridWidth, gridHeight, SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange);
-			grid.insertPoint(p.getX().intValue(), p.getY().intValue(), 1);
-			grid2.insertPoint(p.getX().intValue(), p.getY().intValue(), 1);
+			grid.insertPoint((int)p.getX(),(int) p.getY(), 1);
+			grid2.insertPoint((int)p.getX(),(int) p.getY(), 1);
 		}
 		for(int i =0;i< grid.pointData.length;i++){
 			for(int j=grid.pointData.length-1;j>=0;j--)
@@ -57,6 +58,38 @@ public class CostEstimator {
 		
 		
 	}
+	public CostEstimator(ArrayList<Point> points, int gridWidth, int gridHeight, ArrayList<Query> queries) {
+	
+			
+			grid = new CountersGrid(gridWidth , gridHeight );
+			
+			for(Point p:points){
+				p = SpatialHelper.mapDataPointToIndexCellCoordinates(p, gridWidth, gridHeight, 
+						SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange);
+				grid.insertPoint((int)p.getX(),(int) p.getY(), 1);
+			}
+			
+			for(Query q:queries){
+				ArrayList<Point> minMaxPoints= SpatialHelper.mapRectangleToIndexCellCoordinatesListMinMax(q.getSpatialRange(), gridWidth, gridHeight, 
+						SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange);
+				
+				Point minPoint =minMaxPoints.get(0);
+				Point maxPoint =minMaxPoints.get(1);
+				
+				
+				grid.insertQueryWithType((int)minPoint.getX(),(int) minPoint.getY(),(int) maxPoint.getX(),(int) maxPoint.getY(), q.getQueryType());
+			}
+			
+			for(int i =0;i< grid.pointData.length;i++){
+				for(int j=grid.pointData.length-1;j>=0;j--)
+					if(grid.pointData[i][j]==0)
+						System.out.print(".");
+					else
+						System.out.print(","+grid.pointData[i][j] );
+				System.out.println("");
+			}			
+			
+		}
 
 	/**
 	 * 
@@ -96,12 +129,24 @@ public class CostEstimator {
 	 *            Input partition.
 	 * @return Estimated cost.
 	 */
-	public double getCost(Partition partition) {
+	public double getCostPointOnly(Partition partition) {
 
 		//return getSize(partition) * getNumOverlappingQueries(partition);
 		return getSize(partition);
 	}
 
+	public double getCostPointPointsAndQueries(Partition partition) {
+
+		return grid.getSUMPointsTimesQueries(partition.getBottom(), partition.getTop(), partition.getLeft(), partition.getRight());
+	}
+	public double getBoundaryCostForHorizontalSplit(Partition partition,int splitposition) {
+
+		return grid.getBoundaryCostForHorizontalSplit(partition,splitposition);
+	}
+	public double getBoundaryCostForVerticalSplit(Partition partition,int splitposition) {
+
+		return grid.getBoundaryCostForVerticalSplit(partition,splitposition);
+	}
 	/**
 	 * Estimates the size of a certain partition. If no user information is
 	 * specified, we assume that all the users have the same size and that all

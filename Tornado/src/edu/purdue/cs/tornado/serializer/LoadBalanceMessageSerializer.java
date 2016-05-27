@@ -23,6 +23,8 @@ public class LoadBalanceMessageSerializer extends  com.esotericsoftware.kryo.Ser
 		kryo.writeObjectOrNull(output,laadBalanceMessgae.getParition(),Partition.class);
 		kryo.writeObjectOrNull(output,laadBalanceMessgae.getSendTo(),Integer.class);
 		kryo.writeObjectOrNull(output,laadBalanceMessgae.getType(),String.class);
+		kryo.writeObjectOrNull(output,laadBalanceMessgae.getNewAuxiliaryExecutorTask(),Integer.class);
+		kryo.writeObjectOrNull(output,laadBalanceMessgae.getPlanNumber(),Integer.class);
 	}
 
 	@Override
@@ -37,6 +39,8 @@ public class LoadBalanceMessageSerializer extends  com.esotericsoftware.kryo.Ser
 		loadBalanceMessage.setParition(kryo.readObjectOrNull(input,Partition.class));
 		loadBalanceMessage.setSendTo(kryo.readObjectOrNull(input,Integer.class));
 		loadBalanceMessage.setType(kryo.readObjectOrNull(input,String.class));
+		loadBalanceMessage.setNewAuxiliaryExecutorTask(kryo.readObjectOrNull(input,Integer.class));
+		loadBalanceMessage.setPlanNumber(kryo.readObjectOrNull(input,Integer.class));
 		return loadBalanceMessage;
 	}
 

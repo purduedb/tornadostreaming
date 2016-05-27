@@ -28,10 +28,6 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 
 public abstract class GlobalIndex {
-	public static String routingType ;
-	public static String STATIC_GRID="STATIC_GRID" ;
-	public static String STATIC_KD="STATIC_KD";
-	public static String DYANAMIC_KD="DYANAMIC_KD";
 	protected Double xrange;
 	protected Double yrange;
 
@@ -43,7 +39,11 @@ public abstract class GlobalIndex {
 		this.evaluatorBoltTasks = evaluatorBoltTasks;
 		taskIdToIndex = new HashMap<Integer, Integer>();
 		for(Integer i =0;i<numberOfEvaluatorTasks;i++){
+			if(evaluatorBoltTasks!=null&&evaluatorBoltTasks.get(i)!=null)
 			taskIdToIndex.put(evaluatorBoltTasks.get(i), i);
+			else{
+				System.out.println("Error");
+			}
 		}
 		
 		xrange = SpatioTextualConstants.xMaxRange;
@@ -84,4 +84,8 @@ public abstract class GlobalIndex {
 	public abstract Rectangle getBoundsForTaskIndex(Integer taskIndex);
 	public abstract Rectangle getBoundsForTaskId(Integer taskId);
 	public abstract GlobalIndexIterator globalKNNIterator(Point p);
+	public abstract ArrayList<String> addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text,boolean all,boolean forward);
+	public abstract void dropTextFromTaskID(ArrayList<Integer> tasks, ArrayList<String> text);
+	public abstract Boolean verifyTextOverlap(Integer task, ArrayList<String> text);
+	public abstract Boolean isTextAware();
 }

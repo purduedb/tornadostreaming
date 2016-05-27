@@ -28,8 +28,8 @@ import java.util.Map;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 
-import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.CombinedTuple;
+import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class JsonHelper {
@@ -73,8 +73,8 @@ public class JsonHelper {
 	public static final String lng = "lng";
 	public static final String text = "text";
 	public static final String knn = "knn";
-	public static final String kval="kval";
-	public static final String focal="focal";
+	public static final String kval = "kval";
+	public static final String focal = "focal";
 	private static Gson gson = new Gson();
 
 	public static DataObject convertJsonStringToDataObject(String dataObjectJson) {
@@ -87,44 +87,49 @@ public class JsonHelper {
 		Map m = gson.fromJson(reader, Map.class);
 		Query q = new Query();
 		Map sourceAliasMap = new HashMap<String, String>();
-		q.setQueryId((String) m.get(JsonHelper.name));
+		q.setQueryId((Integer) m.get(JsonHelper.name));
 		String queryTag = (String) m.get(JsonHelper.tag);
 		if (JsonHelper.dropTag.equals(queryTag)) {
-			q.setCommand(SpatioTextualConstants.dropCommand);
+			q.setCommand(Command.dropCommand);
 			return q;
 		} else {
-			q.setCommand(SpatioTextualConstants.addCommand);
+			q.setCommand(Command.addCommand);
 		}
 
 		Map queryMap = (Map) ((List) ((Map) m.get(JsonHelper.plan)).get(JsonHelper.children)).get(0);
 		List sourceNames = (List) m.get(JsonHelper.sourceNames);
 		if (sourceNames.size() > 1) {//this is a join operator{
 			q.setQueryType(SpatioTextualConstants.queryTextualSpatialJoin);
-			
+
 			double latMin = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.south);
 			double lonMin = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.west);
 			double latMax = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.north);
 			double LonMax = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.east);
-			
-			q.setTextualPredicate(SpatioTextualConstants.none);
-			q.setTextualPredicate2(SpatioTextualConstants.none);
-			q.setJoinTextualPredicate(SpatioTextualConstants.none);
-			String textLHSAlias=null;
-			String textRHSAlias=null;
+
+			q.setTextualPredicate(TextualPredicate.NONE);
+			q.setTextualPredicate2(TextualPredicate.NONE);
+			q.setJoinTextualPredicate(TextualPredicate.NONE);
+			String textLHSAlias = null;
+			String textRHSAlias = null;
 			List<Map> conditions = ((List) queryMap.get(JsonHelper.conditions));
 			for (Map condition : conditions) {
-				if (condition != null && condition.containsKey(JsonHelper.op) && ((String)condition.get(JsonHelper.op)).equalsIgnoreCase(JsonHelper.WITHIN_DISTANCE))
+				if (condition != null && condition.containsKey(JsonHelper.op) && ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(JsonHelper.WITHIN_DISTANCE))
 					q.setDistance((Double) condition.get(JsonHelper.cval));
-				else if (condition != null && condition.containsKey(JsonHelper.op) &&( ((String)condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.contains)
-						||((String)condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.overlaps)
-						||((String)condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.semantic)
-						)){
-					q.setJoinTextualPredicate(((String)condition.get(JsonHelper.op)).toLowerCase());
-					if(condition.containsKey(JsonHelper.lhs))
-						textLHSAlias = (String)((Map)condition.get(JsonHelper.lhs)).get(JsonHelper.sourceName);
-					if(condition.containsKey(JsonHelper.rhs))
-						textRHSAlias = (String)((Map)condition.get(JsonHelper.rhs)).get(JsonHelper.sourceName);
-				}else if(condition != null && condition.containsKey(JsonHelper.op) && (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(JsonHelper.INSIDE))){
+				else if (condition != null && condition.containsKey(JsonHelper.op)
+						&& (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(CONTAINS) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(OVERLAPS) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SEMANTIC))) {
+
+					if (OVERLAPS.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+						q.setJoinTextualPredicate(TextualPredicate.OVERlAPS);
+					else if (SEMANTIC.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+						q.setJoinTextualPredicate(TextualPredicate.SEMANTIC);
+					else if (CONTAINS.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+						q.setJoinTextualPredicate(TextualPredicate.CONTAINS);
+
+					if (condition.containsKey(JsonHelper.lhs))
+						textLHSAlias = (String) ((Map) condition.get(JsonHelper.lhs)).get(JsonHelper.sourceName);
+					if (condition.containsKey(JsonHelper.rhs))
+						textRHSAlias = (String) ((Map) condition.get(JsonHelper.rhs)).get(JsonHelper.sourceName);
+				} else if (condition != null && condition.containsKey(JsonHelper.op) && (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(JsonHelper.INSIDE))) {
 					Map rhs = (Map) condition.get(JsonHelper.rhs);
 					if (rhs.containsKey(JsonHelper.south)) {//location is specified here 
 						latMin = (Double) rhs.get(JsonHelper.south);
@@ -138,33 +143,39 @@ public class JsonHelper {
 			String src1 = "";
 			ArrayList<String> text1 = null;
 			String src1Alias = "";
-			String textualPredicate1 = SpatioTextualConstants.none;
+			TextualPredicate textualPredicate1 = TextualPredicate.NONE;
 			Map map1 = (Map) ((List) queryMap.get(JsonHelper.children)).get(0);
 			if (JsonHelper.source.equals((String) (map1).get(JsonHelper.type))) {
 				src1 = (String) (map1).get(JsonHelper.name);//
 				src1Alias = (String) (map1).get(JsonHelper.alias);//
 			} else {
 				src1 = (String) ((Map) ((List) map1.get(JsonHelper.children)).get(0)).get(JsonHelper.name);
-				src1Alias =(String) ((Map) ((List) map1.get(JsonHelper.children)).get(0)).get(JsonHelper.alias);
+				src1Alias = (String) ((Map) ((List) map1.get(JsonHelper.children)).get(0)).get(JsonHelper.alias);
 				for (int i = 0; i < ((List) map1.get(JsonHelper.conditions)).size(); i++) {
 					Map condition = (Map) ((List) map1.get(JsonHelper.conditions)).get(i);
-					if (condition.containsKey(JsonHelper.op) && (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.contains)
-							|| ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.overlaps) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.semantic))) {
+					if (condition.containsKey(JsonHelper.op) && (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(CONTAINS) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(OVERLAPS)
+							|| ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SEMANTIC))) {
 						{
-							
-							text1 =TextHelpers.sortTextArrayList((ArrayList<String>) condition.get(JsonHelper.rhs));
-							
-							textualPredicate1 = ((String) condition.get(JsonHelper.op)).toLowerCase();
+
+							text1 = TextHelpers.sortTextArrayList((ArrayList<String>) condition.get(JsonHelper.rhs));
+
+							if (OVERLAPS.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+								textualPredicate1 = (TextualPredicate.OVERlAPS);
+							else if (SEMANTIC.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+								textualPredicate1 = (TextualPredicate.SEMANTIC);
+							else if (CONTAINS.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+								textualPredicate1 = (TextualPredicate.CONTAINS);
+
 						}
 					}
 				}
 			}
-			
+
 			Map map2 = (Map) ((List) queryMap.get(JsonHelper.children)).get(1);
 			String src2 = "";
 			String src2Alias = "";
 			ArrayList<String> text2 = null;
-			String textualPredicate2 = SpatioTextualConstants.none;
+			TextualPredicate textualPredicate2 = TextualPredicate.NONE;
 			if (JsonHelper.source.equals((String) (map2).get(JsonHelper.type))) {
 				src2 = (String) (map2).get(JsonHelper.name);
 				src2Alias = (String) (map2).get(JsonHelper.alias);//
@@ -173,15 +184,21 @@ public class JsonHelper {
 				src2Alias = (String) ((Map) ((List) map2.get(JsonHelper.children)).get(0)).get(JsonHelper.alias);
 				for (int i = 0; i < ((List) map2.get(JsonHelper.conditions)).size(); i++) {
 					Map condition = (Map) ((List) map2.get(JsonHelper.conditions)).get(i);
-					if (condition.containsKey(JsonHelper.op) && (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.contains)
-							|| ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.overlaps) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SpatioTextualConstants.semantic))) {
-						text2 =TextHelpers.sortTextArrayList((ArrayList<String>) condition.get(JsonHelper.rhs));
-						textualPredicate2 = ((String) condition.get(JsonHelper.op)).toLowerCase();
+					if (condition.containsKey(JsonHelper.op) && (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(CONTAINS) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(OVERLAPS)
+							|| ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SEMANTIC))) {
+						text2 = TextHelpers.sortTextArrayList((ArrayList<String>) condition.get(JsonHelper.rhs));
+
+						if (OVERLAPS.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+							textualPredicate2 = (TextualPredicate.OVERlAPS);
+						else if (SEMANTIC.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+							textualPredicate2 = (TextualPredicate.SEMANTIC);
+						else if (CONTAINS.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
+							textualPredicate2 = (TextualPredicate.CONTAINS);
 					}
 				}
 
 			}
-			if (textLHSAlias==null||textLHSAlias.equals(src1Alias)) {
+			if (textLHSAlias == null || textLHSAlias.equals(src1Alias)) {
 				q.setDataSrc(src1);
 				q.setDataSrc2(src2);
 				if (!"".equals(text1)) {
@@ -205,45 +222,45 @@ public class JsonHelper {
 				}
 			}
 			q.setSpatialRange(new Rectangle(SpatialHelper.convertFromLatLonToXYPoint(new LatLong(latMin, lonMin)), SpatialHelper.convertFromLatLonToXYPoint(new LatLong(latMax, LonMax))));
-		} else if (queryJson.contains("KNN")||queryJson.contains("knn")) {//either range or KNN
+		} else if (queryJson.contains("KNN") || queryJson.contains("knn")) {//either range or KNN
 			q.setQueryType(SpatioTextualConstants.queryTextualKNN);
 			q.setDataSrc((String) sourceNames.get(0));
-			q.setCommand(SpatioTextualConstants.addCommand);
-			q.setTextualPredicate(SpatioTextualConstants.none);
+			q.setCommand(Command.addCommand);
+			q.setTextualPredicate(TextualPredicate.NONE);
 			q.setK(0);
-			q.setFocalPoint(new Point(0.0,0.0));
+			q.setFocalPoint(new Point(0.0, 0.0));
 			q.setQueryText(new ArrayList<String>());
 			List<Map> conditions = (List<Map>) queryMap.get(JsonHelper.conditions);
 			for (Map condition : conditions) {
 				String operation = (String) condition.get(JsonHelper.op);
 				Map lhs = (Map) condition.get(JsonHelper.lhs);
 				//textual predicate
-				if (lhs!=null&&lhs.containsKey(JsonHelper.attributeName)&&JsonHelper.text.equals(lhs.get(JsonHelper.attributeName))) {
-					if(SpatioTextualConstants.overlaps.equals(operation.toLowerCase()))
-					q.setTextualPredicate(SpatioTextualConstants.overlaps);
-					else if (SpatioTextualConstants.semantic.equals(operation.toLowerCase()))
-						q.setTextualPredicate(SpatioTextualConstants.semantic);
-					else if (SpatioTextualConstants.contains.equals(operation.toLowerCase()))
-						q.setTextualPredicate(SpatioTextualConstants.contains);
+				if (lhs != null && lhs.containsKey(JsonHelper.attributeName) && JsonHelper.text.equals(lhs.get(JsonHelper.attributeName))) {
+					if (OVERLAPS.equalsIgnoreCase(operation.toLowerCase()))
+						q.setTextualPredicate(TextualPredicate.OVERlAPS);
+					else if (SEMANTIC.equalsIgnoreCase(operation.toLowerCase()))
+						q.setTextualPredicate(TextualPredicate.SEMANTIC);
+					else if (CONTAINS.equalsIgnoreCase(operation.toLowerCase()))
+						q.setTextualPredicate(TextualPredicate.CONTAINS);
 					ArrayList<String> text = (ArrayList<String>) condition.get(JsonHelper.rhs);
 					q.setQueryText(TextHelpers.sortTextArrayList(text));
 				} else if (JsonHelper.knn.equals(operation.toLowerCase())) {
-					q.setK(((Double)condition.get(JsonHelper.kval)).intValue());
-					Double lat =(Double)((Map)((Map) ((Map)condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lat);
-					Double lng =(Double)((Map)((Map) ((Map)condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lng);
-					q.setFocalPoint(SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat,lng)));
+					q.setK(((Double) condition.get(JsonHelper.kval)).intValue());
+					Double lat = (Double) ((Map) ((Map) ((Map) condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lat);
+					Double lng = (Double) ((Map) ((Map) ((Map) condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lng);
+					q.setFocalPoint(SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat, lng)));
 				}
 
 			}
-			
+
 			//leave now till figuring out the exact KNN syntanx
 
 		} else {
 
 			q.setQueryType(SpatioTextualConstants.queryTextualRange);
 			q.setDataSrc((String) sourceNames.get(0));
-			q.setCommand(SpatioTextualConstants.addCommand);
-			q.setTextualPredicate(SpatioTextualConstants.none);
+			q.setCommand(Command.addCommand);
+			q.setTextualPredicate(TextualPredicate.NONE);
 			//current view location 
 			double latMin = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.south);
 			double lonMin = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.west);
@@ -257,12 +274,12 @@ public class JsonHelper {
 				Map lhs = (Map) condition.get(JsonHelper.lhs);
 				//textual predicate
 				if (JsonHelper.text.equals(lhs.get(JsonHelper.attributeName))) {
-					if(SpatioTextualConstants.overlaps.equals(operation.toLowerCase()))
-					q.setTextualPredicate(SpatioTextualConstants.overlaps);
-					else if (SpatioTextualConstants.semantic.equals(operation.toLowerCase()))
-						q.setTextualPredicate(SpatioTextualConstants.semantic);
-					else if (SpatioTextualConstants.contains.equals(operation.toLowerCase()))
-						q.setTextualPredicate(SpatioTextualConstants.contains);
+					if (OVERLAPS.equalsIgnoreCase(operation.toLowerCase()))
+						q.setTextualPredicate(TextualPredicate.OVERlAPS);
+					else if (SEMANTIC.equalsIgnoreCase(operation.toLowerCase()))
+						q.setTextualPredicate(TextualPredicate.SEMANTIC);
+					else if (CONTAINS.equalsIgnoreCase(operation.toLowerCase()))
+						q.setTextualPredicate(TextualPredicate.CONTAINS);
 					ArrayList<String> text = (ArrayList<String>) condition.get(JsonHelper.rhs);
 					q.setQueryText(TextHelpers.sortTextArrayList(text));
 				} else if (JsonHelper.loc.equals(lhs.get(JsonHelper.attributeName))) {
@@ -277,10 +294,7 @@ public class JsonHelper {
 
 			}
 
-			
 			q.setSpatialRange(new Rectangle(SpatialHelper.convertFromLatLonToXYPoint(new LatLong(latMin, lonMin)), SpatialHelper.convertFromLatLonToXYPoint(new LatLong(latMax, LonMax))));
-
-			
 
 		}
 
