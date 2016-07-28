@@ -153,6 +153,18 @@ public class RtreeGroups implements Groups {
 		
 		return s.toString();
 	}
+
+	@Override
+	public void markCandidateGroup(int groupId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ArrayList<Group> getCandidateGroups() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 	

@@ -10,11 +10,14 @@ import java.util.StringTokenizer;
 import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.JoinQuery;
+import edu.purdue.cs.tornado.messages.KNNQuery;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
 
@@ -80,7 +83,7 @@ public class DataReader {
 		obj.setSrcId("Tweets");
 		return obj;
 	}
-	static public  Query buildQueriesFromUsingOtherLocations(String line, String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, String queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
+	static public  Query buildQueriesFromUsingOtherLocations(String line, String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, QueryType queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
 			Integer k, Double xCoord, Double yCoord,Integer id) {
 		StringTokenizer stringTokenizer = new StringTokenizer(line, ",");
 
@@ -104,33 +107,31 @@ public class DataReader {
 		q.setSrcId(srcId);
 		q.setQueryId(id);
 		q.setCommand(Command.addCommand);
-		q.setContinousQuery(true);
 		q.setDataSrc(dataSrc1);
-		q.setDataSrc2(dataSrc2);
-		q.setDistance(distance);
+		
 		q.setQueryType(queryType);
 		q.setTimeStamp(date.getTime());
-		if (queryType.equals(SpatioTextualConstants.queryTextualRange)) {
+		if (queryType.equals(QueryType.queryTextualRange)) {
 			q.setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
 			q.setTextualPredicate(textualPredicate1);
 			q.setQueryText(queryText1);
-		} else if (queryType.equals(SpatioTextualConstants.queryTextualKNN)) {
-			q.setFocalPoint(new Point(xCoord, yCoord));
-			q.setTextualPredicate(textualPredicate1);
-			q.setQueryText(queryText1);
-			q.setK(k);
-		} else if (queryType.equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
-			q.setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
-			q.setTextualPredicate(textualPredicate1);
-			q.setTextualPredicate2(textualPredicate2);
-			q.setQueryText(queryText1);
-			q.setQueryText(queryText2);
-			q.setDistance(distance);
+		} else if (queryType.equals(QueryType.queryTextualKNN)) {
+			((KNNQuery)q).setFocalPoint(new Point(xCoord, yCoord));
+			((KNNQuery)q).setTextualPredicate(textualPredicate1);
+			((KNNQuery)q).setQueryText(queryText1);
+			((KNNQuery)q).setK(k);
+		} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
+			((JoinQuery)q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
+			((JoinQuery)q).setTextualPredicate(textualPredicate1);
+			((JoinQuery)q).setTextualPredicate2(textualPredicate2);
+			((JoinQuery)q).setQueryText(queryText1);
+			((JoinQuery)q).setQueryText(queryText2);
+			((JoinQuery)q).setDistance(distance);
 		}
 		return q;
 	}
 	
-	static public Query buildQuery(String line, String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, String queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
+	static public Query buildQuery(String line, String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, QueryType queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
 			Integer k,Integer id) {
 		StringTokenizer stringTokenizer = new StringTokenizer(line, ",");
 
@@ -162,32 +163,29 @@ public class DataReader {
 		q.setSrcId(srcId);
 		q.setQueryId(id);
 		q.setCommand(Command.addCommand);
-		q.setContinousQuery(true);
 		q.setDataSrc(dataSrc1);
-		q.setDataSrc2(dataSrc2);
-		q.setDistance(distance);
 		q.setQueryType(queryType);
 		q.setTimeStamp(date.getTime());
-		if (queryType.equals(SpatioTextualConstants.queryTextualRange)) {
+		if (queryType.equals(QueryType.queryTextualRange)) {
 			q.setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
 			q.setTextualPredicate(textualPredicate1);
 			q.setQueryText(queryText1);
-		} else if (queryType.equals(SpatioTextualConstants.queryTextualKNN)) {
-			q.setFocalPoint(new Point(xCoord, yCoord));
-			q.setTextualPredicate(textualPredicate1);
-			q.setQueryText(queryText1);
-			q.setK(k);
-		} else if (queryType.equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
-			q.setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
-			q.setTextualPredicate(textualPredicate1);
-			q.setTextualPredicate2(textualPredicate2);
-			q.setQueryText(queryText1);
-			q.setQueryText(queryText2);
-			q.setDistance(distance);
+		} else if (queryType.equals(QueryType.queryTextualKNN)) {
+			((KNNQuery)q).setFocalPoint(new Point(xCoord, yCoord));
+			((KNNQuery)q).setTextualPredicate(textualPredicate1);
+			((KNNQuery)q).setQueryText(queryText1);
+			((KNNQuery)q).setK(k);
+		} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
+			((JoinQuery)q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
+			((JoinQuery)q).setTextualPredicate(textualPredicate1);
+			((JoinQuery)q).setTextualPredicate2(textualPredicate2);
+			((JoinQuery)q).setQueryText(queryText1);
+			((JoinQuery)q).setQueryText(queryText2);
+			((JoinQuery)q).setDistance(distance);
 		}
 		return q;
 	}
-	static public ArrayList<Query> readQueries(String fileName, int numberOfqueries,String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, String queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
+	static public ArrayList<Query> readQueries(String fileName, int numberOfqueries,String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, QueryType queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
 			Integer k) {
 		ArrayList<Query> allQueiries = new ArrayList<Query>();
 		QueriesFileSystemSpout queriesSpout = new QueriesFileSystemSpout(null, 0);
@@ -214,7 +212,7 @@ public class DataReader {
 		}
 		return allQueiries;
 	}
-	static public ArrayList<Query> readQueriesFromTweets(String fileName, int numberOfqueries,String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, String queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
+	static public ArrayList<Query> readQueriesFromTweets(String fileName, int numberOfqueries,String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, QueryType queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
 			Integer k) {
 		ArrayList<Query> allQueiries = new ArrayList<Query>();
 		QueriesFileSystemSpout queriesSpout = new QueriesFileSystemSpout(null, 0);
@@ -241,7 +239,7 @@ public class DataReader {
 		}
 		return allQueiries;
 	}
-	static public ArrayList<Query> readQueriesFromTweetsLocations(String fileName, int numberOfqueries,String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, String queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
+	static public ArrayList<Query> readQueriesFromTweetsLocations(String fileName, int numberOfqueries,String srcId, int keywordCountVal, String dataSrc1, String dataSrc2, Double distance, QueryType queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
 			Integer k, ArrayList<Point> points) {
 		ArrayList<Query> allQueiries = new ArrayList<Query>();
 		try {

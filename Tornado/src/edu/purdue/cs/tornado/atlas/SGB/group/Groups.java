@@ -1,5 +1,6 @@
 package edu.purdue.cs.tornado.atlas.SGB.group;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import edu.purdue.cs.tornado.atlas.SGB.global.Tuple;
@@ -65,5 +66,7 @@ public interface Groups {
 	public void setTmpFile(HashMap<Integer, Tuple> tmpFile);
 	
 	public Object getSIndex();
-
+	public void markCandidateGroup(int groupId);
+	public ArrayList<Group> getCandidateGroups();
+	
 }

@@ -31,12 +31,14 @@ import java.util.Map.Entry;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.KNNQuery;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class LocalHybridGridIndex extends LocalHybridIndex {
@@ -92,12 +94,12 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 
 	public Boolean addContinousQuery(Query query) {
 		Boolean completed = true;
-		if (query.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
+		if (query.getQueryType().equals(QueryType.queryTextualKNN)) {
 
 			// initially assume that the incomming KKN query for a
 			// volatile data object will go to global data entry for this bolt
 			if (dataSourcesInformation.isVolatile()) {
-				query.resetKNNStructures();
+				((KNNQuery)query).resetKNNStructures();
 				globalKNNQueries.add(query);
 			}
 		}
@@ -164,7 +166,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 
 	public Boolean dropContinousQuery(Query query) {
 		//first check inside the globalNKK list and if found return 
-		if (query.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
+		if (query.getQueryType().equals(QueryType.queryTextualKNN)) {
 			int i = 0;
 			boolean found = false;
 			for (i = 0; i < globalKNNQueries.size(); i++) {
@@ -469,15 +471,15 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 	 */
 	private ArrayList<IndexCellCoordinates> mapQueryToPartitions(Query query) {
 		ArrayList<IndexCellCoordinates> partitions = new ArrayList<IndexCellCoordinates>();
-		if (SpatioTextualConstants.queryTextualRange.equals(query.getQueryType()) || SpatioTextualConstants.queryTextualSpatialJoin.equals(query.getQueryType())) {
+		if (QueryType.queryTextualRange.equals(query.getQueryType()) || QueryType.queryTextualSpatialJoin.equals(query.getQueryType())) {
 			//			if (query.getSpatialRange().getMin().getX() > selfBounds.getMax().getX() || query.getSpatialRange().getMin().getY() > selfBounds.getMax().getY() || query.getSpatialRange().getMax().getX() < selfBounds.getMin().getX()
 			//					|| query.getSpatialRange().getMax().getY() < selfBounds.getMin().getY()) {
 			//				System.err.println("Error query:" + query.getSrcId() + "  is outside the range of this bolt ");
 			//			} else {
 			partitions = mapRecToIndexCells(query.getSpatialRange());
 			//			}
-		} else if (SpatioTextualConstants.queryTextualKNN.equals(query.getQueryType())) {
-			partitions.add(mapDataPointToPartition(query.getFocalPoint()));
+		} else if (QueryType.queryTextualKNN.equals(query.getQueryType())) {
+			partitions.add(mapDataPointToPartition(((KNNQuery)query).getFocalPoint()));
 		}
 		return partitions;
 	}

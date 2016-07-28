@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import edu.purdue.cs.tornado.SpatioTextualLocalCluster;
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
@@ -69,7 +70,7 @@ public class TestMain {
 		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT,new Integer(1000));
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT,new Integer(5));
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc,"Tweets");
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField,SpatioTextualConstants.queryTextualRange);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField,QueryType.queryTextualRange);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate,TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC,new Integer (1000));
 		builder.setSpout("TextualRangeQueryGenerator", new QueriesFileSystemSpout(queriesSpoutConf,100), 1);

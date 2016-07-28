@@ -1,0 +1,6 @@
+../datasets/sampletweets.csv
+../datasets/tweetsAtlasqueries_10_percentrange.csv
+../resultfiles/outputfile.csv
+100000
+3
+4

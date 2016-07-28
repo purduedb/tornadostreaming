@@ -30,6 +30,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 import edu.purdue.cs.tornado.helper.Command;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.RandomGenerator;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
@@ -63,7 +64,7 @@ public class TestTextualRangeQueryGenerator extends BaseRichSpout {
                      		
 		Date date = new Date();
 		this.collector.emit(new Values(
-				SpatioTextualConstants.queryTextualRange,
+				QueryType.queryTextualRange,
 				""+(i++),
 				null,
 				null, 

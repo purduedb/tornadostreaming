@@ -198,6 +198,20 @@ public class ArrayListGroups implements Groups {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+
+	@Override
+	public void markCandidateGroup(int groupId) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public ArrayList<Group> getCandidateGroups() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 	
 }

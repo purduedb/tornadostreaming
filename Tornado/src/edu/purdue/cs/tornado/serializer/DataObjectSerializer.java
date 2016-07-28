@@ -41,9 +41,9 @@ public class DataObjectSerializer extends  com.esotericsoftware.kryo.Serializer<
 		dataObject.setObjectId(kryo.readObjectOrNull(input, Integer.class));
 		dataObject.setLocation(kryo.readObjectOrNull(input, Point.class));
 		dataObject.setObjectText(kryo.readObjectOrNull(input, ArrayList.class));
-		dataObject.setOriginalText(kryo.readObjectOrNull(input, String.class));
-		dataObject.setTimeStamp(kryo.readObjectOrNull(input, Long.class));
-		dataObject.setRelevantArea(kryo.readObjectOrNull(input, Rectangle.class));
+		//dataObject.setOriginalText(kryo.readObjectOrNull(input, String.class));
+		//dataObject.setTimeStamp(kryo.readObjectOrNull(input, Long.class));
+		//dataObject.setRelevantArea(kryo.readObjectOrNull(input, Rectangle.class));
 		dataObject.setCommand(kryo.readObjectOrNull(input, Command.class));
 		
 		return dataObject;
@@ -55,9 +55,9 @@ public class DataObjectSerializer extends  com.esotericsoftware.kryo.Serializer<
 		kryo.writeObjectOrNull(output,dataObject.getObjectId(),Integer.class);
 		kryo.writeObjectOrNull(output,dataObject.getLocation(),Point.class);
 		kryo.writeObjectOrNull(output,dataObject.getObjectText(),ArrayList.class);
-		kryo.writeObjectOrNull(output,dataObject.getOriginalText(),String.class);
-		kryo.writeObjectOrNull(output,dataObject.getTimeStamp(),Long.class);
-		kryo.writeObjectOrNull(output,dataObject.getRelevantArea(),Rectangle.class);
+		//kryo.writeObjectOrNull(output,dataObject.getOriginalText(),String.class);
+		//kryo.writeObjectOrNull(output,dataObject.getTimeStamp(),Long.class);
+		//kryo.writeObjectOrNull(output,dataObject.getRelevantArea(),Rectangle.class);
 		kryo.writeObjectOrNull(output,dataObject.getCommand(),Command.class);
 
 		

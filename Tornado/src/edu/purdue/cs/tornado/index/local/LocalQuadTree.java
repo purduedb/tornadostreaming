@@ -11,12 +11,14 @@ import java.util.Set;
 //import ch.qos.logback.classic.Level;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.KNNQuery;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class LocalQuadTree extends LocalHybridIndex {
@@ -45,12 +47,12 @@ public class LocalQuadTree extends LocalHybridIndex {
 
 	@Override
 	public Boolean addContinousQuery(Query query) {
-		if (query.getQueryType().equals(SpatioTextualConstants.queryTextualKNN)) {
+		if (query.getQueryType().equals(QueryType.queryTextualKNN)) {
 
 			// initially assume that the incomming KKN query for a
 			// volatile data object will go to global data entry for this bolt
 			if (dataSourcesInformation.isVolatile()) {
-				query.resetKNNStructures();
+				((KNNQuery)query).resetKNNStructures();
 				globalKNNQueries.add(query);
 			}
 		}
@@ -59,7 +61,7 @@ public class LocalQuadTree extends LocalHybridIndex {
 		for (IndexCell indexCell : relevantCells) {
 
 			indexCell.addQuery(query);
-			if (SpatioTextualConstants.queryTextualRange.equals(query.getQueryType()) || SpatioTextualConstants.queryTextualSpatialJoin.equals(query.getQueryType())) {
+			if (QueryType.queryTextualRange.equals(query.getQueryType()) || QueryType.queryTextualSpatialJoin.equals(query.getQueryType())) {
 				if (SpatialHelper.insideSpatially(query.getSpatialRange(), indexCell.bounds))
 					indexCell.coverQueryCount++;
 			}
@@ -73,16 +75,16 @@ public class LocalQuadTree extends LocalHybridIndex {
 	private ArrayList<IndexCell> mapQueryToPartitions(Query query) {
 		ArrayList<IndexCell> relevantCells = new ArrayList<IndexCell>();
 		double xmin, ymin, xmax, ymax;
-		if (SpatioTextualConstants.queryTextualRange.equals(query.getQueryType()) || SpatioTextualConstants.queryTextualSpatialJoin.equals(query.getQueryType())) {
+		if (QueryType.queryTextualRange.equals(query.getQueryType()) || QueryType.queryTextualSpatialJoin.equals(query.getQueryType())) {
 			if (query.getSpatialRange().getMin().getX() > selfBounds.getMax().getX() || query.getSpatialRange().getMin().getY() > selfBounds.getMax().getY() || query.getSpatialRange().getMax().getX() < selfBounds.getMin().getX()
 					|| query.getSpatialRange().getMax().getY() < selfBounds.getMin().getY()) {
 				System.err.println("Error query:" + query.getSrcId() + "  is outside the range of this bolt ");
 			} else {
 				relevantCells = getOverlappingIndexCells(query.getSpatialRange());
 			}
-		} else if (SpatioTextualConstants.queryTextualKNN.equals(query.getQueryType())) {
+		} else if (QueryType.queryTextualKNN.equals(query.getQueryType())) {
 
-			relevantCells.add(getOverlappingIndexCells(query.getFocalPoint()));
+			relevantCells.add(getOverlappingIndexCells(((KNNQuery)query).getFocalPoint()));
 		}
 		return relevantCells;
 	}
@@ -153,7 +155,7 @@ public class LocalQuadTree extends LocalHybridIndex {
 		if (queries != null)
 			for (Query query : queries) {
 
-				if (SpatioTextualConstants.queryTextualSpatialJoin.equals(query.getQueryType()) || SpatioTextualConstants.queryTextualRange.equals(query.getQueryType())) {
+				if (QueryType.queryTextualSpatialJoin.equals(query.getQueryType()) || QueryType.queryTextualRange.equals(query.getQueryType())) {
 					//					if (SpatialHelper.insideSpatially(query.getSpatialRange(), currentIndexCell.boundsNoBoundaries))
 					//						currentIndexCell.addQuery(query);
 					//					else
@@ -165,9 +167,9 @@ public class LocalQuadTree extends LocalHybridIndex {
 						if (SpatialHelper.insideSpatially(query.getSpatialRange(), currentIndexCell.children[i].bounds))
 							currentIndexCell.children[i].coverQueryCount++;
 					}
-				} else if (SpatioTextualConstants.queryTextualKNN.equals(query.getQueryType())) {
+				} else if (QueryType.queryTextualKNN.equals(query.getQueryType())) {
 					for (int i = 0; i < currentIndexCell.numberOfChildren; i++) {
-						if (SpatialHelper.overlapsSpatially(query.getFocalPoint(), currentIndexCell.children[i].bounds))
+						if (SpatialHelper.overlapsSpatially(((KNNQuery)query).getFocalPoint(), currentIndexCell.children[i].bounds))
 							currentIndexCell.children[i].addQuery(query);
 					}
 				}

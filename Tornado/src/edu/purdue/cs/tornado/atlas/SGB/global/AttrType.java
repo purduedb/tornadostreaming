@@ -9,6 +9,7 @@ public class AttrType {
   public static final int INTEGER = 11;
   public static final int FLOAT = 12;
   public static final int STRING = 13;
+  public static final int DATAOBJECT = 15;
 
   public static final int COLNAME = 21;
   public static final int FIELDNO = 22;
@@ -16,10 +17,12 @@ public class AttrType {
   public static final int L2=1;
   public static final int Linfinity=2;
   
- public static  final int  ODUPLICATIED=1;
+  public static  final int ODUPLICATIED=1;
   public static final int OANY=2;
   public static final int OELIMINATED=3;
   public static final int OFORMNEW=4;
+  public static  final int  WITHIN_DIST_VALIDATE_ON_FLY=30;
+  public static  final int  WITHIN_DIST_VALIDATE_ON_FLY_RANK_GROUP=30;
   
   // --------------------------------------------------------------------------
 

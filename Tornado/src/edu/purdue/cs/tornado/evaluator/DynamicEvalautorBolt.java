@@ -802,15 +802,15 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 
 			}
 			queryInformationHashMap.get(query.getSrcId()).put(query.getQueryId(), query);
-			if (!sourcesInformations.get(query.getDataSrc()).isVolatile() || (query.getDataSrc2() != null && !sourcesInformations.get(query.getDataSrc2()).isVolatile())) {
-				//this means that this query works on existing data and hence needs to first perorm a snapshop query 
-				//then register itself as a continous query and hence update its result
-				handleSnapShotQuery(query);
-			}
+//			if (!sourcesInformations.get(query.getDataSrc()).isVolatile() || (query.getDataSrc2() != null && !sourcesInformations.get(query.getDataSrc2()).isVolatile())) {
+//				//this means that this query works on existing data and hence needs to first perorm a snapshop query 
+//				//then register itself as a continous query and hence update its result
+//				handleSnapShotQuery(query);
+//			}
 			//TODO CHeck if some more results are needed from neighbour evaluators
 			Boolean completed = sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().addContinousQuery(query);
-			if (query.getDataSrc2() != null)
-				sourcesInformations.get(query.getDataSrc2()).getLocalHybridIndex().addContinousQuery(query);
+//			if (query.getDataSrc2() != null)
+//				sourcesInformations.get(query.getDataSrc2()).getLocalHybridIndex().addContinousQuery(query);
 			if (!completed)
 				forwardQueryTorecpientTask(query);
 		} else if (query.getCommand().equals(Command.updateCommand)) {
@@ -822,14 +822,14 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 			//delete then update
 			Query queryInfo = queryInformationHashMap.get(query.getSrcId()).get(query.getQueryId());
 			sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().updateContinousQuery(queryInfo, query);
-			if (query.getDataSrc2() != null)
-				sourcesInformations.get(query.getDataSrc2()).getLocalHybridIndex().updateContinousQuery(queryInfo, query);
+//			if (query.getDataSrc2() != null)
+//				sourcesInformations.get(query.getDataSrc2()).getLocalHybridIndex().updateContinousQuery(queryInfo, query);
 		} else if (query.getCommand().equals(Command.dropCommand)) {
 			//only getting information from oldStored Query as the new query may not have all information and it may contain source and query ids
 			Query oldQuery = queryInformationHashMap.get(query.getSrcId()).get(query.getQueryId());
 			sourcesInformations.get(oldQuery.getDataSrc()).getLocalHybridIndex().dropContinousQuery(oldQuery);
-			if (oldQuery.getDataSrc2() != null)
-				sourcesInformations.get(oldQuery.getDataSrc2()).getLocalHybridIndex().dropContinousQuery(oldQuery);
+//			if (oldQuery.getDataSrc2() != null)
+//				sourcesInformations.get(oldQuery.getDataSrc2()).getLocalHybridIndex().dropContinousQuery(oldQuery);
 			queryInformationHashMap.get(oldQuery.getSrcId()).remove(oldQuery.getQueryId());
 		}
 

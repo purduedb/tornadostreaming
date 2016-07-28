@@ -34,6 +34,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 import edu.purdue.cs.tornado.helper.JsonHelper;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.Query;
@@ -53,101 +54,71 @@ public class KafkaSpout extends BaseRichSpout {
 	ConsumerIterator<byte[], byte[]> it;
 
 	@Override
-	public void open(Map conf, TopologyContext context,
-			SpoutOutputCollector collector) {
+	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		this.conf = conf;
 		this.context = context;
 		this.collector = collector;
-		
-		this.zookeeper = (String)conf.get(SpatioTextualConstants.kafkaZookeeper);
-		
-		this.group = (String)conf.get(SpatioTextualConstants.kafkaConsumerGroup);
-		this.topic = (String)conf.get(SpatioTextualConstants.kafkaConsumerTopic);
-		
-		consumer = kafka.consumer.Consumer.createJavaConsumerConnector(
-                createConsumerConfig(zookeeper, group));
+
+		this.zookeeper = (String) conf.get(SpatioTextualConstants.kafkaZookeeper);
+
+		this.group = (String) conf.get(SpatioTextualConstants.kafkaConsumerGroup);
+		this.topic = (String) conf.get(SpatioTextualConstants.kafkaConsumerTopic);
+
+		consumer = kafka.consumer.Consumer.createJavaConsumerConnector(createConsumerConfig(zookeeper, group));
 		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
-	    topicCountMap.put(topic, new Integer(1));
-	    Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
-	    List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(topic);
+		topicCountMap.put(topic, new Integer(1));
+		Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
+		List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(topic);
 
 		it = streams.get(0).iterator();
 	}
 
-	private static ConsumerConfig createConsumerConfig(String a_zookeeper,
-			String a_groupId) {
+	private static ConsumerConfig createConsumerConfig(String a_zookeeper, String a_groupId) {
 		Properties props = new Properties();
-        props.put("zookeeper.connect", a_zookeeper);
-        props.put("group.id", a_groupId);
-        props.put("zookeeper.session.timeout.ms", "10000");
-        props.put("zookeeper.sync.time.ms", "400");
-        props.put("auto.commit.interval.ms", "1000"); 
-        return new ConsumerConfig(props);
+		props.put("zookeeper.connect", a_zookeeper);
+		props.put("group.id", a_groupId);
+		props.put("zookeeper.session.timeout.ms", "10000");
+		props.put("zookeeper.sync.time.ms", "400");
+		props.put("auto.commit.interval.ms", "1000");
+		return new ConsumerConfig(props);
 	}
 
 	@Override
 	public void nextTuple() {
-		try{
+		try {
 
-		if (it.hasNext()){
-			String queryJson = new String(it.next().message());
-            Query q = JsonHelper.convertJsonStringToQuery(queryJson);
-            q.setTimeStamp((new Date()).getTime());
-            consumer.commitOffsets();
-            this.collector.emit(new Values(
-            		q.getQueryType(),
-    				q.getQueryId()   ,
-    				q.getFocalPoint().getX() ,
-    				q.getFocalPoint().getY() ,
-    				q.getSpatialRange().getMin().getX() ,
-    				q.getSpatialRange().getMin().getY(),
-    				q.getSpatialRange().getMax().getX(),
-    				q.getSpatialRange().getMax().getY(),
-    				q.getK(),
-    				TextHelpers.convertArrayListOfStringToText(q.getQueryText()),
-    				TextHelpers.convertArrayListOfStringToText(q.getQueryText2()),
-    				q.getTimeStamp(),
-    				q.getDataSrc(),
-    				q.getDataSrc2(),
-    				q.getCommand(),
-    				q.getDistance(),
-    				q.getTextualPredicate(),
-    				q.getTextualPredicate2(),
-    				q.getJoinTextualPredicate()
-            		
-            		));
-            
-           
-        }	
-		}catch (Exception e ){
+			if (it.hasNext()) {
+				String queryJson = new String(it.next().message());
+				Query q = JsonHelper.convertJsonStringToQuery(queryJson);
+				q.setTimeStamp((new Date()).getTime());
+				consumer.commitOffsets();
+				if (QueryType.queryTextualRange.equals(q.getQueryType())) {
+					this.collector.emit(new Values(q.getQueryType(), q.getQueryId(), null, null, q.getSpatialRange().getMin().getX(), q.getSpatialRange().getMin().getY(),
+							q.getSpatialRange().getMax().getX(), q.getSpatialRange().getMax().getY(), null, TextHelpers.convertArrayListOfStringToText(q.getQueryText()), null,
+							q.getTimeStamp(), q.getDataSrc(),null, q.getCommand(), null, q.getTextualPredicate(), null,null
+
+					));
+				}else{
+//					this.collector.emit(new Values(q.getQueryType(), q.getQueryId(), q.getFocalPoint().getX(), q.getFocalPoint().getY(), q.getSpatialRange().getMin().getX(), q.getSpatialRange().getMin().getY(),
+//							q.getSpatialRange().getMax().getX(), q.getSpatialRange().getMax().getY(), q.getK(), TextHelpers.convertArrayListOfStringToText(q.getQueryText()), TextHelpers.convertArrayListOfStringToText(q.getQueryText2()),
+//							q.getTimeStamp(), q.getDataSrc(), q.getDataSrc2(), q.getCommand(), q.getDistance(), q.getTextualPredicate(), q.getTextualPredicate2(), q.getJoinTextualPredicate()
+//
+//					));
+					;
+				}
+
+			}
+		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 	}
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		declarer.declare(new Fields(
-				SpatioTextualConstants.queryTypeField,
-				SpatioTextualConstants.queryIdField,
-				SpatioTextualConstants.focalXCoordField,
-				SpatioTextualConstants.focalYCoordField,
-				SpatioTextualConstants.queryXMinField,
-				SpatioTextualConstants.queryYMinField,
-				SpatioTextualConstants.queryXMaxField,
-				SpatioTextualConstants.queryYMaxField,
-				SpatioTextualConstants.kField,
-				SpatioTextualConstants.queryTextField,
-				SpatioTextualConstants.queryText2Field,
-				SpatioTextualConstants.queryTimeStampField,
-				SpatioTextualConstants.dataSrc,
-				SpatioTextualConstants.dataSrc2,
-				SpatioTextualConstants.queryCommand,
-				SpatioTextualConstants.queryDistance,
-				SpatioTextualConstants.textualPredicate,
-				SpatioTextualConstants.textualPredicate2,
-				SpatioTextualConstants.joinTextualPredicate
-				)
-		);
+		declarer.declare(new Fields(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryIdField, SpatioTextualConstants.focalXCoordField, SpatioTextualConstants.focalYCoordField, SpatioTextualConstants.queryXMinField,
+				SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField, SpatioTextualConstants.queryYMaxField, SpatioTextualConstants.kField, SpatioTextualConstants.queryTextField,
+				SpatioTextualConstants.queryText2Field, SpatioTextualConstants.queryTimeStampField, SpatioTextualConstants.dataSrc, SpatioTextualConstants.dataSrc2, SpatioTextualConstants.queryCommand, SpatioTextualConstants.queryDistance,
+				SpatioTextualConstants.textualPredicate, SpatioTextualConstants.textualPredicate2, SpatioTextualConstants.joinTextualPredicate));
 	}
 
 }

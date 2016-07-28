@@ -30,6 +30,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 import edu.purdue.cs.tornado.helper.Command;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.RandomGenerator;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 
@@ -76,7 +77,7 @@ public class TextualKNNQueryGenerator extends BaseRichSpout {
 					.nextInt(SampleTextualContent.TextArr.length - 1)];
                    		
 			Date date = new Date();
-			this.collector.emit(new Values(SpatioTextualConstants.queryTextualKNN,""+i, xCoord, yCoord, k,textContent,date.getTime(),dataSrcId,Command.addCommand));
+			this.collector.emit(new Values(QueryType.queryTextualKNN,""+i, xCoord, yCoord, k,textContent,date.getTime(),dataSrcId,Command.addCommand));
 
 			try {
 				if (SpatioTextualConstants.queryGeneratorDelay != 0)

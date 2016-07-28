@@ -15,6 +15,7 @@ import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
@@ -48,7 +49,7 @@ public class TestPartitions {
 			for(DataObject obj:tweets)
 				points.add(obj.getLocation());
 			System.out.println("Done reading data");
-			ArrayList<Query> queries = DataReader.readQueries(queriesFilePath, 100000, "scr",3,"scr11", null, null, SpatioTextualConstants.queryTextualRange, 5.0, TextualPredicate.OVERlAPS, null, null);
+			ArrayList<Query> queries = DataReader.readQueries(queriesFilePath, 100000, "scr",3,"scr11", null, null, QueryType.queryTextualRange, 5.0, TextualPredicate.OVERlAPS, null, null);
 			System.out.println("Done reading Queries");
 			//	partitions = PartitionsHelper.getKDBasedParitionsFromPoints(64, points);
 			

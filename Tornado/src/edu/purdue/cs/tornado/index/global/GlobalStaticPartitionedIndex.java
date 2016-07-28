@@ -21,6 +21,7 @@ package edu.purdue.cs.tornado.index.global;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
@@ -162,7 +163,7 @@ public class GlobalStaticPartitionedIndex extends GlobalIndex {
 	}
 
 	@Override
-	public ArrayList<String>  addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text,boolean all,boolean forward) {
+	public HashSet<String>  addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text,boolean all,boolean forward) {
 		return null;
 	}
 

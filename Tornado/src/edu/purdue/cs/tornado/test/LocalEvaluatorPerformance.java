@@ -20,6 +20,7 @@ import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.DataSourceType;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
@@ -33,6 +34,8 @@ import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.index.local.LocalQuadTree;
 import edu.purdue.cs.tornado.loadbalance.Partition;
 import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.JoinQuery;
+import edu.purdue.cs.tornado.messages.KNNQuery;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.spouts.FileSpout;
 import edu.purdue.cs.tornado.spouts.TweetsFSSpout;
@@ -360,7 +363,7 @@ public class LocalEvaluatorPerformance {
 		System.out.println("Done reading data objects");
 		System.out.println("begin reading queries");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",numberOfqueries,numberOfKeywords,
-				"Tweets", null, null, SpatioTextualConstants.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
+				"Tweets", null, null, QueryType.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
 		System.out.println("Done reading queries");
 		int count=0;
 		for(DataObject obj:tweets){
@@ -397,7 +400,7 @@ public class LocalEvaluatorPerformance {
 		System.out.println("Done reading data objects");
 		System.out.println("begin reading queries");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",numberOfqueries,numberOfKeywords,
-				"Tweets", null, null, SpatioTextualConstants.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
+				"Tweets", null, null, QueryType.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
 		System.out.println("Done reading queries");
 		HashMap<String , DataSourceInformation> dataSourcesInformation = getDataSourcesInformation(); 
 		
@@ -444,7 +447,7 @@ public class LocalEvaluatorPerformance {
 		System.out.println("Done reading data objects");
 		System.out.println("begin reading queries");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",numberOfqueries,numberOfKeywords,
-				"Tweets", null, null, SpatioTextualConstants.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
+				"Tweets", null, null, QueryType.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
 		System.out.println("Done reading queries");
 		HashMap<String , DataSourceInformation> dataSourcesInformation = getDataSourcesInformation(); 
 		
@@ -490,7 +493,7 @@ public class LocalEvaluatorPerformance {
 		System.out.println("Done reading data objects");
 		System.out.println("begin reading queries");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",numberOfqueries,numberOfKeywords,
-				"Tweets", null, null, SpatioTextualConstants.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
+				"Tweets", null, null, QueryType.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
 		System.out.println("Done reading queries");
 		HashMap<String , DataSourceInformation> dataSourcesInformation = getDataSourcesInformation(); 
 		
@@ -535,7 +538,7 @@ public class LocalEvaluatorPerformance {
 		System.out.println("Done reading data objects");
 		System.out.println("begin reading queries");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",numberOfqueries,numberOfKeywords,
-				"Tweets", null, null, SpatioTextualConstants.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
+				"Tweets", null, null, QueryType.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
 		System.out.println("Done reading queries");
 		HashMap<String , DataSourceInformation> dataSourcesInformation = getDataSourcesInformation(); 
 		
@@ -589,7 +592,7 @@ public class LocalEvaluatorPerformance {
 		System.out.println("Done reading data objects");
 		System.out.println("begin reading queries");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",numberOfqueries,numberOfKeywords,
-				"Tweets", null, null, SpatioTextualConstants.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
+				"Tweets", null, null, QueryType.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
 		System.out.println("Done reading queries");
 		HashMap<String , DataSourceInformation> dataSourcesInformation = getDataSourcesInformation(); 
 		
@@ -643,7 +646,7 @@ public class LocalEvaluatorPerformance {
 		System.out.println("Done reading data objects");
 		System.out.println("begin reading queries");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",numberOfqueries,numberOfKeywords,
-				"Tweets", null, null, SpatioTextualConstants.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
+				"Tweets", null, null, QueryType.queryTextualRange,null,TextualPredicate.OVERlAPS,null,spatialRange) ;
 		System.out.println("Done reading queries");
 		HashMap<String , DataSourceInformation> dataSourcesInformation = getDataSourcesInformation(); 
 		
@@ -690,7 +693,7 @@ public class LocalEvaluatorPerformance {
 	static void testVolatileJoinGrid(){
 		ArrayList<DataObject> tweets =readTweets("Tweets");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",10000,5,
-				"Tweets", "POIs",20.0 , SpatioTextualConstants.queryTextualSpatialJoin,null,TextualPredicate.OVERlAPS,TextualPredicate.OVERlAPS,50.0) ;
+				"Tweets", "POIs",20.0 , QueryType.queryTextualSpatialJoin,null,TextualPredicate.OVERlAPS,TextualPredicate.OVERlAPS,50.0) ;
 		//this will be tested on tweets and tweets queries  , range, join
 	}
 	static void testCurrentObjectGrid(){
@@ -701,7 +704,7 @@ public class LocalEvaluatorPerformance {
 		ArrayList<DataObject> tweets =readTweets("Tweets");
 		//this will be tested on this is test on tweets and hybrid queries  range, topk 
 	}
-	static ArrayList<Query> addQueries(String queriesFilePath,String querySrc,Integer numberOfQueries, Integer keywordCountVal, String dataSrc1, String dataSrc2, Double distance, String queryType,Integer k,TextualPredicate textualPredicate1,TextualPredicate textualPredicate2,Double spatialRange) {
+	static ArrayList<Query> addQueries(String queriesFilePath,String querySrc,Integer numberOfQueries, Integer keywordCountVal, String dataSrc1, String dataSrc2, Double distance, QueryType queryType,Integer k,TextualPredicate textualPredicate1,TextualPredicate textualPredicate2,Double spatialRange) {
 		
 		ArrayList<Query> queries = new ArrayList<Query>();
 		String filePath = queriesFilePath;
@@ -724,7 +727,7 @@ public class LocalEvaluatorPerformance {
 		
 		return queries;
 	}
-	static Query buildQuery(String line,String querySrc,Integer keywordCountVal, String dataSrc1, String dataSrc2, Double distance, String queryType,Integer k,TextualPredicate textualPredicate1,TextualPredicate textualPredicate2,Double spatialRange) {
+	static Query buildQuery(String line,String querySrc,Integer keywordCountVal, String dataSrc1, String dataSrc2, Double distance, QueryType queryType,Integer k,TextualPredicate textualPredicate1,TextualPredicate textualPredicate2,Double spatialRange) {
 		StringTokenizer stringTokenizer = new StringTokenizer(line, ",");
 		
 		Integer id = stringTokenizer.hasMoreTokens() ? Integer.parseInt(stringTokenizer.nextToken()) : 0;
@@ -757,30 +760,27 @@ public class LocalEvaluatorPerformance {
 		q.setSrcId(querySrc);
 		q.setQueryId(id);
 		q.setCommand(Command.addCommand);
-		q.setContinousQuery(true);
 		q.setDataSrc(dataSrc1);
-		q.setDataSrc2(dataSrc2);
-		q.setDistance(distance);
 		q.setQueryType(queryType);
 		q.setTimeStamp(date.getTime());
-		if(queryType.equals(SpatioTextualConstants.queryTextualRange)){
+		if(queryType.equals(QueryType.queryTextualRange)){
 			q.setSpatialRange(new Rectangle(new Point(xCoord, yCoord),new Point(xCoord+spatialRange,yCoord+spatialRange)) );
 			q.setTextualPredicate(textualPredicate1);
 			q.setQueryText(queryText1);
 		}
-		else if(queryType.equals(SpatioTextualConstants.queryTextualKNN)){
-			q.setFocalPoint(new Point(xCoord, yCoord));
-			q.setTextualPredicate(textualPredicate1);
-			q.setQueryText(queryText1);
-			q.setK(k);
+		else if(queryType.equals(QueryType.queryTextualKNN)){
+			((KNNQuery)q).setFocalPoint(new Point(xCoord, yCoord));
+			((KNNQuery)q).setTextualPredicate(textualPredicate1);
+			((KNNQuery)q).setQueryText(queryText1);
+			((KNNQuery)q).setK(k);
 		}
-		else if(queryType.equals(SpatioTextualConstants.queryTextualSpatialJoin)){
-			q.setSpatialRange(new Rectangle(new Point(xCoord, yCoord),new Point(xCoord+spatialRange,yCoord+spatialRange)) );
-			q.setTextualPredicate(textualPredicate1);
-			q.setTextualPredicate2(textualPredicate2);
-			q.setQueryText(queryText1);
-			q.setQueryText(queryText2);
-			q.setDistance(distance);
+		else if(queryType.equals(QueryType.queryTextualSpatialJoin)){
+			((JoinQuery)q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord),new Point(xCoord+spatialRange,yCoord+spatialRange)) );
+			((JoinQuery)q).setTextualPredicate(textualPredicate1);
+			((JoinQuery)q).setTextualPredicate2(textualPredicate2);
+			((JoinQuery)q).setQueryText(queryText1);
+			((JoinQuery)q).setQueryText(queryText2);
+			((JoinQuery)q).setDistance(distance);
 		}	
 		return q;
 	}

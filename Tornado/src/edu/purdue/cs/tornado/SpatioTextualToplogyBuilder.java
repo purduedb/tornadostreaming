@@ -265,13 +265,18 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 			} else if (GlobalIndexType.DYNAMIC_AQWA == this.globalIndexType||GlobalIndexType.DYNAMIC_OPTIMIZED == this.globalIndexType){
 				//this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
-			}else {
+			}else if (GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD == this.globalIndexType) {
+				//this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
+				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
+			} 
+			else {
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
 			}
 			this._boltDeclarer.addConfiguration(DataSourceType.QUERY_SOURCE.name() + "_" + componentId + "_" + streamId, SpatioTextualConstants.Continuous);
 			spatioTextualConfig.put(DataSourceType.QUERY_SOURCE.name() + "_" + componentId + "_" + streamId, SpatioTextualConstants.Continuous);
 			return this;
 		}
+
 
 		public SpatioTextualBoltDeclarer addContinuousQuerySource(String componentId) {
 			if (GlobalIndexType.PARTITIONED_TEXT_AWARE == this.globalIndexType) {
@@ -280,7 +285,10 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 			} else if (GlobalIndexType.DYNAMIC_AQWA == this.globalIndexType||GlobalIndexType.DYNAMIC_OPTIMIZED == this.globalIndexType){
 			//	this._boltDeclarer = this._boltDeclarer.allGrouping(componentId);
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));
-			}else {
+			}else if (GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD == this.globalIndexType) {
+				//this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
+				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));
+			} else {
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));
 			}
 

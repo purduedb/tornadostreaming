@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.spouts.FileSpout;
@@ -62,7 +63,7 @@ public class DataAndQueriesSources {
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, dataSourceName1);
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc2, dataSourceName2);
 		queriesSpoutConf.put(SpatioTextualConstants.queryDistance, querySpatialDistance);
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryTextualSpatialJoin);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualSpatialJoin);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate2, TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC, emitSleepDurationInNanoSecond);
@@ -80,7 +81,7 @@ public class DataAndQueriesSources {
 		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT, queryCount);
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT, queryKeywordCount);
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, dataSourceName);
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryTextualRange);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualRange);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC, emitSleepDurationInNanoSecond);
 		builder.setSpout(querySourceName, new QueriesFileSystemSpout(queriesSpoutConf, initialSleepDuration), parrellism);
@@ -96,7 +97,7 @@ public class DataAndQueriesSources {
 		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT, queryCount);
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT, queryKeywordCount);
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, dataSourceName);
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryTextualRange);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualRange);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC, emitSleepDurationInNanoSecond);
 		builder.setSpout(querySourceName, new QueriesFileSystemSpoutHotSpots(queriesSpoutConf, initialSleepDuration,hotSpotRatio), parrellism);
@@ -114,7 +115,7 @@ public class DataAndQueriesSources {
 		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT, queryCount);
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT, queryKeywordCount);
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, dataSourceName);
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryTextualRange);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualRange);
 		if (queryTextualPredicate == null)
 			queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
 		else
@@ -135,7 +136,7 @@ public class DataAndQueriesSources {
 		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT, queryCount);
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT, queryKeywordCount);
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, dataSourceName);
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryTextualRange);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualRange);
 		if (queryTextualPredicate == null)
 			queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
 		else
@@ -155,7 +156,7 @@ public class DataAndQueriesSources {
 		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT, queryCount);
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT, queryKeywordCount);
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, dataSourceName);
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryTextualKNN);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualKNN);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC, emitSleepDurationInNanoSecond);
 		builder.setSpout(querySourceName, new QueriesFileSystemSpout(queriesSpoutConf, initialSleepDuration), parrellism);

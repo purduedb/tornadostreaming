@@ -1,6 +1,8 @@
 package edu.purdue.cs.tornado.atlas.SGB.group;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -22,6 +24,11 @@ public class Group {
 	private HashMap<Integer, Tuple> g;
 	
 	private int groupid;
+	public boolean candidate;
+	public float centroid;
+	public float diameter;
+	
+	ArrayList<String > remainingKeywords;
 	
 	/**the center point of one group*/
 	Tuple center;
@@ -60,6 +67,8 @@ public class Group {
 		// TODO Auto-generated constructor stub
 		this.g=new HashMap<Integer, Tuple>();
 		this.groupid=id;
+		this.candidate = false;
+		remainingKeywords = new ArrayList<String>();
 	}
 	
 	/**
@@ -92,10 +101,26 @@ public class Group {
 			this.groupConvexhullbound= new Convexhull2D();
 			this.groupConvexhullbound.setFileds(filedlist);
 		}
-		
+		this.candidate = false;
 		convexhullJudgeresult=-1;
+		remainingKeywords = new ArrayList<String>();
 	}
 	
+	public void addRemainingKeywords(ArrayList<String> keywords){
+		remainingKeywords.addAll(keywords);
+	}
+	public boolean updateRemainingKeywords(HashSet<String> keywords){
+		Iterator<String> itr = remainingKeywords.iterator();
+		while(itr.hasNext()){
+			String text = itr.next();
+			if(keywords.contains(text))
+				itr.remove();
+		    
+		}
+		if(remainingKeywords.size()==0)
+			candidate=true;
+		return candidate;
+	}
 	
 	public Tuple getCenter() {
 		return center;
@@ -116,7 +141,7 @@ public class Group {
 			
 			for(int i:this.getFildeList())
 			{
-				float f1=Float.valueOf(T.getFiled(i).toString());
+				float f1=(Float)(T.getFiled(i));
 				this.center.setFiled(i, f1);
 			}
 			return;
@@ -124,8 +149,8 @@ public class Group {
 		
 		for(int i:this.getFildeList())
 		{
-			float f1=Float.valueOf(T.getFiled(i).toString());
-			float f2=Float.valueOf(this.center.getFiled(i).toString());
+			float f1=(Float)(T.getFiled(i));
+			float f2=(Float)(this.center.getFiled(i));
 			
 			/**get the sum of previous tuples in one dimension*/
 			f2=f2*this.g.size();
@@ -328,7 +353,7 @@ public class Group {
 		int i=0;
 		for(int index:fileds)
 		{
-			float f1=Float.valueOf(t.getFiled(index).toString());
+			float f1=(Float)(t.getFiled(index));
 			float left=this.getGroupRectanglebound()[i][0];
 			float right=this.getGroupRectanglebound()[i][1];
 			
@@ -356,7 +381,7 @@ public class Group {
 			int i=0;
 			for(int index:fileds)
 			{
-				float f1=Float.valueOf(t.getFiled(index).toString());
+				float f1=(Float)(t.getFiled(index));
 				this.getGroupRectanglebound()[i][0]=f1-this.EPS;
 				this.getGroupRectanglebound()[i][1]=f1+this.EPS;
 				i++;
@@ -367,7 +392,7 @@ public class Group {
 			int i=0;
 			for(int index:fileds)
 			{
-				float f1=Float.valueOf(t.getFiled(index).toString());
+				float f1=(Float)(t.getFiled(index));
 				float left=this.getGroupRectanglebound()[i][0];
 				float right=this.getGroupRectanglebound()[i][1];
 				
@@ -406,7 +431,7 @@ public class Group {
 			int i=0;
 			for(int index:fileds)
 			{
-				float f1=Float.valueOf(t.getFiled(index).toString());
+				float f1=(Float)(t.getFiled(index));
 				this.getGroupMaxMinbound()[i][0]=f1;
 				this.getGroupMaxMinbound()[i][1]=f1;
 				i++;
@@ -417,7 +442,7 @@ public class Group {
 			int i=0;
 			for(int index:fileds)
 			{
-				float f1=Float.valueOf(t.getFiled(index).toString());
+				float f1=(Float)(t.getFiled(index));
 				float left=this.getGroupMaxMinbound()[i][0];
 				float right=this.getGroupMaxMinbound()[i][1];
 				
@@ -499,7 +524,7 @@ public class Group {
 		int i=0;
 		for(int index:fileds)
 		{
-			float f1=Float.valueOf(t.getFiled(index).toString());
+			float f1=(Float)t.getFiled(index);
 			float left=this.getGroupRectanglebound()[i][0];
 			float right=this.getGroupRectanglebound()[i][1];
 			

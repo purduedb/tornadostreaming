@@ -2,6 +2,7 @@ package edu.purdue.cs.tornado.index.global;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
@@ -37,8 +38,8 @@ public class GlobalOptimizedPartitionedTextAwareIndex extends GlobalOptimizedPar
 	}
 
 	@Override
-	public ArrayList<String> addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text, boolean all, boolean forward) {
-		ArrayList<String> toForward = null;
+	public HashSet<String> addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text, boolean all, boolean forward) {
+		HashSet<String> toForward = null;
 		Long time = (new java.util.Date()).getTime();
 		for (Integer task : tasks) {
 
@@ -48,9 +49,19 @@ public class GlobalOptimizedPartitionedTextAwareIndex extends GlobalOptimizedPar
 				taskIdTextualSummery.put(task, textSummery);
 			}
 			if (all) {
-				//if (forward)
-				for (String keyword : text) {
-					textSummery.put(keyword, time);
+				if (forward) {
+					if(toForward==null)toForward = new HashSet<String>();
+					for (String keyword : text) {
+						if (!textSummery.containsKey(keyword)) {
+							textSummery.put(keyword, time);
+							toForward.add(keyword);
+						}
+
+					}
+				} else {
+					for (String keyword : text) {
+						textSummery.put(keyword, time);
+					}
 				}
 			} else {//one keyword suffies 
 				Boolean found = false;
@@ -61,6 +72,10 @@ public class GlobalOptimizedPartitionedTextAwareIndex extends GlobalOptimizedPar
 					}
 				}
 				if (!found && text.size() > 0) {
+					if (forward) {
+						if(toForward==null)toForward = new HashSet<String>();
+						toForward.add(text.get(0));
+					}
 					textSummery.put(text.get(0), time);
 				}
 			}

@@ -38,7 +38,7 @@ public class Control {
 	public static String LOAD_BALANCE ="LOAD_BALANCE";
 	public static String CORRECTNESS ="CORRECTNESS";
 	public static String TEXT_SUMMERY ="textsummery";
-	
+	public static String INDEX_TEXT_SUMMERY ="indextextsummery";
 	private String controlMessageType;
 
 	//******************************************************
@@ -51,7 +51,11 @@ public class Control {
 	public Query singleQuery;
 	public DataObject singlDataObject;
 	public ArrayList<Integer> textSummeryTaskIdList;
+	
 
+
+	public ArrayList<String> forwardTextSummeryFromGlobalIndex;
+	public Integer forwardTextIndexTaskIndex;
 	public HashSet<String> textSummery;
 	public IndexCell indexCell;
 	public Long textSummaryTimeStamp;
@@ -59,11 +63,26 @@ public class Control {
 		return textSummery;
 	}
 
+	public Integer getForwardTextIndexTaskIndex() {
+		return forwardTextIndexTaskIndex;
+	}
+
+	public void setForwardTextIndexTaskIndex(Integer forwardTextIndexTaskIndex) {
+		this.forwardTextIndexTaskIndex = forwardTextIndexTaskIndex;
+	}
+
 	public void setTextSummery(HashSet<String> textSummery) {
 		this.textSummery = textSummery;
 	}
 
 
+	public ArrayList<String> getForwardTextSummeryFromGlobalIndex() {
+		return forwardTextSummeryFromGlobalIndex;
+	}
+
+	public void setForwardTextSummeryFromGlobalIndex(ArrayList<String> forwardTextSummeryFromGlobalIndex) {
+		this.forwardTextSummeryFromGlobalIndex = forwardTextSummeryFromGlobalIndex;
+	}
 
 
 	public Long getTextSummaryTimeStamp() {
@@ -146,6 +165,8 @@ public class Control {
 		this.textSummeryTaskIdList=null;
 		this.singleQuery=null;
 		this.singlDataObject=null;
+		this.forwardTextIndexTaskIndex=null;
+		this.forwardTextSummeryFromGlobalIndex=null;
 				
 	}
 

@@ -123,6 +123,13 @@ public class TextHelpers {
 				return true;
 		return false;
 	}
+	public static boolean overlapsTextually(HashSet<String> textMap,ArrayList<String> textList){
+		
+		for(String text: textList)
+			if(textMap.contains(text))
+				return true;
+		return false;
+	}
 	public static boolean overlapsTextuallyWithtime(HashMap<String,Long> textMap,ArrayList<String> textList){
 		
 		for(String text: textList)

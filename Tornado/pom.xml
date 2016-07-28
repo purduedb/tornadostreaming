@@ -26,7 +26,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>edu.purdue.cs.tornado.test.TestClusterMain</mainClass>
+							<mainClass>edu.purdue.cs.tornado.atlas.GroupByWithInDistance</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -262,7 +262,7 @@
 			<scope>provided</scope> 
 		</dependency>
 
-		<!-- Storm Dependency -->
+		<!-- Dependency -->
 		<dependency>
 			<groupId>org.apache.storm</groupId>
 			<artifactId>storm-core</artifactId>

@@ -97,28 +97,28 @@ public class CountersGrid {
 		this.pointData[x][y] += value;
 	}
 
-	public void insertQueryWithType(int minX, int minY, int maxX, int maxY, String type) {
+	public void insertQueryWithType(int minX, int minY, int maxX, int maxY, QueryType type) {
 		for (int x = minX; x <= maxX; x++) {
 			for (int y = minY; y <= maxY; y++) {
 				this.queryCountPerCell[x][y]++;
 
 			}
 		}
-		if (SpatioTextualConstants.queryTextualRange.equals(type))return;//boundaries do not matter
+		if (QueryType.queryTextualRange.equals(type))return;//boundaries do not matter
 		//adding queries across vertical bounds 
 		if (minX < maxX) {
 			for (int y = minY; y <= maxY; y++) {
-				if (SpatioTextualConstants.queryTextualKNN.equals(type)) {
+				if (QueryType.queryTextualKNN.equals(type)) {
 					this.verticalBounaries[minX][y].allOverlappingKNN++;
 					this.verticalBounaries[minX][y].notInPreviousKNN++;
-				} else if (SpatioTextualConstants.queryTextualSpatialJoin.equals(type)) {
+				} else if (QueryType.queryTextualSpatialJoin.equals(type)) {
 					this.verticalBounaries[minX][y].allOverlappingJoin++;
 					this.verticalBounaries[minX][y].notInPreviousJoin++;
 				}
 				for (int x = minX + 1; x < maxX; x++) {
-					if (SpatioTextualConstants.queryTextualKNN.equals(type)) {
+					if (QueryType.queryTextualKNN.equals(type)) {
 						this.verticalBounaries[x][y].allOverlappingKNN++;
-					} else if (SpatioTextualConstants.queryTextualSpatialJoin.equals(type)) {
+					} else if (QueryType.queryTextualSpatialJoin.equals(type)) {
 						this.verticalBounaries[x][y].allOverlappingJoin++;
 					}
 				}
@@ -128,17 +128,17 @@ public class CountersGrid {
 		//adding queries across horizontal bounds 
 		if (minY < maxY) {
 			for (int x = minX; x <= maxX; x++) {
-				if (SpatioTextualConstants.queryTextualKNN.equals(type)) {
+				if (QueryType.queryTextualKNN.equals(type)) {
 					this.horizontalBounaries[x][minY].allOverlappingKNN++;
 					this.horizontalBounaries[x][minY].notInPreviousKNN++;
-				} else if (SpatioTextualConstants.queryTextualSpatialJoin.equals(type)) {
+				} else if (QueryType.queryTextualSpatialJoin.equals(type)) {
 					this.horizontalBounaries[x][minY].allOverlappingJoin++;
 					this.horizontalBounaries[x][minY].notInPreviousJoin++;
 				}
 				for (int y = minY + 1; y < maxY; y++) {
-					if (SpatioTextualConstants.queryTextualKNN.equals(type)) {
+					if (QueryType.queryTextualKNN.equals(type)) {
 						this.horizontalBounaries[x][y].allOverlappingKNN++;
-					} else if (SpatioTextualConstants.queryTextualSpatialJoin.equals(type)) {
+					} else if (QueryType.queryTextualSpatialJoin.equals(type)) {
 						this.horizontalBounaries[x][y].allOverlappingJoin++;
 					}
 				}

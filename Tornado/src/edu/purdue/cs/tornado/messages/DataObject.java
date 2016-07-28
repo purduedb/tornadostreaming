@@ -20,6 +20,7 @@
 package edu.purdue.cs.tornado.messages;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.Point;
@@ -32,9 +33,11 @@ public class DataObject {
 	private Point location;
 	private String originalText;
 	private ArrayList<String> objectText;
+	public HashSet<String>hashedText;
 	private Long timeStamp;
 	private Rectangle relevantArea;
 	private Command command;
+	public boolean added;
 
 	
 	public DataObject(DataObject other){
@@ -44,6 +47,8 @@ public class DataObject {
 		this.originalText=new String(other.originalText);
 		this.objectText=(ArrayList<String>) other.objectText.clone();
 		this.command=other.command;
+		this.added = false;
+		this.hashedText = new HashSet<String>();
 		
 	}
 	@Override
@@ -65,6 +70,8 @@ public class DataObject {
 	public DataObject() {
 		location = new Point();
 		objectText = new ArrayList<String>();
+		added = false;
+		hashedText = new HashSet<String>();
 	}
 
 	public Command getCommand() {
@@ -133,6 +140,8 @@ public class DataObject {
 		this.objectText=objectTextList;
 		this.timeStamp = timeStamp;
 		this.command = command;
+		this.added= false;
+		this.hashedText = new HashSet<String>();
 	}
 	public Rectangle getRelevantArea() {
 		return relevantArea;

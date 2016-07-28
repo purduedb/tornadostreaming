@@ -30,6 +30,8 @@ import com.google.gson.stream.JsonReader;
 
 import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.JoinQuery;
+import edu.purdue.cs.tornado.messages.KNNQuery;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class JsonHelper {
@@ -99,7 +101,7 @@ public class JsonHelper {
 		Map queryMap = (Map) ((List) ((Map) m.get(JsonHelper.plan)).get(JsonHelper.children)).get(0);
 		List sourceNames = (List) m.get(JsonHelper.sourceNames);
 		if (sourceNames.size() > 1) {//this is a join operator{
-			q.setQueryType(SpatioTextualConstants.queryTextualSpatialJoin);
+			q.setQueryType(QueryType.queryTextualSpatialJoin);
 
 			double latMin = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.south);
 			double lonMin = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.west);
@@ -107,23 +109,23 @@ public class JsonHelper {
 			double LonMax = (Double) ((Map) m.get(JsonHelper.currentView)).get(JsonHelper.east);
 
 			q.setTextualPredicate(TextualPredicate.NONE);
-			q.setTextualPredicate2(TextualPredicate.NONE);
-			q.setJoinTextualPredicate(TextualPredicate.NONE);
+			((JoinQuery)q).setTextualPredicate2(TextualPredicate.NONE);
+			((JoinQuery)q).setJoinTextualPredicate(TextualPredicate.NONE);
 			String textLHSAlias = null;
 			String textRHSAlias = null;
 			List<Map> conditions = ((List) queryMap.get(JsonHelper.conditions));
 			for (Map condition : conditions) {
 				if (condition != null && condition.containsKey(JsonHelper.op) && ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(JsonHelper.WITHIN_DISTANCE))
-					q.setDistance((Double) condition.get(JsonHelper.cval));
+					((JoinQuery)q).setDistance((Double) condition.get(JsonHelper.cval));
 				else if (condition != null && condition.containsKey(JsonHelper.op)
 						&& (((String) condition.get(JsonHelper.op)).equalsIgnoreCase(CONTAINS) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(OVERLAPS) || ((String) condition.get(JsonHelper.op)).equalsIgnoreCase(SEMANTIC))) {
 
 					if (OVERLAPS.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
-						q.setJoinTextualPredicate(TextualPredicate.OVERlAPS);
+						((JoinQuery)q).setJoinTextualPredicate(TextualPredicate.OVERlAPS);
 					else if (SEMANTIC.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
-						q.setJoinTextualPredicate(TextualPredicate.SEMANTIC);
+						((JoinQuery)q).setJoinTextualPredicate(TextualPredicate.SEMANTIC);
 					else if (CONTAINS.equalsIgnoreCase(((String) condition.get(JsonHelper.op)).toLowerCase()))
-						q.setJoinTextualPredicate(TextualPredicate.CONTAINS);
+						((JoinQuery)q).setJoinTextualPredicate(TextualPredicate.CONTAINS);
 
 					if (condition.containsKey(JsonHelper.lhs))
 						textLHSAlias = (String) ((Map) condition.get(JsonHelper.lhs)).get(JsonHelper.sourceName);
@@ -200,21 +202,21 @@ public class JsonHelper {
 			}
 			if (textLHSAlias == null || textLHSAlias.equals(src1Alias)) {
 				q.setDataSrc(src1);
-				q.setDataSrc2(src2);
+				((JoinQuery)q).setDataSrc2(src2);
 				if (!"".equals(text1)) {
 					q.setQueryText(text1);
 					q.setTextualPredicate(textualPredicate1);
 				}
 				if (!"".equals(text2)) {
-					q.setQueryText2(text2);
-					q.setTextualPredicate2(textualPredicate2);
+					((JoinQuery)q).setQueryText2(text2);
+					((JoinQuery)q).setTextualPredicate2(textualPredicate2);
 				}
 			} else {
-				q.setDataSrc2(src1);
-				q.setDataSrc(src2);
+				((JoinQuery)q).setDataSrc2(src1);
+				((JoinQuery)q).setDataSrc(src2);
 				if (!"".equals(text1)) {
-					q.setQueryText2(text1);
-					q.setTextualPredicate2(textualPredicate1);
+					((JoinQuery)q).setQueryText2(text1);
+					((JoinQuery)q).setTextualPredicate2(textualPredicate1);
 				}
 				if (!"".equals(text2)) {
 					q.setQueryText(text2);
@@ -223,12 +225,12 @@ public class JsonHelper {
 			}
 			q.setSpatialRange(new Rectangle(SpatialHelper.convertFromLatLonToXYPoint(new LatLong(latMin, lonMin)), SpatialHelper.convertFromLatLonToXYPoint(new LatLong(latMax, LonMax))));
 		} else if (queryJson.contains("KNN") || queryJson.contains("knn")) {//either range or KNN
-			q.setQueryType(SpatioTextualConstants.queryTextualKNN);
+			q.setQueryType(QueryType.queryTextualKNN);
 			q.setDataSrc((String) sourceNames.get(0));
 			q.setCommand(Command.addCommand);
 			q.setTextualPredicate(TextualPredicate.NONE);
-			q.setK(0);
-			q.setFocalPoint(new Point(0.0, 0.0));
+			((KNNQuery)q).setK(0);
+			((KNNQuery)q).setFocalPoint(new Point(0.0, 0.0));
 			q.setQueryText(new ArrayList<String>());
 			List<Map> conditions = (List<Map>) queryMap.get(JsonHelper.conditions);
 			for (Map condition : conditions) {
@@ -245,10 +247,10 @@ public class JsonHelper {
 					ArrayList<String> text = (ArrayList<String>) condition.get(JsonHelper.rhs);
 					q.setQueryText(TextHelpers.sortTextArrayList(text));
 				} else if (JsonHelper.knn.equals(operation.toLowerCase())) {
-					q.setK(((Double) condition.get(JsonHelper.kval)).intValue());
+					((KNNQuery)q).setK(((Double) condition.get(JsonHelper.kval)).intValue());
 					Double lat = (Double) ((Map) ((Map) ((Map) condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lat);
 					Double lng = (Double) ((Map) ((Map) ((Map) condition.get(JsonHelper.rhs))).get("val")).get(JsonHelper.lng);
-					q.setFocalPoint(SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat, lng)));
+					((KNNQuery)q).setFocalPoint(SpatialHelper.convertFromLatLonToXYPoint(new LatLong(lat, lng)));
 				}
 
 			}
@@ -257,7 +259,7 @@ public class JsonHelper {
 
 		} else {
 
-			q.setQueryType(SpatioTextualConstants.queryTextualRange);
+			q.setQueryType(QueryType.queryTextualRange);
 			q.setDataSrc((String) sourceNames.get(0));
 			q.setCommand(Command.addCommand);
 			q.setTextualPredicate(TextualPredicate.NONE);

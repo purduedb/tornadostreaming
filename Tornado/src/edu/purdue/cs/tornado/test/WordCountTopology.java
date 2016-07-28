@@ -244,7 +244,7 @@ public class WordCountTopology {
 		builder.setSpout("spout", new RandomSentenceSpout(), Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()));
 		builder.setBolt("split", new SplitSentence(), Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim())).shuffleGrouping("spout");
 		//builder.setBolt("split", new SplitSentence(), Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim())).customGrouping("spout", new CustomGroup());
-		builder.setBolt("count", new WordCount(), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim())).shuffleGrouping("split");
+		//builder.setBolt("count", new WordCount(), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim())).shuffleGrouping("split");
 
 		Config conf = new Config();
 		conf.setDebug(false);

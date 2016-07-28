@@ -186,3 +186,26 @@ Topology Id, Baseline-116-1463800659,Number of Workers,58,600,Spid,Tweets , emit
 Topology Id, Baseline-116-1463800659,Number of Workers,58,600,Spid,Tweets , emitt,266 , ack,0 , failed,0 , completeLatency,0.0, upTime,1294_1297_1297_1297_1294_1297_1294_1294_1297_1294_,Spid,querySource , emitt,0 , ack,0 , failed,0 , completeLatency,0.0, upTime,1294_,totall,Spid,Tweets , emitt,228760 , ack,0 , failed,0 , completeLatency,0.0, upTime,1294_1297_1297_1297_1294_1297_1294_1294_1297_1294_,Spid,querySource , emitt,999980 , ack,0 , failed,0 , completeLatency,0.0, upTime,1294_,600,Bolt id,BaseLineEvaluator,Emitted,output,565,,Eexecuted,querySource_default,19,Tweets_default,212,,ExecutedstdquerySource_default,0.9440540135322176,Tweets_default,0.6805147938403551,,Eexecute_Latency,querySource_default,0.21801451078079917,Tweets_default,209.9742665721937,,minup time,1292,maxup time,1298,total,Bolt id,BaseLineEvaluator,Emitted,output,465900,,Eexecuted,querySource_default,46000000,Tweets_default,174600,,ExecutedstdquerySource_default,0.0,Tweets_default,490.41088440077704,,Eexecute_Latency,querySource_default,0.33072130434782615,Tweets_default,210.02338090391672,,minup time,1292,maxup time,1298,
 Topology Id, Baseline-116-1463800659,Number of Workers,58,600,Spid,Tweets , emitt,223 , ack,0 , failed,0 , completeLatency,0.0, upTime,1357_1357_1357_1357_1354_1357_1354_1357_1358_1357_,Spid,querySource , emitt,0 , ack,0 , failed,0 , completeLatency,0.0, upTime,1357_,totall,Spid,Tweets , emitt,233680 , ack,0 , failed,0 , completeLatency,0.0, upTime,1357_1357_1357_1357_1354_1357_1354_1357_1358_1357_,Spid,querySource , emitt,999980 , ack,0 , failed,0 , completeLatency,0.0, upTime,1357_,600,Bolt id,BaseLineEvaluator,Emitted,output,561,,Eexecuted,querySource_default,1,Tweets_default,213,,ExecutedstdquerySource_default,0.1304797024100714,Tweets_default,0.6833409984662382,,Eexecute_Latency,querySource_default,0.08537826834741823,Tweets_default,209.59951041360586,,minup time,1354,maxup time,1361,total,Bolt id,BaseLineEvaluator,Emitted,output,500320,,Eexecuted,querySource_default,46000000,Tweets_default,188580,,ExecutedstdquerySource_default,0.0,Tweets_default,516.9557903969668,,Eexecute_Latency,querySource_default,0.33072130434782615,Tweets_default,209.97068302697605,,minup time,1354,maxup time,1361,
 
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+numberOfackers,0,evaluatorParrellism,36,routingParrellism,10,spoutParallesim,15,numberOfQueryKeywords,3,numberOfQueries,5000000,spatialRange,1.0,localIndexType,HYBRID_GRID,globalIndexType,GRID
+
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+numberOfackers,0,evaluatorParrellism,36,routingParrellism,10,spoutParallesim,15,numberOfQueryKeywords,3,numberOfQueries,5000000,spatialRange,1.0,localIndexType,HYBRID_GRID,globalIndexType,GRID
+
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+numberOfackers,0,evaluatorParrellism,36,routingParrellism,10,spoutParallesim,15,numberOfQueryKeywords,3,numberOfQueries,5000000,spatialRange,1.0,localIndexType,HYBRID_GRID,globalIndexType,GRID
+
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+numberOfackers,0,evaluatorParrellism,36,routingParrellism,10,spoutParallesim,15,numberOfQueryKeywords,3,numberOfQueries,5000000,spatialRange,1.0,localIndexType,HYBRID_GRID,globalIndexType,GRID
+
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+numberOfackers,0,evaluatorParrellism,36,routingParrellism,10,spoutParallesim,15,numberOfQueryKeywords,3,numberOfQueries,5000000,spatialRange,1.0,localIndexType,HYBRID_GRID,globalIndexType,GRID
+
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+numberOfackers,0,evaluatorParrellism,36,routingParrellism,10,spoutParallesim,15,numberOfQueryKeywords,3,numberOfQueries,5000000,spatialRange,1.0,localIndexType,HYBRID_GRID,globalIndexType,GRID
+
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,
+PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,

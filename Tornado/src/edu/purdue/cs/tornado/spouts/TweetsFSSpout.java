@@ -47,28 +47,31 @@ public class TweetsFSSpout extends FileSpout {
 
 		super.nextTuple();
 		if (i >= Long.MAX_VALUE)
-			i = (long) 0;
+			i = (long) 1;
 		String tweet = "";
 		try {
 			if ((tweet = br.readLine()) == null) {
+				System.out.println("Done file and reopen emitteed"+i);
+				i = (long)1;
 				br.close();
 				connectToFS();
 
 			}
+			if (tweet == null || tweet.isEmpty()) {
+				emit_previous();
+				return;
+			}
+			i = i + 1;
+
+			emitTweet(tweet, i);
+
+			sleep();
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 			return;
 
 		}
-		if (tweet == null || tweet.isEmpty()) {
-			emit_previous();
-			return;
-		}
-		i = i + 1;
-
-		emitTweet(tweet, i);
-
-		sleep();
+		
 
 	}
 

@@ -27,10 +27,12 @@ public class DynamicGlobalOptimizedIndex extends DynamicGlobalAQWAIndex {
 		super(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
 	}
 
-	public void buildTaskIndexToParition(HashMap<Integer, Cell> taskIndexToPartition, ArrayList<Cell> partitions) {
-		taskIndexToPartition.clear();
+	public void buildTaskIndexToParition(ArrayList< Cell> taskIndexToPartition, ArrayList<Cell> partitions) {
+		taskIdToIndex.clear();
+		for(int i =0;i<partitions.size();i++)
+			taskIndexToPartition.add(null);
 		for (Cell c : partitions) {
-			taskIndexToPartition.put(c.index, c);
+			taskIndexToPartition.set(c.index, c);
 		}
 	}
 
@@ -88,7 +90,7 @@ public class DynamicGlobalOptimizedIndex extends DynamicGlobalAQWAIndex {
 			for (int j = 0; j < yCellsNum; j++)
 				routingIndex[i][j] = null;
 		addPartitionsToGrid(routingIndex, partitions);
-		taskIndexToPartition = new HashMap<Integer, Cell>();
+		taskIndexToPartition = new ArrayList< Cell>();
 		buildTaskIndexToParition(taskIndexToPartition, partitions);
 		minHeap = new PriorityQueue<Cell>(numberParallelismExecutors, minComparator);
 		maxHeap = new PriorityQueue<Cell>(numberParallelismExecutors, maxComparator);
@@ -110,7 +112,7 @@ public class DynamicGlobalOptimizedIndex extends DynamicGlobalAQWAIndex {
 	}
 
 	public void buildMinMaxHeaps(ArrayList<Cell> partitions, RoutingGridCell[][] routingIndex) {
-		HashMap<Integer, Cell> taskIndexToPartition = new HashMap<Integer, Cell>();
+		ArrayList<Cell> taskIndexToPartition = new ArrayList< Cell>();
 		buildTaskIndexToParition(taskIndexToPartition, partitions);
 		maxHeap.clear();
 		minHeap.clear();
@@ -130,7 +132,7 @@ public class DynamicGlobalOptimizedIndex extends DynamicGlobalAQWAIndex {
 			//if mergable add to the minheap 
 			Integer upperPatitionIndex = null, rightPartitionIndex = null;
 
-			if (routingIndex[p.getLeft()][p.getBottom()].rightCell != null && routingIndex[p.getLeft()][p.getBottom()].rightCell.taskIdIndex != null) {
+			if (routingIndex[p.getLeft()][p.getBottom()].rightCell != null && routingIndex[p.getLeft()][p.getBottom()].rightCell.taskIdIndex != -1) {
 
 				rightPartitionIndex = routingIndex[p.getLeft()][p.getBottom()].rightCell.taskIdIndex;
 				Cell rightPartition = taskIndexToPartition.get(rightPartitionIndex);
@@ -155,7 +157,7 @@ public class DynamicGlobalOptimizedIndex extends DynamicGlobalAQWAIndex {
 						shiftHeapCell.setScore(0);
 						shiftHeap.add(shiftHeapCell);
 					}
-					if (routingIndex[p.getLeft()][p.getTop() - 1].rightCell != null && routingIndex[p.getLeft()][p.getTop() - 1].rightCell.taskIdIndex != null) {
+					if (routingIndex[p.getLeft()][p.getTop() - 1].rightCell != null && routingIndex[p.getLeft()][p.getTop() - 1].rightCell.taskIdIndex != -1) {
 						rightPartitionIndex = routingIndex[p.getLeft()][p.getTop() - 1].rightCell.taskIdIndex;
 						Cell rightPartition2 = taskIndexToPartition.get(rightPartitionIndex);
 						if (rightPartition2 != null && rightPartition2 != rightPartition) {
@@ -174,7 +176,7 @@ public class DynamicGlobalOptimizedIndex extends DynamicGlobalAQWAIndex {
 				}
 			}
 
-			if (routingIndex[p.getLeft()][p.getBottom()].upperCell != null && routingIndex[p.getLeft()][p.getBottom()].upperCell.taskIdIndex != null) {
+			if (routingIndex[p.getLeft()][p.getBottom()].upperCell != null && routingIndex[p.getLeft()][p.getBottom()].upperCell.taskIdIndex != -1) {
 				upperPatitionIndex = routingIndex[p.getLeft()][p.getBottom()].upperCell.taskIdIndex;
 				Cell upperPartition = taskIndexToPartition.get(upperPatitionIndex);
 				if (upperPartition != null) {
@@ -198,7 +200,7 @@ public class DynamicGlobalOptimizedIndex extends DynamicGlobalAQWAIndex {
 						shiftHeapCell.setScore(0);
 						shiftHeap.add(shiftHeapCell);
 					}
-					if (routingIndex[p.getRight() - 1][p.getBottom()].upperCell != null && routingIndex[p.getRight() - 1][p.getBottom()].upperCell.taskIdIndex != null) {
+					if (routingIndex[p.getRight() - 1][p.getBottom()].upperCell != null && routingIndex[p.getRight() - 1][p.getBottom()].upperCell.taskIdIndex != -1) {
 						rightPartitionIndex = routingIndex[p.getRight() - 1][p.getBottom()].upperCell.taskIdIndex;
 						Cell upperPartition2 = taskIndexToPartition.get(rightPartitionIndex);
 						if (upperPartition2 != null && upperPartition2 != upperPartition) {

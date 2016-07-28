@@ -21,6 +21,7 @@ package edu.purdue.cs.tornado.index.global;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 import edu.purdue.cs.tornado.helper.Point;
@@ -84,7 +85,7 @@ public abstract class GlobalIndex {
 	public abstract Rectangle getBoundsForTaskIndex(Integer taskIndex);
 	public abstract Rectangle getBoundsForTaskId(Integer taskId);
 	public abstract GlobalIndexIterator globalKNNIterator(Point p);
-	public abstract ArrayList<String> addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text,boolean all,boolean forward);
+	public abstract HashSet<String> addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text,boolean all,boolean forward);
 	public abstract void dropTextFromTaskID(ArrayList<Integer> tasks, ArrayList<String> text);
 	public abstract Boolean verifyTextOverlap(Integer task, ArrayList<String> text);
 	public abstract Boolean isTextAware();

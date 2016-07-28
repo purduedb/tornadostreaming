@@ -18,9 +18,12 @@
 
 package edu.purdue.cs.tornado.atlas.SGB.index;
 
-import gnu.trove.TIntProcedure;
-
+import java.util.ArrayList;
 import java.util.Properties;
+
+import edu.purdue.cs.tornado.atlas.SGB.global.Tuple;
+import edu.purdue.cs.tornado.messages.DataObject;
+import gnu.trove.TIntProcedure;
 
 /**
  * Defines methods that must be implemented by all 
@@ -60,6 +63,18 @@ public interface SpatialIndex {
    *               rectangle was found but with a different ID
    */
   public boolean delete(Rectangle r, int id);
+  /**
+   * Deletes a rectangle from the spatial index
+   * 
+   * @param r  The rectangle to delete from the spatial index
+   * @param id The ID of the rectangle to delete from the spatial
+   *           index
+   * 
+   * @return true  if the rectangle was deleted
+   *         false if the rectangle was not found, or the 
+   *               rectangle was found but with a different ID
+   */
+  public boolean update(Rectangle oldRect,Rectangle newRect, int id);
    
   /**
    * Finds the nearest rectangles to the passed rectangle and calls 
@@ -150,7 +165,7 @@ public interface SpatialIndex {
    * @param ip The procedure whose visit() method is is called
    *           for each contained rectangle.
    */
-  public void containPoint(Rectangle r, TIntProcedure ip); 
+  public ArrayList<Integer> containPoint(Rectangle r, TIntProcedure ip); 
   
   /**
    * Returns the number of entries in the spatial index
@@ -170,5 +185,10 @@ public interface SpatialIndex {
    * eg "SimpleIndex-0.1"
    */
   public String getVersion();
+  
+  public void addDataObject(DataObject obj);
+  public ArrayList<DataObject> getDataObjects(Rectangle r);
+  public ArrayList<Tuple> getSpatialOverlapTuples(Rectangle r);
+  public void addTuple(Tuple t);
   
 }

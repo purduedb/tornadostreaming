@@ -19,16 +19,19 @@
 
 package edu.purdue.cs.tornado.atlas.SGB.index.rtree;
 
+import java.util.ArrayList;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.purdue.cs.tornado.atlas.SGB.global.Tuple;
 import edu.purdue.cs.tornado.atlas.SGB.index.BuildProperties;
 import edu.purdue.cs.tornado.atlas.SGB.index.Point;
 import edu.purdue.cs.tornado.atlas.SGB.index.PriorityQueue;
 import edu.purdue.cs.tornado.atlas.SGB.index.Rectangle;
 import edu.purdue.cs.tornado.atlas.SGB.index.SpatialIndex;
+import edu.purdue.cs.tornado.messages.DataObject;
 import gnu.trove.TIntArrayList;
 import gnu.trove.TIntObjectHashMap;
 import gnu.trove.TIntProcedure;
@@ -610,10 +613,10 @@ public class RTree implements SpatialIndex {
   /**
    *@return  find all rectangles in the tree that contain the passed rectangle
    */
-  public void containPoint(Rectangle r, TIntProcedure v) {
+  public ArrayList<Integer> containPoint(Rectangle r, TIntProcedure v) {
     // find all rectangles in the tree that contain the passed rectangle
     // written to be non-recursive (should model other searches on this?)
-        
+       ArrayList<Integer >list = new ArrayList<Integer>();
     parents.reset();
     parents.push(rootNodeId);
     
@@ -653,15 +656,17 @@ public class RTree implements SpatialIndex {
           if (Rectangle.contains(
                                  n.entriesMinX[i], n.entriesMinY[i], n.entriesMaxX[i], n.entriesMaxY[i],
                                  r.minX, r.minY, r.maxX, r.maxY)) {
-            if (!v.execute(n.ids[i])) {
-              return;
-            }
+//            if (!v.execute(n.ids[i])) {
+//              return null;
+//            }
+        	  list.add(n.ids[i]);
           } 
         }                       
       }
       parents.pop();
       parentsEntry.pop();  
     }
+    return list;
   }
   /**
    * @see com.infomatiq.jsi.SpatialIndex#size()
@@ -1394,4 +1399,35 @@ public class RTree implements SpatialIndex {
     }
     return mbr; 
   }
+
+@Override
+public boolean update(Rectangle oldRect, Rectangle newRect, int id) {
+	delete(oldRect, id);
+	add(newRect,id);
+	return true;
+}
+
+@Override
+public void addDataObject(DataObject obj) {
+	// TODO Auto-generated method stub
+	
+}
+
+@Override
+public ArrayList<DataObject> getDataObjects(Rectangle r) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public ArrayList<Tuple> getSpatialOverlapTuples(Rectangle r) {
+	// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public void addTuple(Tuple t) {
+	// TODO Auto-generated method stub
+	
+}
 }

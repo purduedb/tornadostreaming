@@ -30,6 +30,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 import edu.purdue.cs.tornado.helper.Command;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
 
@@ -60,7 +61,7 @@ public class TestTextualKNNQueryGenerator extends BaseRichSpout {
 		String textList="text2 text1 text4 text5";
 		//String textList="coffee restaurant";
 		this.collector.emit(new Values(
-				SpatioTextualConstants.queryTextualKNN, ""+(i++), 
+				QueryType.queryTextualKNN, ""+(i++), 
 				1000.0, 6000.0,3, textList, date.getTime(),dataSrcId,
 				//SpatioTextualConstants.semantic,
 				TextualPredicate.OVERlAPS,

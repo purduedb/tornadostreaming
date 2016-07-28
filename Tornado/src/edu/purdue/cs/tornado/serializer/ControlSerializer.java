@@ -50,6 +50,9 @@ public class ControlSerializer extends  com.esotericsoftware.kryo.Serializer<Con
 		control.setTextSummery( kryo.readObjectOrNull(input,HashSet.class));
 		control.setTextSummeryTaskIdList(kryo.readObjectOrNull(input,ArrayList.class));
 		control.setTextSummaryTimeStamp(kryo.readObjectOrNull(input,Long.class));
+		control.setTextSummaryTimeStamp(kryo.readObjectOrNull(input,Long.class));
+		control.setForwardTextIndexTaskIndex(kryo.readObjectOrNull(input,Integer.class));
+		control.setForwardTextSummeryFromGlobalIndex(kryo.readObjectOrNull(input, ArrayList.class));
 		return control;
 	}
 
@@ -68,6 +71,8 @@ public class ControlSerializer extends  com.esotericsoftware.kryo.Serializer<Con
 		kryo.writeObjectOrNull(output,control.getTextSummery(),HashSet.class);
 		kryo.writeObjectOrNull(output,control.getTextSummeryTaskIdList(),ArrayList.class);
 		kryo.writeObjectOrNull(output,control.getTextSummaryTimeStamp(),Long.class);
+		kryo.writeObjectOrNull(output,control.getForwardTextIndexTaskIndex(),Integer.class);
+		kryo.writeObjectOrNull(output,control.getForwardTextSummeryFromGlobalIndex(),ArrayList.class);
 	}
 
 	

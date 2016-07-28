@@ -31,6 +31,7 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Values;
 
 import edu.purdue.cs.tornado.helper.Command;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 
 public class TestSpatialJoinQueryGenerator extends BaseRichSpout {
@@ -69,10 +70,10 @@ public class TestSpatialJoinQueryGenerator extends BaseRichSpout {
 //				SpatioTextualConstants.queryTextualSpatialJoin, i, textList.get(0),2550.0,5050.0,
 //				4500.0, 7400.0,100.0,date.getTime(),dataSrc,dataSrc2,SpatioTextualConstants.queryCommandAdd));
 		this.collector.emit(new Values(
-				SpatioTextualConstants.queryTextualSpatialJoin, ""+(i++), textList.get(0),4980.0,7400.0,
+				QueryType.queryTextualSpatialJoin, ""+(i++), textList.get(0),4980.0,7400.0,
 				5100.0, 7600.0,100.0,date.getTime(),dataSrc,dataSrc2,Command.addCommand));
 		this.collector.emit(new Values(
-				SpatioTextualConstants.queryTextualSpatialJoin, ""+(i++), textList.get(0),5001.0,7400.0,
+				QueryType.queryTextualSpatialJoin, ""+(i++), textList.get(0),5001.0,7400.0,
 				6000.0, 7499.0,100.0,date.getTime(),dataSrc,dataSrc2,Command.addCommand));
 		
 			

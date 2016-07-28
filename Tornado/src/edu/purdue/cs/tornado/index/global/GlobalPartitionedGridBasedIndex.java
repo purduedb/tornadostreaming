@@ -19,12 +19,11 @@ public class GlobalPartitionedGridBasedIndex extends GlobalIndex {
 	public Double yStep;
 	public Integer xCellsNum;
 	public Integer yCellsNum;
-	public RoutingGridCell[][] routingIndex;
+	public int[][] routingIndex;
 	public ArrayList<Cell> partitions;
 	public HashMap<Integer, Cell> taskIndexToPartition;
 	public Integer fineGridGran;
 
-	
 	public void printRoutingIndex(RoutingGridCell[][] routingGridCells) {
 		for (int i = 0; i < fineGridGran; i++) {
 			for (int j = 0; j < fineGridGran; j++) {
@@ -48,7 +47,7 @@ public class GlobalPartitionedGridBasedIndex extends GlobalIndex {
 		xCellsNum = fineGridGran;
 		yCellsNum = fineGridGran;
 		yStep = xStep = SpatioTextualConstants.xMaxRange / xCellsNum;
-		routingIndex = new RoutingGridCell[xCellsNum][yCellsNum];
+		routingIndex = new int[xCellsNum][yCellsNum];
 		partitions = getInitialPartitions();
 		taskIndexToPartition = new HashMap<Integer, Cell>();
 		initStructures(partitions);
@@ -61,7 +60,7 @@ public class GlobalPartitionedGridBasedIndex extends GlobalIndex {
 		xCellsNum = fineGridGran;
 		yCellsNum = fineGridGran;
 		yStep = xStep = SpatioTextualConstants.xMaxRange / fineGridGran;
-		routingIndex = new RoutingGridCell[xCellsNum][yCellsNum];
+		routingIndex = new int[xCellsNum][yCellsNum];
 		taskIndexToPartition = new HashMap<Integer, Cell>();
 		if (partitions == null)
 			partitions = getInitialPartitions();
@@ -77,21 +76,19 @@ public class GlobalPartitionedGridBasedIndex extends GlobalIndex {
 	public void initStructures(ArrayList<Cell> partitions) {
 		for (int i = 0; i < xCellsNum; i++)
 			for (int j = 0; j < yCellsNum; j++)
-				routingIndex[i][j] =null;
+				routingIndex[i][j] = -1;
 		addPartitionsToGrid(routingIndex, partitions);
 	}
 
-	public void addPartitionsToGrid(RoutingGridCell[][] routingIndex, ArrayList<Cell> partitions) {
+	public void addPartitionsToGrid(int[][] routingIndex, ArrayList<Cell> partitions) {
 
 		for (int i = 0; i < xCellsNum; i++) {
 			//ArrayList<RoutingGridCell> ycellList = new ArrayList<RoutingGridCell>();
 			for (int j = 0; j < yCellsNum; j++) {
 				//	ycellList.add(new RoutingGridCell(i, j));
-				if (routingIndex[i][j] == null)
-					routingIndex[i][j] = new RoutingGridCell(i, j);
-				else{
-					routingIndex[i][j].resetCell(i, j);
-				}
+
+				routingIndex[i][j] = -1;
+
 			}
 			//	routingIndex.add(ycellList);
 		}
@@ -100,48 +97,19 @@ public class GlobalPartitionedGridBasedIndex extends GlobalIndex {
 			taskIndexToPartition.put(p.index, p);
 			for (int i = p.getLeft(); i < p.getRight(); i++) {
 				for (int j = p.getBottom(); j < p.getTop(); j++) {
-					if ((routingIndex[i][j]).taskIdIndex == -1) {//not assigned
-						(routingIndex[i][j]).taskIdIndex = p.index;
+					if (routingIndex[i][j] == -1) {//not assigned
+						routingIndex[i][j] = p.index;
 					} else {
 						System.err.println("Error assigning a partition to a preassigned partition");
 					}
 				}
 			}
 		}
-		//finding the rightneighours
-		for (int j = 0; j < yCellsNum; j++) {
-			Integer currentIndex = routingIndex[xCellsNum - 1][j].taskIdIndex;
-			RoutingGridCell rightCell = null;
-			routingIndex[xCellsNum - 1][j].rightCell = null;
-			rightCell = routingIndex[xCellsNum - 1][j];
-			for (int i = xCellsNum - 2; i >= 0; i--) {
-				if (routingIndex[i][j].taskIdIndex != currentIndex) {
-					currentIndex = routingIndex[i][j].taskIdIndex;
-					rightCell = routingIndex[i + 1][j];
-				}
-				routingIndex[i][j].rightCell = rightCell;
-
-			}
-		}
-		//finding the top neighours
-		for (int i = 0; i < xCellsNum; i++) {
-			Integer currentIndex = routingIndex[i][yCellsNum - 1].taskIdIndex;
-			RoutingGridCell upperCell = null;
-			routingIndex[i][yCellsNum - 1].upperCell = null;
-			upperCell = routingIndex[i][yCellsNum - 1];
-			for (int j = yCellsNum - 2; j >= 0; j--) {
-				if (routingIndex[i][j].taskIdIndex != currentIndex) {
-					currentIndex = routingIndex[i][j].taskIdIndex;
-					upperCell = routingIndex[i][j + 1];
-				}
-				routingIndex[i][j].upperCell = upperCell;
-
-			}
-		}
+		
 	}
 
 	@Override
-	public ArrayList<String> addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text, boolean all, boolean forward) {
+	public HashSet<String> addTextToTaskID(ArrayList<Integer> tasks, ArrayList<String> text, boolean all, boolean forward) {
 		return null;
 	}
 
@@ -179,7 +147,6 @@ public class GlobalPartitionedGridBasedIndex extends GlobalIndex {
 	@Override
 	public ArrayList<Integer> getTaskIDsOverlappingRecangle(Rectangle rectangle) {
 		HashSet<Integer> uniqueParitions = new HashSet<Integer>();
-		Queue<RoutingGridCell> queue = new LinkedList<RoutingGridCell>();
 		ArrayList<Integer> partitions = new ArrayList<Integer>();
 		int xMinCell = (int) (rectangle.getMin().getX() / xStep);
 		int yMinCell = (int) (rectangle.getMin().getY() / yStep);
@@ -199,16 +166,13 @@ public class GlobalPartitionedGridBasedIndex extends GlobalIndex {
 		else if (yMinCell < 0)
 			yMinCell = 0;
 
-		
-		
-		for(int i =xMinCell;i<=xMaxCell;i++){
-			for(int j =yMinCell;j<yMaxCell;j++){
-				RoutingGridCell cell = routingIndex[i][j];
-			if (!uniqueParitions.contains(cell.taskIdIndex)) {
-				uniqueParitions.add(cell.taskIdIndex);
-				//	if(cell.taskIdIndex!=0)
-				partitions.add(evaluatorBoltTasks.get(cell.taskIdIndex));
-			}
+		for (int i = xMinCell; i <= xMaxCell; i++) {
+			for (int j = yMinCell; j <= yMaxCell; j++) {
+				Integer cell = routingIndex[i][j];
+				if (!uniqueParitions.contains(cell)) {
+					uniqueParitions.add(cell);
+					partitions.add(evaluatorBoltTasks.get(cell));
+				}
 			}
 		}
 
@@ -234,7 +198,7 @@ public class GlobalPartitionedGridBasedIndex extends GlobalIndex {
 		if (yCell < 0)
 			yCell = 0;
 
-		Integer partitionNum = routingIndex[xCell][yCell].taskIdIndex;
+		Integer partitionNum = routingIndex[xCell][yCell];
 		if (partitionNum == -1) {
 			System.err.println("error in data " + x + " , " + y + "  index is not set");
 			return null;

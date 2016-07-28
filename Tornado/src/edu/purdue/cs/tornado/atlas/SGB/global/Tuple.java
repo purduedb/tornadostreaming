@@ -58,10 +58,15 @@ public class Tuple {
 		Object[] values=this.getAllFields();
 		 
 	
-		rct.set(Float.valueOf(values[1].toString()), 
-				Float.valueOf(values[2].toString()),
-				Float.valueOf(values[1].toString()),
-				Float.valueOf(values[2].toString())
+//		rct.set(Float.valueOf(values[1].toString()), 
+//				Float.valueOf(values[2].toString()),
+//				Float.valueOf(values[1].toString()),
+//				Float.valueOf(values[2].toString())
+//				); 
+		rct.set((Float)values[1], 
+				(Float)values[2],
+				(Float)values[1],
+				(Float)values[2]
 				); 
 		
 		return rct;
@@ -77,9 +82,11 @@ public class Tuple {
 		
 		Object[] values=this.getAllFields();
 		
-		float x1=Float.valueOf(values[1].toString());
-		float y1=Float.valueOf(values[2].toString());
+//		float x1=Float.valueOf(values[1].toString());
+//		float y1=Float.valueOf(values[2].toString());
 		
+		float x1=(Float)values[1];
+		float y1=(Float)values[2];
 		rct.set(x1-eps, 
 				y1-eps,
 				x1+eps,

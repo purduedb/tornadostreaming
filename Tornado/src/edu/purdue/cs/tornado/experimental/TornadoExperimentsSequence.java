@@ -22,6 +22,7 @@ import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.KillTopology;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
@@ -57,115 +58,192 @@ import edu.purdue.cs.tornado.storage.POILFSDataSource;
 
 public class TornadoExperimentsSequence {
 
-	static String javaArgs = " -XX:+PrintGCDetails -verbose:gc -Xloggc:/home/apache-storm-1.0.0/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
-			+ ".log  -XX:+PrintGCTimeStamps -XX:GCLogFileSize=10M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/apache-storm-1.0.0/logs/heapdump  -Xmx2600m -Xms2600m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
+	static String javaArgs = " -XX:+PrintGCDetails -verbose:gc -Xloggc:/home/apache-storm-1.0.1/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
+			+ ".log  -XX:+PrintGCTimeStamps -XX:GCLogFileSize=10M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/apache-storm-1.0.1/logs/heapdump  -Xmx2600m -Xms2600m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
 	static Integer fineGridGran = 64;
 
 	public static void main(String[] args) {
-	//		testBaseLineBp("results/baseline.csv", 0, 10, 36);
+		//		testBaseLineBp("results/baseline.csv", 0, 10, 36);
 		//getStats("Baseline");
 		//	experiment2();
 		//	experiment1();
-
-		//		 experiment4() ;
+		//experiment12();
+	//() ;
 		//experiment11();
 		//experiment5();
 		//experiment6();
 
 		//	 experiment9();
 		//		 experiment10();
-			 experiment8();
+		//	 experiment8();
 		//		 experiment7();
-		//		 experiment3();
+
+	//	testRoutingPefromance();
+				 experiment3();
+		
+	}
+	//Testing 
+	public static void testRoutingPefromance() {
+		String result= buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 12/* routingParrellism */,
+				25/* spout parrallism */, 0/* initial emitsleep duration */,
+				0/* number of ackers */, 0/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
+				11/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+				1/* query Spout parrellisim */, 1, 1024, 0);
+		appendToFile("results/routingNoqueriesResults.csv", result);
+		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+				20/* spout parrallism */, 0/* initial emitsleep duration */,
+				0/* number of ackers */, 0/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
+				11/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+				1/* query Spout parrellisim */, 1, 1024, 0);
+		appendToFile("results/routingNoqueriesResults.csv", result);
+		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 7/* routingParrellism */,
+				15/* spout parrallism */, 0/* initial emitsleep duration */,
+				0/* number of ackers */, 0/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
+				11/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+				1/* query Spout parrellisim */, 1, 1024, 0);
+		appendToFile("results/routingNoqueriesResults.csv", result);
+		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 5/* routingParrellism */,
+				10/* spout parrallism */, 0/* initial emitsleep duration */,
+				0/* number of ackers */, 0/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
+				11/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+				1/* query Spout parrellisim */, 1, 1024, 0);
+		appendToFile("results/routingNoqueriesResults.csv", result);
+		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 3/* routingParrellism */,
+				10/* spout parrallism */, 0/* initial emitsleep duration */,
+				0/* number of ackers */, 0/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
+				11/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+				1/* query Spout parrellisim */, 1, 1024, 0);
+		appendToFile("results/routingNoqueriesResults.csv", result);
+		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 1/* routingParrellism */,
+				10/* spout parrallism */, 0/* initial emitsleep duration */,
+				0/* number of ackers */, 0/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
+				11/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+				1/* query Spout parrellisim */, 1, 1024, 0);
+		appendToFile("results/routingNoqueriesResults.csv", result);
+	}
+	//test query throughput 
+	public static void experiment12() {
+		String result = "";
+//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+//				1/* spout parrallism */, 20/* initial emitsleep duration */,
+//				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+//				1/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+//				10/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetsForQueries.csv", TextualPredicate.CONTAINS);
+//		appendToFile("results/querythroughput", result);
+		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */,5/* routingParrellism */,
+				15/* spout parrallism */, 10/* initial emitsleep duration */,
+				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+				2/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD/* globalIndexType */
+				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+				10/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetsForQueries.csv", TextualPredicate.OVERlAPS);
+//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 7/* routingParrellism */,
+//				15/* spout parrallism */, 10/* initial emitsleep duration */,
+//				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+//				2/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD/* globalIndexType */
+//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+//				10/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetsForQueries.csv", TextualPredicate.OVERlAPS);
+//		appendToFile("results/querythroughput", result);
+//	other configurations fail
+//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+//				1/* spout parrallism */, 20/* initial emitsleep duration */,
+//				0/* number of ackers */, 5000000/* number of queries */, 5/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+//				5/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+//				2/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetsForQueries.csv", TextualPredicate.OVERlAPS);
+//		appendToFile("results/querythroughput", result);
 	}
 
-	 
 	public static void experiment11() {
 		String result = "";
 		javaArgs = "-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -Xloggc:/home/apache-storm-1.0.0/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
 				+ ".log  -Xmx2600m -Xms2600m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
-		
-//
-		Double datahotSpotRatio=.8;
-		Double queriesHotSpotRatio=.8;
+
+		//
+		Double datahotSpotRatio = .8;
+		Double queriesHotSpotRatio = .8;
 		appendToFile("results/adaptivityeffect.csv", ".8 hot spot ratio\n");
-//		result = buildHotSpotRangeQueryToplogyBackPressure("Tornado", 25/* evaluatorParrellism */, 10/* routingParrellism */,
-//				12/* spout parrallism */, 3/* initial emitsleep duration */,
-//				0/* number of ackers */,
-//				1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-//				15/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
-//				, "resources/partitions25_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0,80,"/home/staticdata/tweetsForQueries.csv",TextualPredicate.OVERlAPS,datahotSpotRatio,queriesHotSpotRatio);
-//
-//		appendToFile("results/adaptivityeffect.csv", result);
-		
-		
+		//		result = buildHotSpotRangeQueryToplogyBackPressure("Tornado", 25/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				12/* spout parrallism */, 3/* initial emitsleep duration */,
+		//				0/* number of ackers */,
+		//				1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				15/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+		//				, "resources/partitions25_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0,80,"/home/staticdata/tweetsForQueries.csv",TextualPredicate.OVERlAPS,datahotSpotRatio,queriesHotSpotRatio);
+		//
+		//		appendToFile("results/adaptivityeffect.csv", result);
+
 		result = buildHotSpotRangeQueryToplogyBackPressure("Tornado", 25/* evaluatorParrellism */, 10/* routingParrellism */,
-				12/* spout parrallism */,2/* initial emitsleep duration */,
+				12/* spout parrallism */, 2/* initial emitsleep duration */,
 				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
 				7/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.DYNAMIC_OPTIMIZED/* globalIndexType */
 				, "resources/partitions25_1024_prio.ser"/* partitionsPath */,
-				1/* query Spout parrellisim */, 1,1024, 0,80,"/home/staticdata/tweetsForQueries.csv",TextualPredicate.OVERlAPS,datahotSpotRatio,queriesHotSpotRatio);
+				1/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetsForQueries.csv", TextualPredicate.OVERlAPS, datahotSpotRatio, queriesHotSpotRatio);
 		appendToFile("results/adaptivityeffect.csv", result);
 
-//		appendToFile("results/adaptivityeffect.csv", ".4 hot spot ratio\n");
-//		 datahotSpotRatio=.4;
-//		 queriesHotSpotRatio=.4;
-//		result = buildHotSpotRangeQueryToplogyBackPressure("Tornado", 25/* evaluatorParrellism */, 10/* routingParrellism */,
-//				12/* spout parrallism */,2/* initial emitsleep duration */,
-//				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-//				7/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
-//				, "resources/partitions25_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0,80,"/home/staticdata/tweetsForQueries.csv",TextualPredicate.OVERlAPS,datahotSpotRatio,queriesHotSpotRatio);
-//		appendToFile("results/adaptivityeffect.csv", result);
-////		
-//		
-//		result = buildHotSpotRangeQueryToplogyBackPressure("Tornado", 25/* evaluatorParrellism */, 10/* routingParrellism */,
-//				12/* spout parrallism */,2/* initial emitsleep duration */,
-//				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-//				7/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.DYNAMIC_OPTIMIZED/* globalIndexType */
-//				, "resources/partitions25_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1,1024, 0,80,"/home/staticdata/tweetsForQueries.csv",TextualPredicate.OVERlAPS,datahotSpotRatio,queriesHotSpotRatio);
-//		appendToFile("results/adaptivityeffect.csv", result);
+		//		appendToFile("results/adaptivityeffect.csv", ".4 hot spot ratio\n");
+		//		 datahotSpotRatio=.4;
+		//		 queriesHotSpotRatio=.4;
+		//		result = buildHotSpotRangeQueryToplogyBackPressure("Tornado", 25/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				12/* spout parrallism */,2/* initial emitsleep duration */,
+		//				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				7/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+		//				, "resources/partitions25_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0,80,"/home/staticdata/tweetsForQueries.csv",TextualPredicate.OVERlAPS,datahotSpotRatio,queriesHotSpotRatio);
+		//		appendToFile("results/adaptivityeffect.csv", result);
+		////		
+		//		
+		//		result = buildHotSpotRangeQueryToplogyBackPressure("Tornado", 25/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				12/* spout parrallism */,2/* initial emitsleep duration */,
+		//				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				7/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.DYNAMIC_OPTIMIZED/* globalIndexType */
+		//				, "resources/partitions25_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1,1024, 0,80,"/home/staticdata/tweetsForQueries.csv",TextualPredicate.OVERlAPS,datahotSpotRatio,queriesHotSpotRatio);
+		//		appendToFile("results/adaptivityeffect.csv", result);
 	}
 
 	//query spatial range effect 
 	public static void experiment7() {
 		appendToFile("results/querySpatialRangeEffect.csv", "PartitonedTextAWAREGlobalGridLocal5MillionBP,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,-,");
 		String result = "";
-		javaArgs = "-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -Xloggc:/home/apache-storm-1.0.0/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
+		javaArgs = "-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -Xloggc:/home/apache-storm-1.0.1/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
 				+ ".log  -Xmx4000m -Xms4000m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
-//
-//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 6/* routingParrellism */,
-//				15/* spout parrallism */, 4/* initial emitsleep duration */,
-//				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0);
-//		appendToFile("results/querySpatialRangeEffect.csv", result);
-//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-//				15/* spout parrallism */, 6/* initial emitsleep duration */,
-//				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 3.0/* spatialRange */,
-//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0);
-//		appendToFile("results/querySpatialRangeEffect.csv", result);
-//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-//				15/* spout parrallism */, 6/* initial emitsleep duration */,
-//				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 7.0/* spatialRange */,
-//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0);
-//		appendToFile("results/querySpatialRangeEffect.csv", result);
-//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-//				15/* spout parrallism */, 6/* initial emitsleep duration */,
-//				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 10.0/* spatialRange */,
-//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0);
-//		appendToFile("results/querySpatialRangeEffect.csv", result);
-		
-		
+		//
+				result = buildRangeQueryToplogyBackPressure("Tornado", 25/* evaluatorParrellism */, 10/* routingParrellism */,
+						15/* spout parrallism */, 4/* initial emitsleep duration */,
+						0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 3.0/* spatialRange */,
+						18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+						, "resources/partitions25_1024_prio.ser"/* partitionsPath */,
+						1/* query Spout parrellisim */, 1, 1024, 0);
+		//		appendToFile("results/querySpatialRangeEffect.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 6/* initial emitsleep duration */,
+		//				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 3.0/* spatialRange */,
+		//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0);
+		//		appendToFile("results/querySpatialRangeEffect.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 6/* initial emitsleep duration */,
+		//				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 7.0/* spatialRange */,
+		//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0);
+		//		appendToFile("results/querySpatialRangeEffect.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 6/* initial emitsleep duration */,
+		//				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 10.0/* spatialRange */,
+		//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0);
+		//		appendToFile("results/querySpatialRangeEffect.csv", result);
+
 		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				15/* spout parrallism */, 3/* initial emitsleep duration */,
 				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
@@ -194,30 +272,25 @@ public class TornadoExperimentsSequence {
 				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
 				1/* query Spout parrellisim */, 1, 1024, 0);
 		appendToFile("results/querySpatialRangeEffect.csv", result);
-		
-		
+
 		result = runBaseLineToplogySpatialRangeManual("Baseline", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				10/* spout parrallism */, 8/* initial emitsleep duration */,
-				0/* number of ackers */,
-				1000000/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
+				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 1.0/* spatialRange */,
 				20/* minutes to stats */, 1/* query Spout parrellisim */, 1, 0);
 		appendToFile("results/querySpatialRangeEffect.csv", result);
 		result = runBaseLineToplogySpatialRangeManual("Baseline", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				10/* spout parrallism */, 8/* initial emitsleep duration */,
-				0/* number of ackers */,
-				1000000/* number of queries */, 3/* numberOfQueryKeywords */, 3.0/* spatialRange */,
+				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 3.0/* spatialRange */,
 				20/* minutes to stats */, 1/* query Spout parrellisim */, 1, 0);
 		appendToFile("results/querySpatialRangeEffect.csv", result);
 		result = runBaseLineToplogySpatialRangeManual("Baseline", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				10/* spout parrallism */, 8/* initial emitsleep duration */,
-				0/* number of ackers */,
-				1000000/* number of queries */, 3/* numberOfQueryKeywords */,7.0/* spatialRange */,
+				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 7.0/* spatialRange */,
 				20/* minutes to stats */, 1/* query Spout parrellisim */, 1, 0);
 		appendToFile("results/querySpatialRangeEffect.csv", result);
 		result = runBaseLineToplogySpatialRangeManual("Baseline", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				10/* spout parrallism */, 8/* initial emitsleep duration */,
-				0/* number of ackers */,
-				1000000/* number of queries */, 3/* numberOfQueryKeywords */, 10.0/* spatialRange */,
+				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 10.0/* spatialRange */,
 				20/* minutes to stats */, 1/* query Spout parrellisim */, 1, 0);
 		appendToFile("results/querySpatialRangeEffect.csv", result);
 
@@ -230,27 +303,27 @@ public class TornadoExperimentsSequence {
 		javaArgs = "-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -Xloggc:/home/apache-storm-1.0.0/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
 				+ ".log  -Xmx4000m -Xms4000m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
 
-//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-//				15/* spout parrallism */, 6/* initial emitsleep duration */,
-//				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0);
-//		appendToFile("results/queryKeywordCountEffect.csv", result);
-//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-//				15/* spout parrallism */, 6/* initial emitsleep duration */,
-//				0/* number of ackers */, 5000000/* number of queries */, 5/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0);
-//		appendToFile("results/queryKeywordCountEffect.csv", result);
-//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-//				15/* spout parrallism */, 6/* initial emitsleep duration */,
-//				0/* number of ackers */, 5000000/* number of queries */, 7/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0);
-//		appendToFile("results/queryKeywordCountEffect.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 6/* initial emitsleep duration */,
+		//				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0);
+		//		appendToFile("results/queryKeywordCountEffect.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 6/* initial emitsleep duration */,
+		//				0/* number of ackers */, 5000000/* number of queries */, 5/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0);
+		//		appendToFile("results/queryKeywordCountEffect.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 6/* initial emitsleep duration */,
+		//				0/* number of ackers */, 5000000/* number of queries */, 7/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0);
+		//		appendToFile("results/queryKeywordCountEffect.csv", result);
 		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				15/* spout parrallism */, 3/* initial emitsleep duration */,
 				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
@@ -260,7 +333,7 @@ public class TornadoExperimentsSequence {
 		appendToFile("results/queryKeywordCountEffect.csv", result);
 		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				15/* spout parrallism */, 3/* initial emitsleep duration */,
-				0/* number of ackers */, 5000000/* number of queries */,5/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+				0/* number of ackers */, 5000000/* number of queries */, 5/* numberOfQueryKeywords */, 5.0/* spatialRange */,
 				14/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.GRID/* globalIndexType */
 				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
 				1/* query Spout parrellisim */, 1, 1024, 0);
@@ -273,27 +346,21 @@ public class TornadoExperimentsSequence {
 				1/* query Spout parrellisim */, 1, 1024, 0);
 		appendToFile("results/queryKeywordCountEffect.csv", result);
 
-		
-		
 		result = runBaseLineToplogySpatialRangeManual("Baseline", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				10/* spout parrallism */, 8/* initial emitsleep duration */,
-				0/* number of ackers */,
-				1000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+				0/* number of ackers */, 1000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
 				20/* minutes to stats */, 1/* query Spout parrellisim */, 1, 0);
 		appendToFile("results/queryKeywordCountEffect.csv", result);
 		result = runBaseLineToplogySpatialRangeManual("Baseline", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				10/* spout parrallism */, 8/* initial emitsleep duration */,
-				0/* number of ackers */,
-				1000000/* number of queries */, 5/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+				0/* number of ackers */, 1000000/* number of queries */, 5/* numberOfQueryKeywords */, 5.0/* spatialRange */,
 				20/* minutes to stats */, 1/* query Spout parrellisim */, 1, 0);
 		appendToFile("results/queryKeywordCountEffect.csv", result);
 		result = runBaseLineToplogySpatialRangeManual("Baseline", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				10/* spout parrallism */, 8/* initial emitsleep duration */,
-				0/* number of ackers */,
-				1000000/* number of queries */, 7/* numberOfQueryKeywords */,5.0/* spatialRange */,
+				0/* number of ackers */, 1000000/* number of queries */, 7/* numberOfQueryKeywords */, 5.0/* spatialRange */,
 				20/* minutes to stats */, 1/* query Spout parrellisim */, 1, 0);
 		appendToFile("results/queryKeywordCountEffect.csv", result);
-
 
 	}
 
@@ -304,13 +371,13 @@ public class TornadoExperimentsSequence {
 		javaArgs = "-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -Xloggc:/home/apache-storm-1.0.0/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
 				+ ".log  -Xmx3600m -Xms3600m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
 
-//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-//				15/* spout parrallism */, 6/* initial emitsleep duration */,
-//				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-//				1/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetskeywrod_firstQuantile.csv", TextualPredicate.CONTAINS);
-//		appendToFile("results/queryselectivityEffectContains.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 6/* initial emitsleep duration */,
+		//				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetskeywrod_firstQuantile.csv", TextualPredicate.CONTAINS);
+		//		appendToFile("results/queryselectivityEffectContains.csv", result);
 		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 				15/* spout parrallism */, 3/* initial emitsleep duration */,
 				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
@@ -372,19 +439,19 @@ public class TornadoExperimentsSequence {
 		//					1/* query Spout parrellisim */, 1, 1024, 0,80,"/home/staticdata/tweetskeywrod_firstQuantile.csv");
 		//			appendToFile("results/queryselectivityEffect.csv", result);
 		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-				15/* spout parrallism */, 6/* initial emitsleep duration */,
+				15/* spout parrallism */, 5/* initial emitsleep duration */,
 				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
 				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
 				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
 				1/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetskeywrod_secondQuantile.csv", TextualPredicate.OVERlAPS);
 		appendToFile("results/queryselectivityEffect.csv", result);
-		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-				15/* spout parrallism */, 3/* initial emitsleep duration */,
-				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-				15/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
-				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-				1/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetskeywrod_secondQuantile.csv", TextualPredicate.OVERlAPS);
-		appendToFile("results/queryselectivityEffect.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 3/* initial emitsleep duration */,
+		//				0/* number of ackers */, 5000000/* number of queries */, 1/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				15/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0, 80, "/home/staticdata/tweetskeywrod_secondQuantile.csv", TextualPredicate.OVERlAPS);
+		//		appendToFile("results/queryselectivityEffect.csv", result);
 		//			result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
 		//					15/* spout parrallism */, 6/* initial emitsleep duration */,
 		//					0/* number of ackers */,
@@ -435,20 +502,20 @@ public class TornadoExperimentsSequence {
 		//testGridGlobalGridLocaltest("results/GlobalGridLocalGrid.csv", 0, 1, 16);
 		//testBaseLinePlain("results/baseline.csv", 0, 0, 36);
 		//testBaseLine("results/baseline.csv", 0, 0, 36);
-		String result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-				15/* spout parrallism */, 2/* initial emitsleep duration */,
-				0/* number of ackers */, 100000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		String result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 7/* routingParrellism */,
+				15/* spout parrallism */, 4/* initial emitsleep duration */,
+				0/* number of ackers */, 5000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
 				14/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
 				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
 				1/* query Spout parrellisim */, 1, 1024, 0);
-		appendToFile("results/tornadobaselineeffect.csv", result);
-		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
-				15/* spout parrallism */, 4/* initial emitsleep duration */,
-				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-				17/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
-				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
-				1/* query Spout parrellisim */, 1, 1024, 0);
-		appendToFile("results/tornadobaselineeffect.csv", result);
+		//		appendToFile("results/tornadobaselineeffect.csv", result);
+		//		result = buildRangeQueryToplogyBackPressure("Tornado", 36/* evaluatorParrellism */, 10/* routingParrellism */,
+		//				15/* spout parrallism */, 4/* initial emitsleep duration */,
+		//				0/* number of ackers */, 1000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
+		//				17/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+		//				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
+		//				1/* query Spout parrellisim */, 1, 1024, 0);
+		//		appendToFile("results/tornadobaselineeffect.csv", result);
 	}
 
 	//texting various baselines
@@ -457,7 +524,7 @@ public class TornadoExperimentsSequence {
 				+ ".log  -Xmx2600m -Xms2600m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
 		//testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGrid.csv", 0, 10, 36);
 		testPartitonedGlobalGridLocal5millionBP("results/BackPressureGlobalPartitionedLocalGrid.csv", 0, 10, 36);
-	//		testGridGlobalGridLocal5millionBP("results/BackPressureGlobalGridLocalGrid.csv", 0, 6, 36);
+		//		testGridGlobalGridLocal5millionBP("results/BackPressureGlobalGridLocalGrid.csv", 0, 6, 36);
 		//testGridGlobalNoLocal_5millionBP("results/BackPressureGlobalGridNoLocal.csv", 0, 6, 36);
 
 		//testBaseLineBp("results/baseline.csv", 0, 10, 36);
@@ -467,12 +534,12 @@ public class TornadoExperimentsSequence {
 	public static void experiment4() {
 		javaArgs = "-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -Xloggc:/home/apache-storm-1.0.0/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
 				+ ".log  -Xmx2600m -Xms2600m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
-		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 1, 36);
-		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 2, 36);
-		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 3, 36);
-		//testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 4, 36);
-		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 5, 36);
-		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 7, 36);
+
+		//		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 4, 36);
+		//		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 6, 36);
+		//		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 7, 36);
+		//		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 8, 36);
+		testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGridRoutingEffect.csv", 0, 12, 10);
 	}
 
 	//Testing the effect of evaluators
@@ -716,7 +783,7 @@ public class TornadoExperimentsSequence {
 				15/* spout parrallism */, 6/* initial emitsleep duration */,
 				numberOfAckers/* number of ackers */,
 				5000000/* number of queries */, 3/* numberOfQueryKeywords */, 5.0/* spatialRange */,
-				18/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
+				16/* minutes to stats */, LocalIndexType.HYBRID_GRID /* localIndexType */, GlobalIndexType.PARTITIONED_TEXT_AWARE/* globalIndexType */
 				, "resources/partitions36_1024_prio.ser"/* partitionsPath */,
 				1/* query Spout parrellisim */, 1, 1024, 0);
 		appendToFile(fileName, result);
@@ -928,7 +995,7 @@ public class TornadoExperimentsSequence {
 			nimbusInfo[1] = "" + nimbusPort;
 			nimbusInfo[2] = "" + topologyName;
 			Thread.sleep(1000 * 60 * minutesToStats);
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < 3; i++) {
 				toRetun += ClusterInformationExtractor.getStats(nimbusInfo) + "\n";
 				Thread.sleep(1000 * 60);
 			}
@@ -946,12 +1013,12 @@ public class TornadoExperimentsSequence {
 		return toRetun;
 
 	}
+
 	public static String buildHotSpotRangeQueryToplogyBackPressure(String topologyName, Integer evaluatorParrellism, Integer routingParrellism, Integer spoutParallesim, Integer initialSpoutSleepDuration, Integer numberOfackers,
 			Integer numberOfQueries, Integer numberOfQueryKeywords, Double spatialRange, Integer minutesToStats, LocalIndexType localIndexType, GlobalIndexType globalIndexType, String partitionsPath, Integer querySpoutParrellisim,
-			Integer spoutBatch, Integer fineGridGranularity, Integer spoutSleepDuration, Integer numberOfWorkers, String queriesFilePath, TextualPredicate queryTextualPredicate,Double datahotSpotRatio,Double queriesHotSpotRatio) {
+			Integer spoutBatch, Integer fineGridGranularity, Integer spoutSleepDuration, Integer numberOfWorkers, String queriesFilePath, TextualPredicate queryTextualPredicate, Double datahotSpotRatio, Double queriesHotSpotRatio) {
 		String tweetsSource = "Tweets";
 		String querySource = "querySource";
-
 
 		String toRetun = "numberOfackers," + numberOfackers + ",evaluatorParrellism," + evaluatorParrellism + ",routingParrellism," + routingParrellism + ",spoutParallesim," + spoutParallesim * spoutBatch + ",numberOfQueryKeywords,"
 				+ numberOfQueryKeywords + ",numberOfQueries," + numberOfQueries + ",spatialRange," + spatialRange + ",localIndexType," + localIndexType.name() + ",globalIndexType," + globalIndexType.name() + "\n";
@@ -963,8 +1030,9 @@ public class TornadoExperimentsSequence {
 		}
 
 		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
-		DataAndQueriesSources.addHotSpotLFSTweetsSpout(tweetsSource, builder, properties, spoutParallesim, spoutSleepDuration, initialSpoutSleepDuration * 60000, spoutBatch,datahotSpotRatio);
-		DataAndQueriesSources.addHotSpotRangeQueries(tweetsSource, querySource, builder, properties, querySpoutParrellisim, spatialRange, numberOfQueries, numberOfQueryKeywords, 0, 0, FileSpout.LFS, queriesFilePath, queryTextualPredicate,queriesHotSpotRatio);
+		DataAndQueriesSources.addHotSpotLFSTweetsSpout(tweetsSource, builder, properties, spoutParallesim, spoutSleepDuration, initialSpoutSleepDuration * 60000, spoutBatch, datahotSpotRatio);
+		DataAndQueriesSources.addHotSpotRangeQueries(tweetsSource, querySource, builder, properties, querySpoutParrellisim, spatialRange, numberOfQueries, numberOfQueryKeywords, 0, 0, FileSpout.LFS, queriesFilePath, queryTextualPredicate,
+				queriesHotSpotRatio);
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
 
@@ -1029,6 +1097,7 @@ public class TornadoExperimentsSequence {
 		return toRetun;
 
 	}
+
 	public static String getStats(String toplogyName) {
 		String toReturn = "";
 		try {
@@ -1197,7 +1266,7 @@ public class TornadoExperimentsSequence {
 		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT, numberOfQueries);
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT, numberOfQueryKeywords);
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, tweetsSource);
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryTextualRange);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualRange);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC, 0);
 		builder.setSpout(querySource, new QueriesFileSystemSpout(queriesSpoutConf, 0), querySpoutParrellisim);

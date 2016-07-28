@@ -19,6 +19,7 @@ import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
@@ -27,6 +28,8 @@ import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.GlobalIndexBolt;
 import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.JoinQuery;
+import edu.purdue.cs.tornado.messages.KNNQuery;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.storage.AbstractStaticDataSource;
 import edu.purdue.cs.tornado.storage.POIHDFSSource;
@@ -105,7 +108,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 		} else if (input.getSourceComponent().equals("querySource")) {
 			//			_queriesCountMetric.incr();
 			//			_queriesCountMeanMetric.update(1);
-			String queryType = input.getStringByField(SpatioTextualConstants.queryTypeField);
+			QueryType queryType =(QueryType) input.getValueByField(SpatioTextualConstants.queryTypeField);
 			Query query = GlobalIndexBolt.readQueryByType(input, queryType, "querySource");
 			singleIndexCell.addQuery(query);
 			//	allQueries.add(query);
@@ -120,7 +123,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 			collector.ack(input);
 	}
 
-	private Query readQueryByType(Tuple input, String queryType, String source) {
+	private Query readQueryByType(Tuple input, QueryType queryType, String source) {
 		Query query = new Query();
 		query.setQueryId(input.getIntegerByField(SpatioTextualConstants.queryIdField));
 		query.setSrcId(source);
@@ -137,7 +140,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 		if (input.contains(SpatioTextualConstants.textualPredicate2)) {
 			query.setTextualPredicate((TextualPredicate) input.getValueByField(SpatioTextualConstants.textualPredicate2));
 		} else {
-			query.setTextualPredicate2(TextualPredicate.NONE);
+			((JoinQuery)query).setTextualPredicate2(TextualPredicate.NONE);
 		}
 		if (input.contains(SpatioTextualConstants.queryTextField)) {
 			text = input.getStringByField(SpatioTextualConstants.queryTextField);
@@ -158,24 +161,24 @@ public class BaselineEvaluator extends BaseRichBolt {
 				queryText = TextHelpers.transformIntoSortedArrayListOfString(text2);
 
 			} else {
-				query.setTextualPredicate2(TextualPredicate.NONE);
+				((JoinQuery)query).setTextualPredicate2(TextualPredicate.NONE);
 			}
-			query.setQueryText2(queryText);
+			((JoinQuery)query).setQueryText2(queryText);
 
 		}
 
 		if (input.contains(SpatioTextualConstants.joinTextualPredicate)) {
-			query.setJoinTextualPredicate((TextualPredicate) input.getValueByField(SpatioTextualConstants.joinTextualPredicate));
+			((JoinQuery)query).setJoinTextualPredicate((TextualPredicate) input.getValueByField(SpatioTextualConstants.joinTextualPredicate));
 		} else {
-			query.setJoinTextualPredicate(TextualPredicate.NONE);
+			((JoinQuery)query).setJoinTextualPredicate(TextualPredicate.NONE);
 		}
 
-		if (SpatioTextualConstants.queryTextualKNN.equals(queryType)) {
-			query.setK(input.getIntegerByField(SpatioTextualConstants.kField));
-			query.getFocalPoint().setX(input.getDoubleByField(SpatioTextualConstants.focalXCoordField));
-			query.getFocalPoint().setY(input.getDoubleByField(SpatioTextualConstants.focalYCoordField));
-			query.setSpatialRange(new Rectangle(query.getFocalPoint(), query.getFocalPoint()));
-		} else if (SpatioTextualConstants.queryTextualRange.equals(queryType) || (SpatioTextualConstants.queryTextualSpatialJoin.equals(queryType))) {
+		if (QueryType.queryTextualKNN.equals(queryType)) {
+			((KNNQuery)query).setK(input.getIntegerByField(SpatioTextualConstants.kField));
+			((KNNQuery)query).getFocalPoint().setX(input.getDoubleByField(SpatioTextualConstants.focalXCoordField));
+			((KNNQuery)query).getFocalPoint().setY(input.getDoubleByField(SpatioTextualConstants.focalYCoordField));
+			((KNNQuery)query).setSpatialRange(new Rectangle(((KNNQuery)query).getFocalPoint(), ((KNNQuery)query).getFocalPoint()));
+		} else if (QueryType.queryTextualRange.equals(queryType) || (QueryType.queryTextualSpatialJoin.equals(queryType))) {
 			Point min = new Point();
 			min.setX(input.getDoubleByField(SpatioTextualConstants.queryXMinField));
 			min.setY(input.getDoubleByField(SpatioTextualConstants.queryYMinField));
@@ -183,9 +186,9 @@ public class BaselineEvaluator extends BaseRichBolt {
 			max.setX(input.getDoubleByField(SpatioTextualConstants.queryXMaxField));
 			max.setY(input.getDoubleByField(SpatioTextualConstants.queryYMaxField));
 			query.setSpatialRange(new Rectangle(min, max));
-			if (SpatioTextualConstants.queryTextualSpatialJoin.equals(queryType)) {
-				query.setDataSrc2(input.getStringByField(SpatioTextualConstants.dataSrc2));
-				query.setDistance(input.getDoubleByField(SpatioTextualConstants.queryDistance));
+			if (QueryType.queryTextualSpatialJoin.equals(queryType)) {
+				((JoinQuery)query).setDataSrc2(input.getStringByField(SpatioTextualConstants.dataSrc2));
+				((JoinQuery)query).setDistance(input.getDoubleByField(SpatioTextualConstants.queryDistance));
 			}
 		}
 
@@ -198,11 +201,11 @@ public class BaselineEvaluator extends BaseRichBolt {
 		List<Query> queriesList = singleIndexCell.getQueries();
 	
 			for (Query q : queriesList) {
-				if (!fromNeighbour && q.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
+				if (!fromNeighbour && q.getQueryType().equals(QueryType.queryTextualRange)) {
 					if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
 						generateOutput(q, dataObject, Command.addCommand);
-				} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
-					if (processVolatileDataObjectForTextualSpatialJoinQuery(dataObject, q))
+				} else if (q.getQueryType().equals(QueryType.queryTextualSpatialJoin)) {
+					if (processVolatileDataObjectForTextualSpatialJoinQuery(dataObject, ((JoinQuery)q)))
 						resend = true;
 				}
 			}
@@ -213,18 +216,18 @@ public class BaselineEvaluator extends BaseRichBolt {
 	private Boolean evaluateDataObjectAgainstQueries_old(DataObject dataObject, Boolean fromNeighbour) {
 		Boolean resend = false;
 		for (Query q : allQueries) {
-			if (!fromNeighbour && q.getQueryType().equals(SpatioTextualConstants.queryTextualRange)) {
+			if (!fromNeighbour && q.getQueryType().equals(QueryType.queryTextualRange)) {
 				if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))
 					generateOutput(q, dataObject, Command.addCommand);
-			} else if (q.getQueryType().equals(SpatioTextualConstants.queryTextualSpatialJoin)) {
-				if (processVolatileDataObjectForTextualSpatialJoinQuery(dataObject, q))
+			} else if (q.getQueryType().equals(QueryType.queryTextualSpatialJoin)) {
+				if (processVolatileDataObjectForTextualSpatialJoinQuery(dataObject, (JoinQuery)q))
 					resend = true;
 			}
 		}
 		return resend;
 	}
 
-	private Boolean processVolatileDataObjectForTextualSpatialJoinQuery(DataObject dataObject, Query q) {
+	private Boolean processVolatileDataObjectForTextualSpatialJoinQuery(DataObject dataObject, JoinQuery q) {
 		Boolean resend = false;
 		if (!SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()))
 			return resend;
@@ -299,14 +302,14 @@ public class BaselineEvaluator extends BaseRichBolt {
 		collector.emit("output", new Values(outputTuple));
 	}
 
-	void generateOutput(Query q, DataObject obj, DataObject obj2, Command obj1Command, Command obj2Command) {
+	void generateOutput(JoinQuery q, DataObject obj, DataObject obj2, Command obj1Command, Command obj2Command) {
 		//		System.out.println("[Output: command  "+obj1Command+" query:"  + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
 		//		_outputCountMeanMetric.update(1);
 		//		_outputCountMetric.incr();
 		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.setDataObject(obj);
 		outputTuple.setDataObject2(obj2);
-		Query miniQuery = new Query();
+		JoinQuery miniQuery = new JoinQuery();
 		miniQuery.setQueryId(q.getQueryId());
 		miniQuery.setSrcId(q.getSrcId());
 		miniQuery.setDataSrc(q.getDataSrc());

@@ -6,9 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.util.Map;
 
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+//import org.apache.hadoop.conf.Configuration;
+//import org.apache.hadoop.fs.FileSystem;
+//import org.apache.hadoop.fs.Path;
 import org.apache.storm.Config;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -32,11 +32,11 @@ public class FileSpout extends BaseRichSpout {
 
 	//public Map conf;
 	public  BufferedReader br;
-	public  Configuration hdfsconf;
+	//public  Configuration hdfsconf;
 	public  FileInputStream fstream;
 	public  String filePath;
 	public  String corePath;
-	public Path pt;
+	//public Path pt;
 	public String fileSystemType;
 	public Integer sleepDurationMicroSec;
 	public Map spoutConf;
@@ -74,11 +74,11 @@ public class FileSpout extends BaseRichSpout {
 		this.sleepDurationMicroSec = (Integer) spoutConf.get(EMIT_SLEEP_DURATION_NANOSEC);
 		if (fileSystemType.equals(HDFS)) {
 			this.corePath = (String) spoutConf.get(CORE_FILE_PATH);
-			hdfsconf = new Configuration();
-			hdfsconf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
-			hdfsconf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
-			hdfsconf.addResource(new Path(corePath));
-			pt = new Path(filePath);
+//			hdfsconf = new Configuration();
+//			hdfsconf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+//			hdfsconf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+//			hdfsconf.addResource(new Path(corePath));
+//			pt = new Path(filePath);
 		}
 		count=0;
 		connectToFS();
@@ -100,12 +100,12 @@ public class FileSpout extends BaseRichSpout {
 
 	public void sleep() {
 		if (sleepDurationMicroSec != 0) {
-			try {
-				//TimeUnit.NANOSECONDS.sleep(sleepDurationNanoSec);
-				Thread.sleep(0,sleepDurationMicroSec);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
+//			try {
+//				//TimeUnit.NANOSECONDS.sleep(sleepDurationNanoSec);
+//				Thread.sleep(0,sleepDurationMicroSec);
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
 
 		}
 	}
@@ -122,8 +122,8 @@ public class FileSpout extends BaseRichSpout {
 
 	public void connectToHDFS() {
 		try {
-			FileSystem fs = FileSystem.get(hdfsconf);
-			br = new BufferedReader(new InputStreamReader(fs.open(pt)));
+//			FileSystem fs = FileSystem.get(hdfsconf);
+//			br = new BufferedReader(new InputStreamReader(fs.open(pt)));
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}

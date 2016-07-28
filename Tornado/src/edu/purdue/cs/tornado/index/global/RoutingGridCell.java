@@ -6,36 +6,35 @@ public class RoutingGridCell implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -2664508488552532404L;
-	public Integer taskIdIndex;
-	public Integer xCoordinate;
-	public Integer yCoordinate;
+	public int taskIdIndex;
 	public RoutingGridCell rightCell;
 	public RoutingGridCell upperCell;
-	public Integer fineGridGran;
-	public Double step;
+//	public int x;
+//	public int y;
+
 
 	public RoutingGridCell() {
 		taskIdIndex = -1;
 		rightCell = null;
 		upperCell = null;
-		xCoordinate = null;
-		yCoordinate = null;
+//		x=-1;
+//		y=-1;
 	}
 
 	public RoutingGridCell(Integer x, Integer y) {
 		taskIdIndex = -1;
 		rightCell = null;
 		upperCell = null;
-		xCoordinate = x;
-		yCoordinate = y;
+//		this.x=x;
+//		this.y=y;
+
 	}
 	public void resetCell(Integer x, Integer y){
 		taskIdIndex = -1;
 		rightCell = null;
 		upperCell = null;
-		xCoordinate = x;
-		yCoordinate = y;
+//		this.x=x;
+//		this.y=y;
 	}
 
 }

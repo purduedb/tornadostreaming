@@ -20,8 +20,8 @@ public class L2distance implements Distance {
 			{
 				for(int i:Fileds)
 				{
-					float f1=Float.valueOf(t1.getFiled(i).toString());
-					float f2=Float.valueOf(t2.getFiled(i).toString());
+					float f1=(Float)(t1.getFiled(i));
+					float f2=(Float)(t2.getFiled(i));
 					results=results+(f1-f2)*(f1-f2);
 				}
 				

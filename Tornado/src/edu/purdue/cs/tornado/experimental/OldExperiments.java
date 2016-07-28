@@ -12,9 +12,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.storm.Config;
-import org.apache.storm.StormSubmitter;
 import org.apache.storm.metric.LoggingMetricsConsumer;
-import org.apache.storm.topology.TopologyBuilder;
 
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
@@ -24,6 +22,7 @@ import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.KillTopology;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
@@ -52,11 +51,9 @@ import edu.purdue.cs.tornado.serializer.PointSerializer;
 import edu.purdue.cs.tornado.serializer.QuerySerializer;
 import edu.purdue.cs.tornado.serializer.RectangleSerializer;
 import edu.purdue.cs.tornado.serializer.ResultSetChangeSerializer;
-import edu.purdue.cs.tornado.spouts.DummyTweetGenerator;
 import edu.purdue.cs.tornado.spouts.FileSpout;
 import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
 import edu.purdue.cs.tornado.spouts.TweetsFSSpout;
-import edu.purdue.cs.tornado.spouts.TweetsFSSpoutSlow;
 import edu.purdue.cs.tornado.storage.POILFSDataSource;
 
 public class OldExperiments{
@@ -552,7 +549,7 @@ public class OldExperiments{
 		queriesSpoutConf.put(QueriesFileSystemSpout.TOTAL_QUERY_COUNT, numberOfQueries);
 		queriesSpoutConf.put(QueriesFileSystemSpout.KEYWORD_COUNT, numberOfQueryKeywords);
 		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, tweetsSource);
-		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryTextualRange);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualRange);
 		queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
 		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC, 0);
 		builder.setSpout(querySource, new QueriesFileSystemSpout(queriesSpoutConf, 0), querySpoutParrellisim);

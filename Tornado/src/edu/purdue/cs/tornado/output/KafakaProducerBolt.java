@@ -38,6 +38,7 @@ import org.apache.storm.tuple.Tuple;
 import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.JsonHelper;
 import edu.purdue.cs.tornado.helper.LatLong;
+import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.messages.CombinedTuple;
@@ -82,7 +83,7 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		//	fw.write(jsonOutput.toString()+"\n");
 //			ProducerRecord<String, String> producerRecord = new ProducerRecord<String, String>(topic, outputTuple.getQuery().getQueryId(), jsonOutput);
 //			producer.send(producerRecord);
-			if (SpatioTextualConstants.queryTextualSpatialJoin.equals(outputTuple.getQuery().getQueryType())) {
+			if (QueryType.queryTextualSpatialJoin.equals(outputTuple.getQuery().getQueryType())) {
 				latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject2().getLocation());
 				lat = latLong.getLatitude();
 				lon = latLong.getLongitude();

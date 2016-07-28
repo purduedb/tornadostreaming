@@ -19,11 +19,10 @@
  */
 package edu.purdue.cs.tornado.helper;
 
-import java.net.PasswordAuthentication;
 import java.util.ArrayList;
 
 import edu.purdue.cs.tornado.loadbalance.Partition;
-import edu.purdue.cs.tornado.messages.Query;
+import edu.purdue.cs.tornado.messages.KNNQuery;
 
 public class SpatialHelper {
 	private final static double QUARTERPI = Math.PI / 4.0;
@@ -35,7 +34,7 @@ public class SpatialHelper {
 	 * @param query
 	 * @return
 	 */
-	public static Boolean checkKNNQueryDoneWithinLocalBounds(Query query, Rectangle bounds) {
+	public static Boolean checkKNNQueryDoneWithinLocalBounds(KNNQuery query, Rectangle bounds) {
 		if (query.getKNNlistSize() == query.getK()) {
 			//we got the K items 
 			Double farthestDistance = query.getFarthestDistance();
@@ -124,6 +123,11 @@ public class SpatialHelper {
 		Double dist = 0.0;
 		dist = Math.sqrt(Math.pow(p1.getX() - p2.getX(), 2) + Math.pow(p1.getY() - p2.getY(), 2));
 		return dist;
+
+	}
+
+	public static double getAreaInBetween(Point a, Point b, Point c) {
+		return (b.X-a.X)*(c.Y-a.Y) - (b.Y-a.Y)*(c.X-a.X);
 
 	}
 
@@ -367,8 +371,8 @@ public class SpatialHelper {
 			aRight = splitPosition;
 		}
 		splits[0] = new Partition(aBottom, aTop, aLeft, aRight);
-		if(splits[0].dimensions[0]<0||splits[0].dimensions[1]<0){
-			System.err.println("Error in split there is a problem in input coordinates"+parent.toString()+",split position:"+splitPosition+",is horizontal"+isHorizontal);
+		if (splits[0].dimensions[0] < 0 || splits[0].dimensions[1] < 0) {
+			System.err.println("Error in split there is a problem in input coordinates" + parent.toString() + ",split position:" + splitPosition + ",is horizontal" + isHorizontal);
 			return null;
 		}
 		// Cell B will be split[1]
@@ -383,10 +387,10 @@ public class SpatialHelper {
 			BLeft = splitPosition;
 			BBottom = parent.getBottom();
 		}
-		
+
 		splits[1] = new Partition(BBottom, BTop, BLeft, BRight);
-		if(splits[1].dimensions[0]<0||splits[1].dimensions[1]<0){
-			System.err.println("Error in split there is a problem in input coordinates"+parent.toString()+",split position:"+splitPosition+",is horizontal"+isHorizontal);
+		if (splits[1].dimensions[0] < 0 || splits[1].dimensions[1] < 0) {
+			System.err.println("Error in split there is a problem in input coordinates" + parent.toString() + ",split position:" + splitPosition + ",is horizontal" + isHorizontal);
 			return null;
 		}
 		return splits;
@@ -442,6 +446,7 @@ public class SpatialHelper {
 
 		return splits;
 	}
+
 	public static Partition[] splitWithQueriesCost(Partition parent, int splitPosition, boolean isHorizontal, CostEstimator costEstimator) {
 
 		Partition[] splits = new Partition[2];
@@ -478,5 +483,5 @@ public class SpatialHelper {
 
 		return splits;
 	}
-	
+
 }

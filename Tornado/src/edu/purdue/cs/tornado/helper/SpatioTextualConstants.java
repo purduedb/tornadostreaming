@@ -145,9 +145,9 @@ public class SpatioTextualConstants {
 	public static final String hotSpotRatio = "hotSpotRatio";
 	//Query types 
 	public static final String queryTypeField = "type";
-	public static final String queryTextualKNN = "TextualKNN";
-	public static final String queryTextualRange = "TextualRange";
-	public static final String queryTextualSpatialJoin = "TextualSpatialJoin";
+	//public static final String queryTextualKNN = "TextualKNN";
+	//public static final String queryTextualRange = "TextualRange";
+	//public static final String queryTextualSpatialJoin = "TextualSpatialJoin";
 
 	//Text constants
 	public static final String  textDelimiter = " ";

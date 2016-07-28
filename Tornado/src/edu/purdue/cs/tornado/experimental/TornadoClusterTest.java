@@ -198,21 +198,46 @@ public class TornadoClusterTest {
 //		statsdConfig.put(StatsdMetricConsumer.STATSD_HOST, "128.211.254.131");
 //		statsdConfig.put(StatsdMetricConsumer.STATSD_PORT, 8125);
 //		statsdConfig.put(StatsdMetricConsumer.STATSD_PREFIX, "cluster.counter.");
-		Double hotSpotRatio = .25;
-		DataAndQueriesSources.addHotSpotLFSTweetsSpout(tweetsSource, builder, properties, 1, 0, 0,1,hotSpotRatio);
+		
+		//*************************************************************************************
+		//Adaptivity test
+//		Double hotSpotRatio = .25;
+//		DataAndQueriesSources.addHotSpotLFSTweetsSpout(tweetsSource, builder, properties, 1, 0, 0,1,hotSpotRatio);
+//		DataAndQueriesSources.addHotSpotRangeQueries(tweetsSource, querySource, builder, properties, 1, 100.0, 100000, 5, 0, 0, FileSpout.LFS,hotSpotRatio);
+//		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
+//		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
+//		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_64_prio.ser");
+//		builder.addDynamicSpatioTextualProcessor("tornado", 3, 17, 
+//				partitions,GlobalIndexType.DYNAMIC_OPTIMIZED, LocalIndexType.HYBRID_GRID,64)
+//		.addVolatileSpatioTextualInput(tweetsSource)
+//				//			.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POIHDFSSource", staticSourceConf)
+//				//	.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POILFSDataSource", staticSourceConf)
+//				.addContinuousQuerySource(querySource);
+		//*************************************************************************************
+		
+	
+		DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, 1, 0, 100000,1);
+		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 100.0, 1000, 5, 0, 0, FileSpout.LFS);
+		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
+		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
+		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_64_prio.ser");
+		builder.addSpatioTextualProcessor("tornado", 3, 16, 
+				partitions,GlobalIndexType.PARTITIONED_TEXT_AWARE, LocalIndexType.HYBRID_GRID,64)
+		.addVolatileSpatioTextualInput(tweetsSource)
+				//			.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POIHDFSSource", staticSourceConf)
+				//	.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POILFSDataSource", staticSourceConf)
+				.addContinuousQuerySource(querySource);
+		
 	//	DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 0, 0,1);
 	//	builder.setSpout(tweetsSource, new DummyTweetGenerator(5), Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()));
 		//DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 3000, 10000, 1);
 		//	builder.setSpout(tweetsSource, new DummyTweetGenerator(10), Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()));
 		//	DataAndQueriesSources.addJoinQueries(tweetsSource, POISource, querySource2, builder, properties, 1, 50.0, 1000, 5, 20.0, 0);
 		//	DataAndQueriesSources.addTopKQueries(tweetsSource, querySource3, builder, properties, 1, 10, 1000, 5, 0);
-		DataAndQueriesSources.addHotSpotRangeQueries(tweetsSource, querySource, builder, properties, 1, 100.0, 100000, 5, 0, 0, FileSpout.LFS,hotSpotRatio);
-
-		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
+		
 		//	staticSourceConf.put(POIHDFSSource.HDFS_POI_FOLDER_PATH, properties.getProperty(POIHDFSSource.HDFS_POI_FOLDER_PATH));
 		//		staticSourceConf.put(POIHDFSSource.CORE_FILE_PATH, properties.getProperty("CORE_FILE_PATH"));
-		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
-		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_64_prio.ser");
+		
 	//	builder.addSpatioTextualProcessor("tornado", Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim()), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim()))
 		//	builder.addDynamicSpatioTextualProcessor("tornado", Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim()), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim()), null, null)
 //		builder.addSpatioTextualProcessor("tornado", Integer.parseInt(properties.getProperty("ROUTING_PARALLEISM").trim()), Integer.parseInt(properties.getProperty("EVALUATOR_PARALLEISM").trim()), 
@@ -221,12 +246,7 @@ public class TornadoClusterTest {
 				//	.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POILFSDataSource", staticSourceConf)
 				//.addContinuousQuerySource(querySource);
 
-		builder.addDynamicSpatioTextualProcessor("tornado", 3, 17, 
-				partitions,GlobalIndexType.DYNAMIC_OPTIMIZED, LocalIndexType.HYBRID_GRID,64)
-		.addVolatileSpatioTextualInput(tweetsSource)
-				//			.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POIHDFSSource", staticSourceConf)
-				//	.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POILFSDataSource", staticSourceConf)
-				.addContinuousQuerySource(querySource);
+		
 		String topologyName = "Tornado";
 		Config conf = new Config();
 		conf.setDebug(false);

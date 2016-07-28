@@ -20,8 +20,8 @@
 package edu.purdue.cs.tornado.helper;
 
 public class IndexCellCoordinates {
-	Integer x;
-	Integer y;
+	public Integer x;
+	public Integer y;
 	public IndexCellCoordinates(Integer x, Integer y) {
 		super();
 		this.x = x;

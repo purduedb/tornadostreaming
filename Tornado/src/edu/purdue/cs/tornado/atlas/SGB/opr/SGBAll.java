@@ -94,7 +94,75 @@ public class SGBAll extends SGBOpr {
 
 		} else if (this.overlap == AttrType.OELIMINATED) {
 			oprTupleOverlapEliminate(T);
+		} else if (this.overlap == AttrType.ODUPLICATIED) {
+			oprTupleOverlapEliminate(T);
 		}
+
+	}
+
+	private void OprTupleOverlapDuplicate(Tuple T) {
+		// check the intersection of the tuple with groups
+		ArrayList<Group> groups = (ArrayList<Group>)this.getGstorage().getStorage();
+
+		boolean joinsucc = false;
+
+		//if (this.getGstorage()> 0) 
+		{
+			for (Group g :groups) {
+				
+				//TreeMap<Integer, Tuple> tuplesinsidebound = new TreeMap<Integer, Tuple>();
+
+				boolean inside = g.judgeJoinGroup(T, this.getFileds());
+
+				// if new tuple can join in one exist group
+				if (inside) {
+					// add this one to that group
+					g.addExecuteAgg(T);
+					// update the group bound
+					g.updateGroupRectangleBound(T, this.getFileds());
+					g.updateGroupMaxiMinBound(T, this.getFileds());
+					
+					if(g.getDistanceMetric()==AttrType.L2)
+					{
+					   g.updateGroupConvexHullBound(T, this.getFileds());
+					}
+					// g.add(id, t);
+					joinsucc=true;
+				//	break; //removed this break to allow that an object can join multiple groups 
+				}
+
+			}
+
+		}
+		
+
+		// if there is not intersection or can not join in any groups
+		// build one group and add this tuple into this group,
+		// add group into the gstorage
+		if (joinsucc == false || groups.size() <= 0) {
+			
+			int id = this.Gstorage.getCount() + 1;
+			
+			// init the group information
+			Group g = new Group(id, 
+					this.getDistanceMetric(),
+					this.getFileds(),
+					this.Eps);
+
+			// update the group bound
+			g.updateGroupRectangleBound(T, this.getFileds());
+			g.updateGroupMaxiMinBound(T, this.getFileds());
+			
+			if(g.getDistanceMetric()==AttrType.L2)
+			{
+			   g.updateGroupConvexHullBound(T, this.getFileds());
+			}
+			//add this tuple into group
+			g.addExecuteAgg(T);
+			// we need to add the duplicated points into the new groups
+			this.Gstorage.addgroup(g);
+
+		}// if
 
 	}
 
@@ -132,6 +200,7 @@ public class SGBAll extends SGBOpr {
 			}
 
 		}
+		
 
 		// if there is not intersection or can not join in any groups
 		// build one group and add this tuple into this group,
@@ -163,7 +232,6 @@ public class SGBAll extends SGBOpr {
 
 	}
 
-	
 
 	/**
 	 * handle the form-New overlap option
