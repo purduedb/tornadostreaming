@@ -95,7 +95,7 @@ public class KafkaSpout extends BaseRichSpout {
 				if (QueryType.queryTextualRange.equals(q.getQueryType())) {
 					this.collector.emit(new Values(q.getQueryType(), q.getQueryId(), null, null, q.getSpatialRange().getMin().getX(), q.getSpatialRange().getMin().getY(),
 							q.getSpatialRange().getMax().getX(), q.getSpatialRange().getMax().getY(), null, TextHelpers.convertArrayListOfStringToText(q.getQueryText()), null,
-							q.getTimeStamp(), q.getDataSrc(),null, q.getCommand(), null, q.getTextualPredicate(), null,null
+							q.getTimeStamp(), q.getDataSrc(),null, null, null, q.getTextualPredicate(), null,null
 
 					));
 				}else{

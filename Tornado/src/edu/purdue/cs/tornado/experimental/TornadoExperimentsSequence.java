@@ -521,7 +521,7 @@ public class TornadoExperimentsSequence {
 	//texting various baselines
 	public static void experiment3() {
 		javaArgs = "-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -Xloggc:/home/apache-storm-1.0.0/logs/gc-storm-worker-%ID%-" + (new Date()).getTime()
-				+ ".log  -Xmx2600m -Xms2600m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
+				+ ".log  -Xmx4600m -Xms4600m -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
 		//testPartitonedTextAWAREGlobalGridLocal5MillionBP("results/BackPressureGlobalPartitionedTextLocalGrid.csv", 0, 10, 36);
 		testPartitonedGlobalGridLocal5millionBP("results/BackPressureGlobalPartitionedLocalGrid.csv", 0, 10, 36);
 		//		testGridGlobalGridLocal5millionBP("results/BackPressureGlobalGridLocalGrid.csv", 0, 6, 36);
@@ -1332,7 +1332,7 @@ public class TornadoExperimentsSequence {
 		return toRetun;
 	}
 
-	static void appendToFile(String fileName, String data) {
+	public static void appendToFile(String fileName, String data) {
 		BufferedWriter bw = null;
 
 		try {

@@ -26,17 +26,15 @@ import edu.purdue.cs.tornado.messages.Query;
  * @author ahmed
  *
  */
-public class LocalHybridMultiGridIndex extends LocalHybridIndex {
+public class LocalHybridMultiGridIndex extends LocalHybridIndex{
 	private Integer localXcellCount;
 	private Integer localYcellCount;
 	private Double localXstep;
 	private Double localYstep;
 	private Integer height;
-	//private LocalHybridGridIndex[] index;
 	private LocalHybridGridIndex[] index;
 	private Rectangle selfBounds;
 	DataSourceInformation dataSourcesInformation;
-	private ArrayList<Query> globalKNNQueries;
 	private Integer xGridGranularity;
 	private Integer yGridGranularity;
 	private Boolean spatialOnlyFlag;
@@ -70,25 +68,12 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 		int xgranularity = xGridGranularity;
 		int ygranularity = yGridGranularity;
 		index = new LocalHybridGridIndex[2 * height];
-		globalKNNQueries = new ArrayList<Query>();
 		for (int k = 0; k <= height; k++) {
 			LocalHybridGridIndex levelGridIndex;
 			if (k == 0)
 				levelGridIndex = new LocalHybridGridIndex(selfBounds, dataSourcesInformation, xgranularity, ygranularity, spatialOnlyFlag, k);
 			else{
 				levelGridIndex = new LocalHybridGridIndex(selfBounds, dataSourcesInformation, xgranularity, ygranularity, true, k);}
-//				ArrayList<IndexCell> parentCells =levelGridIndex .getOverlappingIndexCells(selfBounds);
-//				for(IndexCell parentCell:parentCells){
-//					parentCell.children= new IndexCell[4];
-//					ArrayList<IndexCell> childCells = index[k-1].getOverlappingIndexCells(parentCell.boundsNoBoundaries);
-//					int j=0;
-//					for(IndexCell childCell:childCells){
-//						parentCell.children[j++]=childCell;
-//						childCell.parent=parentCell;
-//						
-//					}
-//				}
-//			}
 			xgranularity = xgranularity / 2;
 			ygranularity = ygranularity / 2;
 			index[k] = levelGridIndex;
@@ -124,12 +109,12 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 		return index[0].dropContinousQuery(query);
 	}
 
-	@Override
+	
 	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords) {
 		return getCountPerKeywrodsAll(keywords, selfBounds);
 	}
 
-	@Override
+	
 	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords, Rectangle rect) {
 		Integer count = 0;
 		for (int k = height; k >= 0; k++) {
@@ -140,12 +125,12 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 		return count;
 	}
 
-	@Override
+	
 	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords) {
 		return getCountPerKeywrodsAny(keywords, selfBounds);
 	}
 
-	@Override
+	
 	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords, Rectangle rect) {
 		Integer count = 0;
 		for (int k = height; k >= 0; k++) {
@@ -196,12 +181,12 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 
 	}
 
-	@Override
+	
 	public ArrayList<IndexCell> getOverlappingIndexCellWithData(ArrayList<String> keywords) {
 		return getOverlappingIndexCellWithData(selfBounds, keywords);
 	}
 
-	@Override
+	
 	public ArrayList<IndexCell> getOverlappingIndexCellWithData(Rectangle rectangle) {
 		Queue<IndexCell> queue = new LinkedList<IndexCell>();
 		ArrayList<IndexCell> relevantIndexCells = new ArrayList<>();
@@ -231,7 +216,7 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 
 	}
 
-	@Override
+	
 	public ArrayList<IndexCell> getOverlappingIndexCellWithData(Rectangle rectangle, ArrayList<String> keywords) {
 		if (spatialOnlyFlag)
 			return getOverlappingIndexCellWithData(rectangle);
@@ -284,12 +269,12 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 
 	}
 
-	@Override
+	
 	public LocalIndexKNNIterator KNNIterator(Point focalPoint, Double distance) {
 		return null;
 	}
 
-	@Override
+	
 	public LocalIndexKNNIterator LocalKNNIterator(Point focalPoint) {
 		return null;
 	}
@@ -333,19 +318,19 @@ public class LocalHybridMultiGridIndex extends LocalHybridIndex {
 		return true;
 	}
 
-	@Override
+	
 	public ArrayList<List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Set<String> getUpdatedTextSummery() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public void cleanUp() {
 		// TODO Auto-generated method stub
 		

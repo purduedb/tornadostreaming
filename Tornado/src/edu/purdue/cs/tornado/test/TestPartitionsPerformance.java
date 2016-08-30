@@ -9,6 +9,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.concurrent.TimeUnit;
@@ -17,13 +20,16 @@ import com.google.common.base.Stopwatch;
 
 import edu.purdue.cs.tornado.evaluator.DynamicEvalautorBolt;
 import edu.purdue.cs.tornado.evaluator.SpatioTextualEvaluatorBolt;
+import edu.purdue.cs.tornado.experimental.TornadoExperimentsSequence;
 import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.DataSourceType;
+import edu.purdue.cs.tornado.helper.KeyWordTrieIndex;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.ObjectSizeCalculator;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.QueryType;
+import edu.purdue.cs.tornado.helper.RandomGenerator;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
@@ -35,31 +41,247 @@ import edu.purdue.cs.tornado.index.global.GlobalIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndex;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndexLowerSpace;
-import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedTextAwareIndex;
 import edu.purdue.cs.tornado.index.global.GlobalPartitionedGridBasedIndex;
-import edu.purdue.cs.tornado.index.global.GlobalStaticPartitionedIndex;
 import edu.purdue.cs.tornado.index.local.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
+import edu.purdue.cs.tornado.index.local.LocalHybridPyramidGridIndexOptimized;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.index.local.NoLocalIndex;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.JoinQuery;
 import edu.purdue.cs.tornado.messages.KNNQuery;
+import edu.purdue.cs.tornado.messages.MinimalRangeQuery;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
 
+/**
+ * This class tests the global and local index performance and test the value of
+ * partitioning
+ * 
+ * @author ahmed
+ *
+ */
 public class TestPartitionsPerformance {
 	static Integer countId = 0;
 	static Integer queryCountId = 0;
 	static Integer finegGridGran = 64;
+	static RandomGenerator randomGenerator = new RandomGenerator(0);
 
 	public static void main(String[] args) throws Exception {
 
 		//testGlocalIndexPerformance();
 		//testPartitions();
 		testLocalIndexPerformance();
+		//testlocalIndexPerformanceSpatialRange();
+		//testlocalIndexPerformanceNumberOfKeywords();
+		//testlocalIndexPerformanceNumberOfQueries();
 
+	}
+
+	static void testlocalIndexPerformanceSpatialRange() throws Exception {
+		String outputFile = "results/pyramidSpatialRangeContains.csv";
+		String tweetsFile = "/media/D/googleDrive/walid research/datasets/twittersample/sampletweets.csv";
+		//	String queriesFile = "/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv";
+		//	String queriesFile = "/media/D/googleDrive/walid research/datasets/querykeywordssorted/POIQueries.csv";
+		String queriesFile = "/media/D/datasets/tweetsForQueries.csv";
+
+		finegGridGran = 1024;
+		ArrayList<Double> spatialRanges = new ArrayList<Double>();
+		spatialRanges.add(1.0);
+		spatialRanges.add(5.0);
+		spatialRanges.add(10.0);
+		spatialRanges.add(50.0);
+//		spatialRanges.add(100.0);
+//		spatialRanges.add(500.0);
+//		spatialRanges.add(1000.0);
+//		spatialRanges.add(5000.0);
+
+		Integer numberOfDataObjects = 1000000;
+		Integer numberOfQueries = 2500000;
+		Integer numberOfKeywords = 3;
+		
+		Integer maxLevel=1;
+		TextualPredicate txtPredicate = TextualPredicate.CONTAINS;
+		ArrayList<DataObject> dataObjects = readDataObjects(tweetsFile, numberOfDataObjects);
+		TornadoExperimentsSequence.appendToFile(outputFile,
+				"Number of queries," + numberOfQueries + ",Number of objects," + numberOfDataObjects + ",Number of keywords," + numberOfKeywords + ",Max grid granualitry," + finegGridGran + "text perdicate," + txtPredicate.toString());
+         System.out.println("Done reading data");
+		TornadoExperimentsSequence.appendToFile(outputFile, "Spatial range, query insert time, object time, index size");
+		ArrayList<MinimalRangeQuery> queries = readMinimalQueries(queriesFile, numberOfQueries, txtPredicate, 0, numberOfKeywords);
+		System.out.println("Done reading queries");
+		double previousRange=0;
+		long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
+		System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
+		
+		
+		for (Double spatialRange : spatialRanges) {
+			System.out.println("********************************************************");
+			System.out.println("Hybrid Pyramid grid spatial range"+spatialRange);
+			String result = "" + spatialRange + ",";
+			for(MinimalRangeQuery q :queries){
+				q.setSpatialRange(new Rectangle(q.getSpatialRange().getMin(),
+						new Point(q.getSpatialRange().getMax().getX()-previousRange+spatialRange,q.getSpatialRange().getMax().getY()-previousRange+spatialRange)));
+			}
+			previousRange = spatialRange;
+			System.out.println("Done reading queries");
+			
+			System.gc();
+			System.gc();
+			
+			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
+					finegGridGran,maxLevel);
+			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+			TornadoExperimentsSequence.appendToFile(outputFile, result);
+			localHybridPyramidIndex = null;
+			System.gc();
+			System.gc();
+		}
+//		outputFile = "results/pyramidSpatialRangeOverlaps.csv";
+//		txtPredicate = TextualPredicate.OVERlAPS;
+//		TornadoExperimentsSequence.appendToFile(outputFile,
+//				"Number of queries," + numberOfQueries + ",Number of objects," + numberOfDataObjects + ",Number of keywords," + numberOfKeywords + ",Max grid granualitry," + finegGridGran + "text perdicate," + txtPredicate.toString());
+//
+//		TornadoExperimentsSequence.appendToFile(outputFile, "Spatial range, query insert time, object time, index size");
+//
+//		System.out.println("Done reading data");
+//		for (Double spatialRange : spatialRanges) {
+//			String result = "" + spatialRange + ",";
+//			ArrayList<MinimalRangeQuery> queries = readMinimalQueries(queriesFile, numberOfQueries, txtPredicate, spatialRange, numberOfKeywords);
+//			System.out.println("Done reading queries");
+//			long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
+//			System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
+//			System.gc();
+//			System.gc();
+//			System.out.println("********************************************************");
+//			System.out.println("Hybrid Pyramid grid");
+//			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
+//					finegGridGran);
+//			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+//			TornadoExperimentsSequence.appendToFile(outputFile, result);
+//			localHybridPyramidIndex = null;
+//			System.gc();
+//			System.gc();
+//		}
+	}
+
+	static void testlocalIndexPerformanceNumberOfKeywords() throws Exception {
+		String outputFile = "results/pyramidNumberOfKeywordsContains.csv";
+		String tweetsFile = "/media/D/googleDrive/walid research/datasets/twittersample/sampletweets.csv";
+		//	String queriesFile = "/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv";
+		//	String queriesFile = "/media/D/googleDrive/walid research/datasets/querykeywordssorted/POIQueries.csv";
+		String queriesFile = "/media/D/datasets/tweetsForQueries.csv";
+
+		finegGridGran = 1024;
+		ArrayList<Integer> numberOfKeywords = new ArrayList<Integer>();
+		numberOfKeywords.add(1);
+		numberOfKeywords.add(2);
+		numberOfKeywords.add(3);
+		numberOfKeywords.add(4);
+		numberOfKeywords.add(5);
+//		numberOfKeywords.add(6);
+//		numberOfKeywords.add(7);
+
+		Integer numberOfDataObjects = 1000000;
+		Integer numberOfQueries = 2500000;
+		Double spatialRange = 10.0;
+		Integer maxLevel=10;
+		ArrayList<DataObject> dataObjects = readDataObjects(tweetsFile, numberOfDataObjects);
+
+		TextualPredicate txtPredicate = TextualPredicate.CONTAINS;
+		TornadoExperimentsSequence.appendToFile(outputFile,
+				"Number of queries," + numberOfQueries + ",Number of objects," + numberOfDataObjects + ",Number of keywords," + numberOfKeywords + ",Max grid granualitry," + finegGridGran + "text perdicate," + txtPredicate.toString());
+		TornadoExperimentsSequence.appendToFile(outputFile, "NumberOfKeywords, query insert time, object time, index size");
+
+		System.out.println("Done reading data");
+		for (Integer numberofkeyword : numberOfKeywords) {
+			String result = "" + numberofkeyword + ",";
+			ArrayList<MinimalRangeQuery> queries = readMinimalQueries(queriesFile, numberOfQueries, txtPredicate, spatialRange, numberofkeyword);
+			System.out.println("Done reading queries");
+			long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
+			System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
+			System.gc();
+			System.gc();
+			System.out.println("********************************************************");
+			System.out.println("Hybrid Pyramid grid");
+			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
+					finegGridGran,maxLevel);
+			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+			TornadoExperimentsSequence.appendToFile(outputFile, result);
+			localHybridPyramidIndex = null;
+			System.gc();
+			System.gc();
+		}
+		outputFile = "results/pyramidNumberOfKeywordsOverlaps.csv";
+		txtPredicate = TextualPredicate.OVERlAPS;
+		TornadoExperimentsSequence.appendToFile(outputFile,
+				"Number of queries," + numberOfQueries + ",Number of objects," + numberOfDataObjects + ",Number of keywords," + numberOfKeywords + ",Max grid granualitry," + finegGridGran + "text perdicate," + txtPredicate.toString());
+		TornadoExperimentsSequence.appendToFile(outputFile, "NumberOfKeywords, query insert time, object time, index size");
+
+		System.out.println("Done reading data");
+		for (Integer numberofkeyword : numberOfKeywords) {
+			String result = "" + numberofkeyword + ",";
+			ArrayList<MinimalRangeQuery> queries = readMinimalQueries(queriesFile, numberOfQueries, txtPredicate, spatialRange, numberofkeyword);
+			System.out.println("Done reading queries");
+			long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
+			System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
+			System.gc();
+			System.gc();
+			System.out.println("********************************************************");
+			System.out.println("Hybrid Pyramid grid");
+			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
+					finegGridGran,maxLevel);
+			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+			TornadoExperimentsSequence.appendToFile(outputFile, result);
+			localHybridPyramidIndex = null;
+			System.gc();
+			System.gc();
+		}
+	}
+
+	static void testlocalIndexPerformanceNumberOfQueries() throws Exception {
+		String outputFile = "results/pyramidNumberOfQueriesOverlaps.csv";
+		String tweetsFile = "/media/D/googleDrive/walid research/datasets/twittersample/sampletweets.csv";
+		//	String queriesFile = "/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv";
+		//	String queriesFile = "/media/D/googleDrive/walid research/datasets/querykeywordssorted/POIQueries.csv";
+		String queriesFile = "/media/D/datasets/tweetsForQueries.csv";
+
+		finegGridGran = 1024;
+		ArrayList<Integer> numberofqueries = new ArrayList<Integer>();
+		numberofqueries.add(500000);
+		numberofqueries.add(1000000);
+		numberofqueries.add(2000000);
+		numberofqueries.add(3000000);
+
+		Integer numberOfDataObjects = 1000000;
+		Double spatialRange = 5.0;
+		int numberOfKeywords = 3;
+		Integer maxLevel=10;
+		TextualPredicate txtPredicate = TextualPredicate.OVERlAPS;
+		ArrayList<DataObject> dataObjects = readDataObjects(tweetsFile, numberOfDataObjects);
+		TornadoExperimentsSequence.appendToFile(outputFile, ",Number of objects," + numberOfDataObjects + ",Number of keywords," + numberOfKeywords + ",Max grid granualitry," + finegGridGran + "text perdicate," + txtPredicate.toString());
+
+		TornadoExperimentsSequence.appendToFile(outputFile, "NumberOfKeywords, query insert time, object time, index size");
+
+		System.out.println("Done reading data");
+		for (Integer queriesNum : numberofqueries) {
+			String result = "" + queriesNum + ",";
+			ArrayList<MinimalRangeQuery> queries = readMinimalQueries(queriesFile, queriesNum, txtPredicate, spatialRange, numberOfKeywords);
+			System.out.println("Done reading queries");
+			long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
+			System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
+			System.gc();
+			System.gc();
+			System.out.println("********************************************************");
+			System.out.println("Hybrid Pyramid grid");
+			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
+					finegGridGran,maxLevel);
+			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+			TornadoExperimentsSequence.appendToFile(outputFile, result);
+			localHybridPyramidIndex = null;
+			System.gc();
+			System.gc();
+		}
 	}
 
 	static void testGlocalIndexPerformance() throws Exception {
@@ -82,7 +304,8 @@ public class TestPartitionsPerformance {
 		System.out.println("Done reading data");
 		//ArrayList<Query> queries = readQueriesFromTweetsLocations(queriesFile, 1000000,dataObjects);
 		//ArrayList<Query> queries = readQueries(queriesFile, 100000,TextualPredicate.OVERlAPS);
-		ArrayList<Query> queries = readQueries(queriesFile, 1000000, TextualPredicate.CONTAINS,5,3);
+		ArrayList<Query> queries = readQueries(queriesFile, 1000000, TextualPredicate.CONTAINS, 5, 3);
+
 		System.out.println("Done reading queries");
 
 		//		
@@ -94,7 +317,7 @@ public class TestPartitionsPerformance {
 		//		System.gc();
 		for (int i = 0; i < 4; i++) {
 			System.out.println("********************************************************");
-			
+
 			System.out.println("Partitioned  traditional grid");
 			GlobalPartitionedGridBasedIndex partitionedIndex4 = new GlobalPartitionedGridBasedIndex(numberOfPartitions, evaluators, partitions, finegGridGran);
 			testGlobal(dataObjects, queries, partitionedIndex4, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID, "", numberOfPartitions);
@@ -108,28 +331,27 @@ public class TestPartitionsPerformance {
 			partitionedIndex0 = null;
 			System.gc();
 			System.gc();
-//			System.out.println("------------");
-//			System.out.println("Partitioned augmented grid text aware ");
-//			GlobalOptimizedPartitionedIndex partitionedIndex1 = new GlobalOptimizedPartitionedTextAwareIndex(numberOfPartitions, evaluators, partitions, finegGridGran);
-//			testGlobal(dataObjects, queries, partitionedIndex1, GlobalIndexType.PARTITIONED_TEXT_AWARE, LocalIndexType.HYBRID_GRID, "", numberOfPartitions);
-//			partitionedIndex1 = null;
-//			System.gc();
-//			System.gc();
-//			System.out.println("------------");
-//			System.out.println("Partitioned augmented grid");
-//			GlobalOptimizedPartitionedIndex partitionedIndex2 = new GlobalOptimizedPartitionedIndex(numberOfPartitions, evaluators, partitions, finegGridGran);
-//			testGlobal(dataObjects, queries, partitionedIndex2, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID, "", numberOfPartitions);
-//			partitionedIndex2 = null;
-//			System.gc();
-//			System.gc();
-//			System.out.println("------------");
-//			System.out.println("Partitioned  Rtree");
-//			GlobalStaticPartitionedIndex partitionedIndex3 = new GlobalStaticPartitionedIndex(numberOfPartitions, evaluators, partitions, finegGridGran);
-//			testGlobal(dataObjects, queries, partitionedIndex3, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID, "", numberOfPartitions);
-//			partitionedIndex3 = null;
-//			System.gc();
-//			System.gc();
-			
+			//			System.out.println("------------");
+			//			System.out.println("Partitioned augmented grid text aware ");
+			//			GlobalOptimizedPartitionedIndex partitionedIndex1 = new GlobalOptimizedPartitionedTextAwareIndex(numberOfPartitions, evaluators, partitions, finegGridGran);
+			//			testGlobal(dataObjects, queries, partitionedIndex1, GlobalIndexType.PARTITIONED_TEXT_AWARE, LocalIndexType.HYBRID_GRID, "", numberOfPartitions);
+			//			partitionedIndex1 = null;
+			//			System.gc();
+			//			System.gc();
+			//			System.out.println("------------");
+			//			System.out.println("Partitioned augmented grid");
+			//			GlobalOptimizedPartitionedIndex partitionedIndex2 = new GlobalOptimizedPartitionedIndex(numberOfPartitions, evaluators, partitions, finegGridGran);
+			//			testGlobal(dataObjects, queries, partitionedIndex2, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID, "", numberOfPartitions);
+			//			partitionedIndex2 = null;
+			//			System.gc();
+			//			System.gc();
+			//			System.out.println("------------");
+			//			System.out.println("Partitioned  Rtree");
+			//			GlobalStaticPartitionedIndex partitionedIndex3 = new GlobalStaticPartitionedIndex(numberOfPartitions, evaluators, partitions, finegGridGran);
+			//			testGlobal(dataObjects, queries, partitionedIndex3, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID, "", numberOfPartitions);
+			//			partitionedIndex3 = null;
+			//			System.gc();
+			//			System.gc();
 
 		}
 
@@ -143,18 +365,18 @@ public class TestPartitionsPerformance {
 
 		finegGridGran = 1024;
 
-	
-		Integer numberOfDataObjects = 10000;
-		Integer numberOfQueries = 1500000;
+		Integer numberOfDataObjects = 100000;
+		Integer numberOfQueries = 2500000;
 
 		ArrayList<DataObject> dataObjects = readDataObjects(tweetsFile, numberOfDataObjects);
 		System.out.println("Done reading data");
 		//ArrayList<Query> queries = readQueriesFromTweetsLocations(queriesFile, 1000000,dataObjects);
-		//ArrayList<Query> queries = readQueries(queriesFile, 100000,TextualPredicate.OVERlAPS);
-		ArrayList<Query> queries = readQueries(queriesFile, numberOfQueries, TextualPredicate.CONTAINS, 5,3);
+		ArrayList<Query> queries = readQueries(queriesFile, numberOfQueries, TextualPredicate.CONTAINS, 10, 3);
+		//ArrayList<MinimalRangeQuery> minimalqueries = readMinimalQueries(queriesFile, numberOfQueries, TextualPredicate.OVERlAPS, 5, 1);
+		//ArrayList<Query> queries = readRandomQueries(queriesFile, numberOfQueries, TextualPredicate.CONTAINS,100, 10);
 		System.out.println("Done reading queries");
-		long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
-		System.out.println("Queries size =" + queriesSize/1024/1024+" MB");
+		//long queriesSize = ObjectSizeCalculator.getObjectSize(minimalqueries);
+		//System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
 		System.gc();
 		System.gc();
 		//		
@@ -165,15 +387,94 @@ public class TestPartitionsPerformance {
 		//		System.gc();
 		//		System.gc();
 		//for (int i = 0; i < 4; i++) {
+
+		//		System.out.println("********************************************************");
+		//		System.out.println("Hybrid Pyramid grid");
+		//		LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
+		//				finegGridGran);
+		//		testLocal(dataObjects, minimalqueries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+		//		localHybridPyramidIndex = null;
+		//		System.gc();
+		//		System.gc();
+		//		System.out.println("********************************************************");
+		//		System.out.println("Test keyword trie");
+		//		testKeywordTrie(dataObjects,queries);
+		//		System.gc();
+		//		System.gc();
+		//		System.out.println("********************************************************");
+		//		System.out.println("Optimized Hybrid grid");
+		//		LocalHybridGridIndexOptimized localHybridIndexOpt = new LocalHybridGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null, finegGridGran);
+		//		testLocal(dataObjects, queries, localHybridIndexOpt, LocalIndexType.HYBRID_GRID);
+		//		localHybridIndexOpt = null;
+		//		System.gc();
+		//		System.gc();
 		System.out.println("********************************************************");
 		System.out.println("Hybrid grid");
 		LocalHybridGridIndex localHybridIndex = new LocalHybridGridIndex(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null, finegGridGran);
 		testLocal(dataObjects, queries, localHybridIndex, LocalIndexType.HYBRID_GRID);
+		localHybridIndex = null;
 		System.gc();
 		System.gc();
 
 		//}
 
+	}
+
+	public static void testKeywordTrie(ArrayList<DataObject> dataObjects, ArrayList<MinimalRangeQuery> queries) {
+		KeyWordTrieIndex localIndex = new KeyWordTrieIndex();
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		Long dataProcessingDuration;
+
+		Long queryRegisterationduration;
+		int queryTasks = 0;
+		//	System.out.println();
+		for (MinimalRangeQuery q : queries) {
+			localIndex.insertOld1(q.getQueryText(), q);
+		}
+
+		stopwatch.stop();
+
+		queryRegisterationduration = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+
+		long indexMemorySize = ObjectSizeCalculator.getObjectSize(localIndex);
+		System.out.println("Local index size =" + indexMemorySize / 1024 / 1024 + " MB");
+
+		System.out.println("Query register Time per query (nanos)= " + queryRegisterationduration / queries.size());
+		System.out.println("Total query evalautors= " + queryTasks);
+
+		stopwatch = Stopwatch.createStarted();
+		int querycount = 0;
+		Integer sendTuples = 0;
+		int i = 0;
+		//for (int i = 0; i < 100; i++) {
+		for (DataObject obj : dataObjects) {
+			LinkedList<MinimalRangeQuery> result = localIndex.find(obj.getObjectText());
+
+			if (result != null && result.size() > 0) {
+				querycount += result.size();
+				if (result.size() > 0) {
+					System.out.println("-----------------------------------");
+					System.out.println(obj.toString());
+					for (MinimalRangeQuery q : result)
+						System.out.println(q.toString());
+				}
+			}
+			i++;
+
+		}
+		//}
+		stopwatch.stop();
+		System.gc();
+		System.gc();
+
+		dataProcessingDuration = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+		Integer maxData = 0, maxDataIndex = 0, maxQuery = 0, maxQueryIndex = 0, maxEmitted = 0, maxEmittedIndex = 0;
+		Integer totalEmiitedCount = 0;
+
+		System.out.println(" DataProcessing Time per object (nano)= " + dataProcessingDuration / dataObjects.size() + " with qulified tuples:" + totalEmiitedCount + " max emitted:" + maxEmitted + "total query count = " + querycount);
+
+		dataObjects = null;
+		queries = null;
 	}
 
 	static void testPartitions() throws Exception {
@@ -480,35 +781,103 @@ public class TestPartitionsPerformance {
 		}
 
 		stopwatch.stop();
-		
-		
+
 		queryRegisterationduration = stopwatch.elapsed(TimeUnit.NANOSECONDS);
-		
-		
+
 		long indexMemorySize = ObjectSizeCalculator.getObjectSize(localIndex);
-		System.out.println("Local index size =" + indexMemorySize/1024/1024+" MB");
+		System.out.println("Local index size =" + indexMemorySize / 1024 / 1024 + " MB");
 
 		System.out.println("Query register Time per query (nanos)= " + queryRegisterationduration / queries.size());
 		System.out.println("Total query evalautors= " + queryTasks);
 
 		stopwatch = Stopwatch.createStarted();
+		int querycount = 0;
 		Integer sendTuples = 0;
-		for (int i = 0; i < 100; i++) {
-			for (DataObject obj : dataObjects) {
-				localIndex.getReleventSpatialKeywordRangeQueries(obj, false);
-			}
+		//	for (int i = 0; i < 100; i++) {
+		for (DataObject obj : dataObjects) {
+			ArrayList<List<Query>> result = localIndex.getReleventSpatialKeywordRangeQueries(obj, false);
+			if (result != null)
+				querycount += result.get(0).size();
 		}
+		//	}
 		stopwatch.stop();
 		dataProcessingDuration = stopwatch.elapsed(TimeUnit.NANOSECONDS);
 		Integer maxData = 0, maxDataIndex = 0, maxQuery = 0, maxQueryIndex = 0, maxEmitted = 0, maxEmittedIndex = 0;
 		Integer totalEmiitedCount = 0;
 
-		System.out.println(" Local:" + localIndexType.name() + " DataProcessing Time per object (nano)= " + dataProcessingDuration / dataObjects.size() / 100 + " with qulified tuples:" + totalEmiitedCount + " max emitted:" + maxEmitted
-				+ " max emitted index:" + maxEmittedIndex + "Send tuples:" + sendTuples);
+		System.out.println(" Local:" + localIndexType.name() + " DataProcessing Time per object (nano)= " + dataProcessingDuration / dataObjects.size() + " with qulified tuples:" + totalEmiitedCount + " max emitted:" + maxEmitted
+				+ "total query count = " + querycount);
 
 		dataObjects = null;
 		queries = null;
 
+	}
+
+	
+	static String testLocal(ArrayList<DataObject> dataObjects, ArrayList<MinimalRangeQuery> queries, LocalHybridPyramidGridIndexOptimized localIndex, LocalIndexType localIndexType) throws Exception {
+
+		String toReturn = "";
+		Long dataProcessingDuration;
+		Long queryRegisterationduration;
+		LocalHybridPyramidGridIndexOptimized.totalVisited =0;
+		LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries =0;
+		int queryTasks = 0;
+		Stopwatch stopwatch = Stopwatch.createStarted();
+		//	System.out.println();
+		for (MinimalRangeQuery q : queries) {
+			localIndex.addContinousQuery(q);
+		}
+
+		stopwatch.stop();
+
+		queryRegisterationduration = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+
+		long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
+		System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
+
+		System.out.println("Query register Time per query (nanos)= " + queryRegisterationduration / queries.size());
+		System.out.println("Total query evalautors= " + queryTasks);
+
+		stopwatch = Stopwatch.createStarted();
+		int querycount = 0;
+		Integer sendTuples = 0;
+
+		//for (int i = 0; i < 100; i++) {
+		for (DataObject obj : dataObjects) {
+			ArrayList<List<MinimalRangeQuery>> result = localIndex.getReleventSpatialKeywordRangeQueries(obj, false);
+			if (result != null && result.get(0).size() > 0) {
+				querycount += result.get(0).size();
+				//					if(result.get(0).size()>0){
+				//						System.out.println("-----------------------------------");
+				//						System.out.println(obj.toString() );
+				//						for(Query q :result.get(0) )
+				//							System.out.println(q.toString() );
+				//					}
+			}
+
+		}
+		//}
+		stopwatch.stop();
+		System.gc();
+		System.gc();
+		dataProcessingDuration = stopwatch.elapsed(TimeUnit.NANOSECONDS);
+		long indexMemorySize = ObjectSizeCalculator.getObjectSize(localIndex) - queriesSize;
+		System.out.println("Local index size =" + indexMemorySize / 1024 / 1024 + " MB");
+		System.gc();
+		System.gc();
+		Integer maxData = 0, maxDataIndex = 0, maxQuery = 0, maxQueryIndex = 0, maxEmitted = 0, maxEmittedIndex = 0;
+		Integer totalEmiitedCount = 0;
+
+		System.out.println(" Local:" + localIndexType.name() + " DataProcessing Time per object (nano)= " + dataProcessingDuration / dataObjects.size() + " with qulified tuples:" + totalEmiitedCount + " max emitted:" + maxEmitted
+				+ "total query count = " + querycount+ "total visted  = " + LocalHybridPyramidGridIndexOptimized.totalVisited+ "totalspatial overlapping  = " + LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries);
+
+		toReturn = toReturn + (queryRegisterationduration / queries.size()) + "," + (dataProcessingDuration / dataObjects.size()) + "," +
+		(indexMemorySize / 1024 / 1024)+ ","+
+				(queriesSize / 1024 / 1024)+","+
+	querycount+","+LocalHybridPyramidGridIndexOptimized.totalVisited+","+LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries;
+		dataObjects = null;
+		queries = null;
+		return toReturn;
 	}
 
 	static void testGlobal(ArrayList<DataObject> dataObjects, ArrayList<Query> queries, GlobalIndex globalIndex, GlobalIndexType globalIndexType, LocalIndexType localIndexType, String resultsFile, Integer numberOfEvaluators)
@@ -624,8 +993,11 @@ public class TestPartitionsPerformance {
 			int i = 0;
 			while (i < numberOfDataObjects && (line = br.readLine()) != null) {
 				obj = parseTweetToDataObject(line);
+				
 				if (obj == null)
 					continue;
+				obj.hashedText = new HashSet<>(obj.getObjectText());
+			//	obj.setObjectText(null);
 				allObjects.add(obj);
 				i++;
 
@@ -672,15 +1044,78 @@ public class TestPartitionsPerformance {
 			FileInputStream fstream = new FileInputStream(fileName);
 			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
 			String line;
-			Query obj;
+			Query query;
 			int i = 0;
 			while ((line = br.readLine()) != null && i < numberOfqueries) {
 				if ("".equals(line))
 					continue;
-				obj = queriesSpout.buildQuery(line, "querySrc", numberOfKeywords, "Tweets", null, null, QueryType.queryTextualRange, spatialRange, textualPredicate, null, null);
-				if (obj == null)
+				query = queriesSpout.buildQuery(line, "querySrc", numberOfKeywords, "Tweets", null, null, QueryType.queryTextualRange, spatialRange, textualPredicate, null, null);
+				if (query == null)
 					continue;
-				allQueiries.add(obj);
+				allQueiries.add(query);
+				i++;
+
+			}
+			br.close();
+			fstream.close();
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		return allQueiries;
+	}
+
+	static ArrayList<MinimalRangeQuery> readMinimalQueries(String fileName, int numberOfqueries, TextualPredicate textualPredicate, double spatialRange, int numberOfKeywords) {
+		ArrayList<MinimalRangeQuery> allQueiries = new ArrayList<MinimalRangeQuery>();
+		QueriesFileSystemSpout queriesSpout = new QueriesFileSystemSpout(null, 0);
+		try {
+			FileInputStream fstream = new FileInputStream(fileName);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+			String line;
+			Query query;
+			MinimalRangeQuery minimalRangeQuery;
+			int i = 0;
+			while ((line = br.readLine()) != null && i < numberOfqueries) {
+				if ("".equals(line))
+					continue;
+				query = queriesSpout.buildQuery(line, "querySrc", numberOfKeywords, "Tweets", null, null, QueryType.queryTextualRange, spatialRange, textualPredicate, null, null);
+				if (query == null)
+					continue;
+				minimalRangeQuery = new MinimalRangeQuery();
+				minimalRangeQuery.queryId = i;
+				minimalRangeQuery.textualPredicate = textualPredicate;
+				minimalRangeQuery.spatialRange = query.getSpatialRange();
+				minimalRangeQuery.queryText = query.getQueryText();
+
+				allQueiries.add(minimalRangeQuery);
+				i++;
+
+			}
+			br.close();
+			fstream.close();
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+		}
+		return allQueiries;
+	}
+
+	static ArrayList<Query> readRandomQueries(String fileName, int numberOfqueries, TextualPredicate textualPredicate, double spatialRange, int numberOfKeywords) {
+		ArrayList<Query> allQueiries = new ArrayList<Query>();
+		QueriesFileSystemSpout queriesSpout = new QueriesFileSystemSpout(null, 0);
+		try {
+			FileInputStream fstream = new FileInputStream(fileName);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+			String line;
+			Query query;
+			int i = 0;
+			spatialRange = randomGenerator.nextDouble(0, spatialRange);
+			numberOfKeywords = randomGenerator.nextInt(numberOfKeywords);
+			while ((line = br.readLine()) != null && i < numberOfqueries) {
+				if ("".equals(line))
+					continue;
+				query = queriesSpout.buildQuery(line, "querySrc", numberOfKeywords, "Tweets", null, null, QueryType.queryTextualRange, spatialRange, textualPredicate, null, null);
+				if (query == null)
+					continue;
+				allQueiries.add(query);
 				i++;
 
 			}
@@ -838,17 +1273,17 @@ public class TestPartitionsPerformance {
 			q.setTextualPredicate(null);
 			q.setQueryText(queryText1);
 		} else if (queryType.equals(QueryType.queryTextualKNN)) {
-			((KNNQuery)q).setFocalPoint(new Point(xCoord, yCoord));
-			((KNNQuery)q).setTextualPredicate(null);
-			((KNNQuery)q).setQueryText(queryText1);
-			((KNNQuery)q).setK(5);
+			((KNNQuery) q).setFocalPoint(new Point(xCoord, yCoord));
+			((KNNQuery) q).setTextualPredicate(null);
+			((KNNQuery) q).setQueryText(queryText1);
+			((KNNQuery) q).setK(5);
 		} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
-			((JoinQuery)q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
-			((JoinQuery)q).setTextualPredicate(null);
-			((JoinQuery)q).setTextualPredicate2(null);
-			((JoinQuery)q).setQueryText(queryText1);
-			((JoinQuery)q).setQueryText(queryText2);
-			((JoinQuery)q).setDistance(0.0);
+			((JoinQuery) q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
+			((JoinQuery) q).setTextualPredicate(null);
+			((JoinQuery) q).setTextualPredicate2(null);
+			((JoinQuery) q).setQueryText(queryText1);
+			((JoinQuery) q).setQueryText(queryText2);
+			((JoinQuery) q).setDistance(0.0);
 		}
 		return q;
 	}
@@ -973,17 +1408,17 @@ public class TestPartitionsPerformance {
 			q.setTextualPredicate(textualPredicate1);
 			q.setQueryText(queryText1);
 		} else if (queryType.equals(QueryType.queryTextualKNN)) {
-			((KNNQuery)q).setFocalPoint(new Point(xCoord, yCoord));
-			((KNNQuery)q).setTextualPredicate(textualPredicate1);
-			((KNNQuery)q).setQueryText(queryText1);
-			((KNNQuery)q).setK(k);
+			((KNNQuery) q).setFocalPoint(new Point(xCoord, yCoord));
+			((KNNQuery) q).setTextualPredicate(textualPredicate1);
+			((KNNQuery) q).setQueryText(queryText1);
+			((KNNQuery) q).setK(k);
 		} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
-			((JoinQuery)q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
-			((JoinQuery)q).setTextualPredicate(textualPredicate1);
-			((JoinQuery)q).setTextualPredicate2(textualPredicate2);
-			((JoinQuery)q).setQueryText(queryText1);
-			((JoinQuery)q).setQueryText(queryText2);
-			((JoinQuery)q).setDistance(distance);
+			((JoinQuery) q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
+			((JoinQuery) q).setTextualPredicate(textualPredicate1);
+			((JoinQuery) q).setTextualPredicate2(textualPredicate2);
+			((JoinQuery) q).setQueryText(queryText1);
+			((JoinQuery) q).setQueryText(queryText2);
+			((JoinQuery) q).setDistance(distance);
 		}
 		return q;
 	}
@@ -1022,17 +1457,17 @@ public class TestPartitionsPerformance {
 			q.setTextualPredicate(textualPredicate1);
 			q.setQueryText(queryText1);
 		} else if (queryType.equals(QueryType.queryTextualKNN)) {
-			((KNNQuery)q).setFocalPoint(new Point(xCoord, yCoord));
-			((KNNQuery)q).setTextualPredicate(textualPredicate1);
-			((KNNQuery)q).setQueryText(queryText1);
-			((KNNQuery)q).setK(k);
+			((KNNQuery) q).setFocalPoint(new Point(xCoord, yCoord));
+			((KNNQuery) q).setTextualPredicate(textualPredicate1);
+			((KNNQuery) q).setQueryText(queryText1);
+			((KNNQuery) q).setK(k);
 		} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
-			((JoinQuery)q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
-			((JoinQuery)q).setTextualPredicate(textualPredicate1);
-			((JoinQuery)q).setTextualPredicate2(textualPredicate2);
-			((JoinQuery)q).setQueryText(queryText1);
-			((JoinQuery)q).setQueryText(queryText2);
-			((JoinQuery)q).setDistance(distance);
+			((JoinQuery) q).setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + spatialRangeVal, yCoord + spatialRangeVal)));
+			((JoinQuery) q).setTextualPredicate(textualPredicate1);
+			((JoinQuery) q).setTextualPredicate2(textualPredicate2);
+			((JoinQuery) q).setQueryText(queryText1);
+			((JoinQuery) q).setQueryText(queryText2);
+			((JoinQuery) q).setDistance(distance);
 		}
 		return q;
 	}

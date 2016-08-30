@@ -353,7 +353,7 @@ public class IndexCell {
 										tempQueries.add(q);
 									q.visitied++;
 									if (q.visitied >= q.getQueryText().size()) {
-										if (q.added != true) {
+										if (q.added != true&&TextHelpers.containsTextually(keywords, q.getQueryText())) {
 											q.added = true;
 											finalQueries.add(q);
 										}

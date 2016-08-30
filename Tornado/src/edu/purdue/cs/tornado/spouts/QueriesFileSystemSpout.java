@@ -167,13 +167,12 @@ public class QueriesFileSystemSpout extends FileSpout {
 
 	public  Query buildQuery(String line, String scId, int keywordCount, String data1, String data2, Double distance, QueryType queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
 			Integer k) {
-		if (previousLocations == null) {
+		if (previousLocations == null||selfTaskId==null ||selfTaskIndex==null) {
 			previousLocations = new ArrayList<LatLong>();
 			r = new RandomGenerator(0);
 			selfTaskId = 0;
 			selfTaskIndex = 0;
 			i = 0;
-
 		}
 
 		keywordCountVal = keywordCount;
@@ -313,7 +312,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 
 			if (lat < SpatioTextualConstants.minLat || lat > SpatioTextualConstants.maxLat || lon < SpatioTextualConstants.minLong || lon > SpatioTextualConstants.maxLong
 					|| (Double.compare(lat, 0.0) == 0 && Double.compare(lon, 0.0) == 0)) {
-
+				
 				if (previousLocations.size() > 0) {
 					latLong = previousLocations.get(r.nextInt(previousLocations.size()));
 					prevLocCount++;
@@ -324,6 +323,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 			} else {
 				latLong = new LatLong(lat, lon);
 				previousLocations.add(latLong);
+				
 			}
 			from = to;
 			to = line.indexOf(',', from + 1);
@@ -335,17 +335,23 @@ public class QueriesFileSystemSpout extends FileSpout {
 			String textContent = line.substring(from + 1);
 			ArrayList<String> queryText1 = new ArrayList<String>();
 			ArrayList<String> textList = TextHelpers.transformIntoSortedArrayListOfString(textContent);
-			if (textList.size() == 0) {
-				if (previousTextList == null)
-					return null;
-				textList = previousTextList;
-			} else {
+			if (textList.size() <keywordCountVal) {
+				return null;
+//				if (previousTextList == null)
+//					return null;
+//				textList.addAll(previousTextList);
+			} else  {
 				previousTextList = textList;
 			}
 
+//			for (int j = 0; j < keywordCountVal; j++) {
+//
+//				queryText1.add(textList.get(r.nextInt(textList.size())));
+//				//queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
+//			}
 			for (int j = 0; j < keywordCountVal; j++) {
 
-				queryText1.add(textList.get(r.nextInt(textList.size())));
+				queryText1.add(textList.get(j));
 				//queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
 			}
 			Integer id = i + selfTaskIndex * totalQueryCountVal;

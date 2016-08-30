@@ -57,6 +57,8 @@ public class SpatioTextualConstants {
 	public static String HDFS = "HDFS";
 	//****************************************************************************
 	//***********************Spout constants
+	public static final Integer DataTweetsSource = 2;
+	public static final Integer QuerySource = 1;
 	public static final Integer generatorSeed = 1000;
 	public static final Integer dataGeneratorDelay = 100; // setting this to zero to achieve the highest data rate possible
 	public static final Integer queryGeneratorDelay = 10000; // setting this to zero to achieve to send queries to bolts as  soon as possible

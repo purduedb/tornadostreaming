@@ -24,8 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-
-import edu.purdue.cs.tornado.messages.Query;
+import java.util.Set;
 
 public class TextHelpers {
 	public static final String[] SET_VALUES = new String[] { "a","ab","abt","attwaction","attwicted",
@@ -88,13 +87,26 @@ public class TextHelpers {
 	 * @return
 	 */
 	public static ArrayList<String> transformIntoSortedArrayListOfString(String inputText) {
-		String[] splitText = inputText.replaceAll("[^A-Za-z0-9]" , " ").split(SpatioTextualConstants.textDelimiter);
+		String[] splitText = inputText.replaceAll("[^A-Za-z0-9@/.:_]" , " ").split(SpatioTextualConstants.textDelimiter);
 		Arrays.sort(splitText);
 		ArrayList<String> sortedTextList = new ArrayList<String>(Arrays.asList(splitText));
 		ArrayList<String> finalSortedList = new ArrayList<String>();
 		String previousString ="";
 		for (String s:sortedTextList)
-			if(s!=null&&!s.equals(previousString)&&isReleventKeyword(s)){
+			if(s!=null&&!s.toLowerCase().equals(previousString.toLowerCase())&&isReleventKeyword(s)){
+				previousString = s;
+				finalSortedList.add(s.toLowerCase());				
+		}
+		return finalSortedList;
+	}
+	public static ArrayList<String> transformIntoSortedArrayListOfStringOld(String inputText) {
+		String[] splitText = inputText.replaceAll("[^A-Za-z0-9@/.:]" , " ").split(SpatioTextualConstants.textDelimiter);
+		Arrays.sort(splitText);
+		ArrayList<String> sortedTextList = new ArrayList<String>(Arrays.asList(splitText));
+		ArrayList<String> finalSortedList = new ArrayList<String>();
+		String previousString ="";
+		for (String s:sortedTextList)
+			if(s!=null&&!s.toLowerCase().equals(previousString.toLowerCase())&&isReleventKeyword(s)){
 				previousString = s;
 				finalSortedList.add(s.toLowerCase());				
 		}
@@ -124,6 +136,20 @@ public class TextHelpers {
 		return false;
 	}
 	public static boolean overlapsTextually(HashSet<String> textMap,ArrayList<String> textList){
+		
+		for(String text: textList)
+			if(textMap.contains(text))
+				return true;
+		return false;
+	}
+	public static boolean containsTextually(HashSet<String> textMap,ArrayList<String> textList){
+		
+		for(String text: textList)
+			if(!textMap.contains(text))
+				return false;
+		return true;
+	}
+public static boolean overlapsTextually(Set<String> textMap,ArrayList<String> textList){
 		
 		for(String text: textList)
 			if(textMap.contains(text))
@@ -244,6 +270,27 @@ public class TextHelpers {
 			  return true;
 		  return false;
 	}
+	public static boolean containsTextually(ArrayList<String> textListContainer,ArrayList<String> textListSubset,int containerBegin,int sublistBegin){
+		  int n1 = textListContainer.size();
+		  int n2 = textListSubset.size();
+		  int matchingCount=0;
+		  int i = containerBegin, j = sublistBegin;
+		  while (i < n1 && j < n2) {
+			int val= textListContainer.get(i).compareToIgnoreCase(textListSubset.get(j));
+		    if (val <0 ) { //str1 is greater than str2
+		      i++;
+		    } else if (val>0) {//str2 is greater than str1
+		      return false; // a String is not matched
+		    } else {
+		      i++;
+		      j++;
+		      matchingCount++;
+		    }
+		  }
+		  if(matchingCount==n2)
+			  return true;
+		  return false;
+	}
 	/**
 	 * This method determines if one keyword list contains all keywords of the other list
 	 * This method assumes that input lists are sorted on text to speed up the overlap identification process
@@ -285,6 +332,8 @@ public class TextHelpers {
 		int length;
 		length = keyword.length();
 		if (length >= SpatioTextualConstants.relevenatKeyWordMinSize && length < SpatioTextualConstants.relevenatKeyWordMaxSize) {
+			if(keyword.charAt(0)=='@' ||keyword.contains("http"))
+				isImpt = false;
 			if (isAlphanumeric(keyword, length)) {
 				if (stop_list.contains(keyword.toLowerCase())) {
 					isImpt = false;

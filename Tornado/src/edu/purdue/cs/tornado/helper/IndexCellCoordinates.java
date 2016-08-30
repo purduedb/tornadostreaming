@@ -19,23 +19,57 @@
  */
 package edu.purdue.cs.tornado.helper;
 
+import org.apache.storm.trident.operation.builtin.Equals;
+
 public class IndexCellCoordinates {
-	public Integer x;
-	public Integer y;
-	public IndexCellCoordinates(Integer x, Integer y) {
+	public int x;
+	public int y;
+
+	public IndexCellCoordinates(int x, int y) {
 		super();
 		this.x = x;
 		this.y = y;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (!IndexCellCoordinates.class.isAssignableFrom(obj.getClass())) {
+			return false;
+		}
+		final IndexCellCoordinates other = (IndexCellCoordinates) obj;
+
+		if (this.x != other.x) {
+			return false;
+		}
+		if (this.y != other.y) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = 3;
+		hash = 53 * hash + this.x;
+		hash = 53 * hash + this.y;
+		return hash;
+	}
+
 	public Integer getX() {
 		return x;
 	}
+
 	public void setX(Integer x) {
 		this.x = x;
 	}
+
 	public Integer getY() {
 		return y;
 	}
+
 	public void setY(Integer y) {
 		this.y = y;
 	}
