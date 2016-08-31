@@ -16,15 +16,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ * 
+ * 
+ * This version is meant for the fair comparison of with the state of the art
+ *  index that does not have any other cluster and tornado related attributes
  */
-package edu.purdue.cs.tornado.index.local;
+package edu.purdue.cs.tornado.index.local.hybridpyramidminimal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
-import edu.purdue.cs.tornado.helper.IndexCellOptimized;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;

@@ -26,6 +26,7 @@ import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.GlobalIndexBolt;
+import edu.purdue.cs.tornado.index.local.hybridgrid.GridIndexCell;
 import edu.purdue.cs.tornado.messages.CombinedTuple;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.JoinQuery;
@@ -69,7 +70,7 @@ public class BaselineEvaluator extends BaseRichBolt {
 		allQueries = new ArrayList<Query>();
 		staticData = new ArrayList<DataObject>(); //Maybe this needs to be spatially partitioned 
 		selfBounds = new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange));
-		singleIndexCell = new IndexCell(selfBounds, false, 0);
+		singleIndexCell = new GridIndexCell(selfBounds, false, 0);
 		//	initMetrics(context);
 		//		Long startTime = System.nanoTime();
 		//	    readStaticData();

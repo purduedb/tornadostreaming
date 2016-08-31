@@ -1,7 +1,7 @@
 /**
  *  
  * @author Anas Daghistani <anas@purdue.edu>
- *
+ * @author Ahmed Mahmood
  */
 package edu.purdue.cs.tornado.evaluator;
 
@@ -30,8 +30,10 @@ import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.index.global.DynamicGlobalAQWAIndex;
 import edu.purdue.cs.tornado.index.global.DynamicGlobalOptimizedIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
-import edu.purdue.cs.tornado.index.local.LocalHybridGridIndex;
+import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
+import edu.purdue.cs.tornado.index.local.hybridgrid.LocalHybridGridIndex;
+//import edu.purdue.cs.tornado.index.local.hybridgrid.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.loadbalance.LoadBalanceMessage;
 import edu.purdue.cs.tornado.loadbalance.LocalBestSplitInfo;
@@ -227,9 +229,9 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 			DataSourceInformation sourceInfo = itr.next().getValue();
 			if (DataSourceType.DATA_SOURCE.equals(sourceInfo.dataSourceType)) {
 				String sourceId = sourceInfo.dataSourceId;
-				ArrayList<IndexCell> indexCells = ((LocalHybridGridIndex) sourceInfo.localHybridIndex).getIndexCellsFromPartition(myPartition);
+				ArrayList<IndexCell> indexCells = sourceInfo.localHybridIndex.getIndexCellsFromPartition(myPartition);
 				for (IndexCell indexCell : indexCells) {
-					indexCell.indexCellCost /= 2;
+					indexCell.setIndexCellCost (indexCell.getIndexCellCost()/ 2);
 				}
 			}
 		}
@@ -303,9 +305,10 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 		//			fromNeighbour = false;
 		//		}
 		//		if (!fromNeighbour) {
-		LocalHybridGridIndex localHybridGridIndex = ((LocalHybridGridIndex) sourcesInformations.get(dataObject.getSrcId()).getLocalHybridIndex());
+		LocalHybridIndex localHybridGridIndex = sourcesInformations.get(dataObject.getSrcId()).getLocalHybridIndex();
 		IndexCellCoordinates cellCoordinates = localHybridGridIndex.mapDataPointToPartition(dataObject.getLocation());
 		IndexCell indexCell = localHybridGridIndex.getIndexCellFromCoordinates(cellCoordinates);
+		
 
 		if (indexCell == null) {
 			this.totalCostUnMatched++;
@@ -314,7 +317,7 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 			//			if (incommingCells[cellCoordinates.getX()][cellCoordinates.getY()] == true)
 			//				System.out.println("Cannot find cell at" + cellCoordinates.getX() + "," + cellCoordinates.getY() + "my partition" + myPartition.toString());
 			return;
-		} else if (indexCell.transmitted == true) {
+		} else if (indexCell.isTransmitted() == true) {
 			forwardDataObjectTorecpientTask(dataObject);
 			return;
 		}
@@ -323,7 +326,7 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 		this.totalCost += keywordCount;
 		this.xColumnCost[cellCoordinates.getX()] += keywordCount;
 		this.yRowCost[cellCoordinates.getY()] += keywordCount;
-		indexCell.indexCellCost += keywordCount;
+		indexCell.setIndexCellCost(indexCell.getIndexCellCost()+keywordCount) ;
 		ArrayList<List<Query>> queries = localHybridGridIndex.getReleventSpatialKeywordRangeQueries(dataObject, fromNeighbour);
 
 		if (queries == null) {
@@ -339,7 +342,7 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 			this.totalCost += srcQueryList.size();
 			this.xColumnCost[cellCoordinates.getX()] += srcQueryList.size();
 			this.yRowCost[cellCoordinates.getY()] += srcQueryList.size();
-			indexCell.indexCellCost += srcQueryList.size();
+			indexCell.setIndexCellCost(indexCell.getIndexCellCost()+srcQueryList.size());
 			ArrayList<Integer> qualifiedQueriesIds = new ArrayList<Integer>();
 			String queryScrId = null;
 			if (srcQueryList.size() > 0) {
@@ -626,21 +629,21 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 	void handleIncommingIndexCellsFromMergeSplit(String srcId, ArrayList<IndexCell> indexCells) {
 		LocalHybridGridIndex localIdnex = ((LocalHybridGridIndex) sourcesInformations.get(srcId).getLocalHybridIndex());
 		for (IndexCell indexCell : indexCells) {
-			this.totalCost += indexCell.indexCellCost;
-			this.xColumnCost[indexCell.globalCoordinates.getX()] += indexCell.indexCellCost;
-			this.yRowCost[indexCell.globalCoordinates.getY()] += indexCell.indexCellCost;
-			indexCell.transmitted = false;
+			this.totalCost += indexCell.getIndexCellCost();
+			this.xColumnCost[indexCell.getGlobalCoordinates().getX()] += indexCell.getIndexCellCost();
+			this.yRowCost[indexCell.getGlobalCoordinates().getY()] += indexCell.getIndexCellCost();
+			indexCell.setTransmitted (false);
 			localIdnex.addIndexCellsFromPartition(indexCell,globalIndex.isTextAware());
 		}
 	}
 
 	void handleIncommingIndexCellsFromMergeSplit(String srcId, IndexCell indexCell) {
-		this.totalCost += indexCell.indexCellCost;
-		this.xColumnCost[indexCell.globalCoordinates.getX()] += indexCell.indexCellCost;
-		this.yRowCost[indexCell.globalCoordinates.getY()] += indexCell.indexCellCost;
+		this.totalCost += indexCell.getIndexCellCost();
+		this.xColumnCost[indexCell.getGlobalCoordinates().getX()] += indexCell.getIndexCellCost();
+		this.yRowCost[indexCell.getGlobalCoordinates().getY()] += indexCell.getIndexCellCost();
 		
 		((LocalHybridGridIndex) sourcesInformations.get(srcId).getLocalHybridIndex()).addIndexCellsFromPartition(indexCell,globalIndex.isTextAware());
-		indexCell.transmitted = false;
+		indexCell.setTransmitted ( false);
 		//System.out.println("Recieved index cell " + indexCell.globalCoordinates.getX() + "," + indexCell.globalCoordinates.getY() );
 		//	incommingCells[indexCell.globalCoordinates.getX()][indexCell.globalCoordinates.getY()]=true;
 		//for debugging
@@ -730,17 +733,17 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 					newControl.setControlMessageType(Control.LOAD_BALANCE);
 					newControl.indexCell = indexCell;
 					newControl.srcId = sourceId;
-					indexCell.transmitted = true;
+					indexCell.setTransmitted ( true);
 					//this.totalCostOther += indexCell.indexCellCost;
-					this.totalCost -= indexCell.indexCellCost;
+					this.totalCost -= indexCell.getIndexCellCost();
 					
 					
 //					if (this.totalCostOther > this.totalCost)
 //						System.err.println("Error in the cost of data to be send ");
 //					this.xColumnCostOther[indexCell.globalCoordinates.getX()] += indexCell.indexCellCost;
 //					this.yRowCostOther[indexCell.globalCoordinates.getY()] += indexCell.indexCellCost;
-					this.xColumnCost[indexCell.globalCoordinates.getX()] -= indexCell.indexCellCost;
-					this.yRowCost[indexCell.globalCoordinates.getY()] -= indexCell.indexCellCost;
+					this.xColumnCost[indexCell.getGlobalCoordinates().getX()] -= indexCell.getIndexCellCost();
+					this.yRowCost[indexCell.getGlobalCoordinates().getY()] -= indexCell.getIndexCellCost();
 					LoadBalanceMessage newLoadBalanceMessage = new LoadBalanceMessage();
 					newLoadBalanceMessage.setLoadBalanceMessageType(LoadBalanceMessageType);
 					newControl.setLeadBalanceMessage(newLoadBalanceMessage);

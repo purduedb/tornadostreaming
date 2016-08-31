@@ -29,10 +29,10 @@ import org.apache.storm.generated.InvalidTopologyException;
 import org.apache.storm.generated.StormTopology;
 import org.apache.storm.generated.SubmitOptions;
 
-import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
+import edu.purdue.cs.tornado.index.local.hybridgrid.GridIndexCell;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.loadbalance.LoadBalanceMessage;
 import edu.purdue.cs.tornado.loadbalance.Partition;
@@ -47,8 +47,8 @@ import edu.purdue.cs.tornado.serializer.CombinedTupleSerializer;
 import edu.purdue.cs.tornado.serializer.ControlSerializer;
 import edu.purdue.cs.tornado.serializer.DataObjectListSerializer;
 import edu.purdue.cs.tornado.serializer.DataObjectSerializer;
+import edu.purdue.cs.tornado.serializer.GridIndexCellSerializer;
 import edu.purdue.cs.tornado.serializer.IndexCellCoordinatesSerializer;
-import edu.purdue.cs.tornado.serializer.IndexCellSerializer;
 import edu.purdue.cs.tornado.serializer.LoadBalanceMessageSerializer;
 import edu.purdue.cs.tornado.serializer.PartitionSerializer;
 import edu.purdue.cs.tornado.serializer.PointSerializer;
@@ -89,7 +89,7 @@ public class SpatioTextualToplogySubmitter extends StormSubmitter{
 		((Config)conf).registerSerialization(ResultSetChange.class, ResultSetChangeSerializer.class);
 		((Config)conf).registerSerialization(Partition.class, PartitionSerializer.class);
 		((Config)conf).registerSerialization(Cell.class, CellSerializer.class);
-		((Config)conf).registerSerialization(IndexCell.class, IndexCellSerializer.class);
+		((Config)conf).registerSerialization(GridIndexCell.class, GridIndexCellSerializer.class);
 		((Config)conf).registerSerialization(IndexCellCoordinates.class, IndexCellCoordinatesSerializer.class);
 		
 	}

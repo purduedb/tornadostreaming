@@ -1,4 +1,4 @@
-package edu.purdue.cs.tornado.index.local;
+package edu.purdue.cs.tornado.index.local.quadtree;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,21 +9,21 @@ import java.util.Queue;
 import java.util.Set;
 
 //import ch.qos.logback.classic.Level;
-import edu.purdue.cs.tornado.helper.IndexCell;
+//import edu.purdue.cs.tornado.helper.QuadTreeIndexCell;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
-import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
+import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.KNNQuery;
 import edu.purdue.cs.tornado.messages.Query;
 
-public class LocalQuadTree extends LocalHybridIndex {
+public class LocalQuadTree {
 
-	IndexCell root;
+	QuadTreeIndexCell root;
 	public Rectangle selfBounds;
 	DataSourceInformation dataSourcesInformation;
 	public ArrayList<Query> globalKNNQueries;
@@ -39,13 +39,13 @@ public class LocalQuadTree extends LocalHybridIndex {
 		this.maxLevel = maxlevel;
 		this.dataSourcesInformation = dataSourcesInformation;
 		this.splitThreshold = splitThreshold;
-		root = new IndexCell(selfBounds, spatialOnlyFlag, 0);
+		root = new QuadTreeIndexCell(selfBounds, spatialOnlyFlag, 0);
 		this.spatialOnlyFlag = spatialOnlyFlag;
 		this.globalKNNQueries = new ArrayList<Query>();
 
 	}
 
-	@Override
+	
 	public Boolean addContinousQuery(Query query) {
 		if (query.getQueryType().equals(QueryType.queryTextualKNN)) {
 
@@ -57,23 +57,23 @@ public class LocalQuadTree extends LocalHybridIndex {
 			}
 		}
 
-		ArrayList<IndexCell> relevantCells = mapQueryToPartitions(query);
-		for (IndexCell indexCell : relevantCells) {
+		ArrayList<QuadTreeIndexCell> relevantCells = mapQueryToPartitions(query);
+		for (QuadTreeIndexCell QuadTreeIndexCell : relevantCells) {
 
-			indexCell.addQuery(query);
+			QuadTreeIndexCell.addQuery(query);
 			if (QueryType.queryTextualRange.equals(query.getQueryType()) || QueryType.queryTextualSpatialJoin.equals(query.getQueryType())) {
-				if (SpatialHelper.insideSpatially(query.getSpatialRange(), indexCell.bounds))
-					indexCell.coverQueryCount++;
+				if (SpatialHelper.insideSpatially(query.getSpatialRange(), QuadTreeIndexCell.bounds))
+					QuadTreeIndexCell.coverQueryCount++;
 			}
-			if (indexCell.storedQueries.size() >= splitThreshold && indexCell.storedQueries.size() > indexCell.coverQueryCount*2 && indexCell.level < this.maxLevel) {
-				splitCell(indexCell);
+			if (QuadTreeIndexCell.storedQueries.size() >= splitThreshold && QuadTreeIndexCell.storedQueries.size() > QuadTreeIndexCell.coverQueryCount*2 && QuadTreeIndexCell.level < this.maxLevel) {
+				splitCell(QuadTreeIndexCell);
 			}
 		}
 		return true;
 	}
 
-	private ArrayList<IndexCell> mapQueryToPartitions(Query query) {
-		ArrayList<IndexCell> relevantCells = new ArrayList<IndexCell>();
+	private ArrayList<QuadTreeIndexCell> mapQueryToPartitions(Query query) {
+		ArrayList<QuadTreeIndexCell> relevantCells = new ArrayList<QuadTreeIndexCell>();
 		double xmin, ymin, xmax, ymax;
 		if (QueryType.queryTextualRange.equals(query.getQueryType()) || QueryType.queryTextualSpatialJoin.equals(query.getQueryType())) {
 			if (query.getSpatialRange().getMin().getX() > selfBounds.getMax().getX() || query.getSpatialRange().getMin().getY() > selfBounds.getMax().getY() || query.getSpatialRange().getMax().getX() < selfBounds.getMin().getX()
@@ -89,10 +89,10 @@ public class LocalQuadTree extends LocalHybridIndex {
 		return relevantCells;
 	}
 
-	@Override
-	public IndexCell addDataObject(DataObject dataObject) {
-		IndexCell currentIndexCell = root;
-		IndexCell retunIndexCell = null;
+	
+	public QuadTreeIndexCell addDataObject(DataObject dataObject) {
+		QuadTreeIndexCell currentIndexCell = root;
+		QuadTreeIndexCell retunIndexCell = null;
 		while (currentIndexCell.children != null) {
 			currentIndexCell.dataObjectCount++;
 			for (int i = 0; i < currentIndexCell.numberOfChildren; i++) {
@@ -120,8 +120,8 @@ public class LocalQuadTree extends LocalHybridIndex {
 
 	}
 
-	private void splitCell(IndexCell currentIndexCell) {
-		currentIndexCell.children = new IndexCell[4];
+	private void splitCell(QuadTreeIndexCell currentIndexCell) {
+		currentIndexCell.children = new QuadTreeIndexCell[4];
 		double xrange = currentIndexCell.getBounds().getMax().getX() - currentIndexCell.getBounds().getMin().getX();
 		double yrange = currentIndexCell.getBounds().getMax().getY() - currentIndexCell.getBounds().getMin().getY();
 		double xmin = currentIndexCell.getBounds().getMin().getX();
@@ -131,10 +131,10 @@ public class LocalQuadTree extends LocalHybridIndex {
 		Rectangle bounds2 = new Rectangle(new Point(xmin + xrange / 2, ymin), new Point(xmin + xrange, ymin + yrange / 2));
 		Rectangle bounds3 = new Rectangle(new Point(xmin, ymin + yrange / 2), new Point(xmin + xrange / 2, ymin + yrange));
 		Rectangle bounds4 = new Rectangle(new Point(xmin + xrange / 2, ymin + yrange / 2), new Point(xmin + xrange, ymin + yrange));
-		currentIndexCell.children[0] = new IndexCell(bounds1, spatialOnlyFlag, currentIndexCell.level + 1);
-		currentIndexCell.children[1] = new IndexCell(bounds2, spatialOnlyFlag, currentIndexCell.level + 1);
-		currentIndexCell.children[2] = new IndexCell(bounds3, spatialOnlyFlag, currentIndexCell.level + 1);
-		currentIndexCell.children[3] = new IndexCell(bounds4, spatialOnlyFlag, currentIndexCell.level + 1);
+		currentIndexCell.children[0] = new QuadTreeIndexCell(bounds1, spatialOnlyFlag, currentIndexCell.level + 1);
+		currentIndexCell.children[1] = new QuadTreeIndexCell(bounds2, spatialOnlyFlag, currentIndexCell.level + 1);
+		currentIndexCell.children[2] = new QuadTreeIndexCell(bounds3, spatialOnlyFlag, currentIndexCell.level + 1);
+		currentIndexCell.children[3] = new QuadTreeIndexCell(bounds4, spatialOnlyFlag, currentIndexCell.level + 1);
 		currentIndexCell.numberOfChildren = 4;
 		if (currentIndexCell.getStoredObjects() != null) {
 			Iterator<DataObject> itr = currentIndexCell.getStoredObjects().values().iterator();
@@ -183,44 +183,44 @@ public class LocalQuadTree extends LocalHybridIndex {
 		currentIndexCell.queryCount = 0;
 	}
 
-	@Override
+	
 	public Boolean dropContinousQuery(Query query) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords) {
 		return getCountPerKeywrodsAll(keywords, selfBounds);
 	}
 
-	@Override
+	
 	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords, Rectangle rect) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords, Rectangle rect) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Integer getCountPerRec(Rectangle rec) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public IndexCell getOverlappingIndexCells(Point point) {
-		IndexCell currentIndexCell = root;
+	
+	public QuadTreeIndexCell getOverlappingIndexCells(Point point) {
+		QuadTreeIndexCell currentIndexCell = root;
 		while (currentIndexCell.children != null) {
 			for (int i = 0; i < currentIndexCell.numberOfChildren; i++) {
 				if (SpatialHelper.overlapsSpatially(point, currentIndexCell.children[i].bounds)) {
@@ -232,9 +232,9 @@ public class LocalQuadTree extends LocalHybridIndex {
 		return currentIndexCell;
 	}
 
-	public ArrayList<IndexCell> getOverlappingIndexCellsIncludingNonLeaf(Point point) {
-		ArrayList<IndexCell> relevantCells = new ArrayList<IndexCell>();
-		IndexCell currentIndexCell = root;
+	public ArrayList<QuadTreeIndexCell> getOverlappingIndexCellsIncludingNonLeaf(Point point) {
+		ArrayList<QuadTreeIndexCell> relevantCells = new ArrayList<QuadTreeIndexCell>();
+		QuadTreeIndexCell currentIndexCell = root;
 		relevantCells.add(currentIndexCell);
 		while (currentIndexCell.children != null) {
 
@@ -249,11 +249,11 @@ public class LocalQuadTree extends LocalHybridIndex {
 		return relevantCells;
 	}
 
-	@Override
-	public ArrayList<IndexCell> getOverlappingIndexCells(Rectangle rectangle) {
-		ArrayList<IndexCell> relevantCells = new ArrayList<IndexCell>();
-		IndexCell currentIndexCell = root;
-		Queue<IndexCell> queue = new LinkedList<IndexCell>();
+	
+	public ArrayList<QuadTreeIndexCell> getOverlappingIndexCells(Rectangle rectangle) {
+		ArrayList<QuadTreeIndexCell> relevantCells = new ArrayList<QuadTreeIndexCell>();
+		QuadTreeIndexCell currentIndexCell = root;
+		Queue<QuadTreeIndexCell> queue = new LinkedList<QuadTreeIndexCell>();
 		if (SpatialHelper.overlapsSpatially(currentIndexCell.boundsNoBoundaries, rectangle))
 			queue.add(currentIndexCell);
 		while (!queue.isEmpty()) {
@@ -270,10 +270,10 @@ public class LocalQuadTree extends LocalHybridIndex {
 		return relevantCells;
 	}
 
-	public ArrayList<IndexCell> getOverlappingIndexCellsIncludingNonleaf(Rectangle rectangle) {
-		ArrayList<IndexCell> relevantCells = new ArrayList<IndexCell>();
-		IndexCell currentIndexCell = root;
-		Queue<IndexCell> queue = new LinkedList<IndexCell>();
+	public ArrayList<QuadTreeIndexCell> getOverlappingIndexCellsIncludingNonleaf(Rectangle rectangle) {
+		ArrayList<QuadTreeIndexCell> relevantCells = new ArrayList<QuadTreeIndexCell>();
+		QuadTreeIndexCell currentIndexCell = root;
+		Queue<QuadTreeIndexCell> queue = new LinkedList<QuadTreeIndexCell>();
 		if (SpatialHelper.overlapsSpatially(currentIndexCell.boundsNoBoundaries, rectangle)) {
 			queue.add(currentIndexCell);
 		}
@@ -291,16 +291,16 @@ public class LocalQuadTree extends LocalHybridIndex {
 		return relevantCells;
 	}
 
-	@Override
-	public ArrayList<IndexCell> getOverlappingIndexCellWithData(ArrayList<String> keywords) {
+	
+	public ArrayList<QuadTreeIndexCell> getOverlappingIndexCellWithData(ArrayList<String> keywords) {
 		return getOverlappingIndexCellWithData(selfBounds, keywords);
 	}
 
-	@Override
-	public ArrayList<IndexCell> getOverlappingIndexCellWithData(Rectangle rectangle) {
-		ArrayList<IndexCell> relevantCells = new ArrayList<IndexCell>();
-		IndexCell currentIndexCell = root;
-		Queue<IndexCell> queue = new LinkedList<IndexCell>();
+	
+	public ArrayList<QuadTreeIndexCell> getOverlappingIndexCellWithData(Rectangle rectangle) {
+		ArrayList<QuadTreeIndexCell> relevantCells = new ArrayList<QuadTreeIndexCell>();
+		QuadTreeIndexCell currentIndexCell = root;
+		Queue<QuadTreeIndexCell> queue = new LinkedList<QuadTreeIndexCell>();
 		if (SpatialHelper.overlapsSpatially(currentIndexCell.boundsNoBoundaries, rectangle))
 			queue.add(currentIndexCell);
 		while (!queue.isEmpty()) {
@@ -318,11 +318,11 @@ public class LocalQuadTree extends LocalHybridIndex {
 
 	}
 
-	@Override
-	public ArrayList<IndexCell> getOverlappingIndexCellWithData(Rectangle rectangle, ArrayList<String> keywords) {
-		ArrayList<IndexCell> relevantCells = new ArrayList<IndexCell>();
-		IndexCell currentIndexCell = root;
-		Queue<IndexCell> queue = new LinkedList<IndexCell>();
+	
+	public ArrayList<QuadTreeIndexCell> getOverlappingIndexCellWithData(Rectangle rectangle, ArrayList<String> keywords) {
+		ArrayList<QuadTreeIndexCell> relevantCells = new ArrayList<QuadTreeIndexCell>();
+		QuadTreeIndexCell currentIndexCell = root;
+		Queue<QuadTreeIndexCell> queue = new LinkedList<QuadTreeIndexCell>();
 		if (SpatialHelper.overlapsSpatially(currentIndexCell.boundsNoBoundaries, rectangle))
 			queue.add(currentIndexCell);
 		while (!queue.isEmpty()) {
@@ -339,7 +339,7 @@ public class LocalQuadTree extends LocalHybridIndex {
 		return relevantCells;
 	}
 
-	@Override
+	
 	public HashMap<String, Query> getReleventQueries(DataObject dataObject, Boolean fromNeighbour) {
 		//this hashmap is based on query source id , query id itself
 		HashMap<String, Query> queriesMap = new HashMap<String, Query>();
@@ -350,13 +350,13 @@ public class LocalQuadTree extends LocalHybridIndex {
 			if (!queriesMap.containsKey(unqQueryId))
 				queriesMap.put(unqQueryId, q);
 		}
-		ArrayList<IndexCell> relevantIndexCells;
+		ArrayList<QuadTreeIndexCell> relevantIndexCells;
 		if (fromNeighbour) {
 			relevantIndexCells = getOverlappingIndexCells(dataObject.getRelevantArea());
-			for (IndexCell indexCell : relevantIndexCells) {
-				if (indexCell == null)
+			for (QuadTreeIndexCell QuadTreeIndexCell : relevantIndexCells) {
+				if (QuadTreeIndexCell == null)
 					continue;
-				List<Query> queries = indexCell.getQueries();
+				List<Query> queries = QuadTreeIndexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -364,11 +364,11 @@ public class LocalQuadTree extends LocalHybridIndex {
 				}
 			}
 		} else {
-			IndexCell indexCell = getOverlappingIndexCells(dataObject.getLocation());
-			//for (IndexCell indexCell : relevantIndexCells) {
-			if (indexCell != null && indexCell.getQueries() != null) {
+			QuadTreeIndexCell QuadTreeIndexCell = getOverlappingIndexCells(dataObject.getLocation());
+			//for (QuadTreeIndexCell QuadTreeIndexCell : relevantIndexCells) {
+			if (QuadTreeIndexCell != null && QuadTreeIndexCell.getQueries() != null) {
 
-				List<Query> queries = indexCell.getQueries();
+				List<Query> queries = QuadTreeIndexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -381,42 +381,42 @@ public class LocalQuadTree extends LocalHybridIndex {
 		return queriesMap;
 	}
 
-	@Override
+	
 	public LocalIndexKNNIterator KNNIterator(Point focalPoint, Double distance) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public LocalIndexKNNIterator LocalKNNIterator(Point focalPoint) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
-	public IndexCell mapDataObjectToIndexCell(DataObject dataObject) {
+	
+	public QuadTreeIndexCell mapDataObjectToIndexCell(DataObject dataObject) {
 		return getOverlappingIndexCells(dataObject.getLocation());
 	}
 
-	@Override
+	
 	public Boolean updateContinousQuery(Query oldQuery, Query query) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public ArrayList< List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public Set<String> getUpdatedTextSummery() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	@Override
+	
 	public void cleanUp() {
 		// TODO Auto-generated method stub
 		

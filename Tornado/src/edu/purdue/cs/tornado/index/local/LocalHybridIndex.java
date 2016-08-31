@@ -6,8 +6,10 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.purdue.cs.tornado.helper.IndexCell;
+import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
+import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
 
@@ -32,8 +34,11 @@ public abstract class LocalHybridIndex {
 	public abstract LocalIndexKNNIterator KNNIterator(Point focalPoint, Double distance) ;
 	public abstract LocalIndexKNNIterator LocalKNNIterator(Point focalPoint) ;
 	public abstract IndexCell mapDataObjectToIndexCell(DataObject dataObject) ;
+	public abstract ArrayList<IndexCell> getIndexCellsFromPartition(Cell partition) ;
 	public abstract Boolean updateContinousQuery(Query oldQuery, Query query) ;
 	public abstract Set<String> getUpdatedTextSummery() ;
 	public abstract void cleanUp() ;
+	public abstract IndexCellCoordinates mapDataPointToPartition(Point point) ;
+	public abstract IndexCell getIndexCellFromCoordinates(IndexCellCoordinates indexCell);
 
 }

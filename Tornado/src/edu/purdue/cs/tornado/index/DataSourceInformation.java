@@ -27,14 +27,12 @@ import edu.purdue.cs.tornado.helper.DataSourceType;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
-import edu.purdue.cs.tornado.index.local.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
-import edu.purdue.cs.tornado.index.local.LocalHybridMultiGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.index.local.LocalTextIndex;
 import edu.purdue.cs.tornado.index.local.LocalTextInvertedListIndex;
 import edu.purdue.cs.tornado.index.local.NoLocalIndex;
-import edu.purdue.cs.tornado.loadbalance.Cell;
+import edu.purdue.cs.tornado.index.local.hybridgrid.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.messages.DataObject;
 
 /**
@@ -80,17 +78,12 @@ public class DataSourceInformation {
 			case HYBRID_GRID:
 				this.localHybridIndex = new LocalHybridGridIndex(selfBounds, this,fineGridGran);
 				break;
-			case HYBRID_MULTI_LEVEL_GRID:
-				this.localHybridIndex = new LocalHybridMultiGridIndex(selfBounds, this,fineGridGran);
-				break;
+			
 			case SPATIAL_GRID:
 				this.localHybridIndex = new LocalHybridGridIndex(selfBounds, this,fineGridGran,fineGridGran,true,0);
 				
 				break;
-			case SPATIAL_MULTI_LEVEL_GRID:
-				this.localHybridIndex = new LocalHybridMultiGridIndex(selfBounds, this,fineGridGran,fineGridGran,true);
-				
-				break;
+			
 			default:
 				break;
 			}

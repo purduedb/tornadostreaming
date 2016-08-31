@@ -11,7 +11,7 @@ import java.util.Set;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 
-public class GlobalOptimizedPartitionedTextAwareIndex extends GlobalOptimizedPartitionedIndex {
+public class GlobalOptimizedPartitionedTextAwareIndex extends GlobalOptimizedPartitionedIndexLowerSpace {
 
 	public HashMap<Integer, HashMap<String, Long>> taskIdTextualSummery;//this give information about query keywords in every task
 	public HashMap<Integer, Boolean> noVerifyOnTextOverlap; // true this means i need to verify the text false means i do not verify and send directly

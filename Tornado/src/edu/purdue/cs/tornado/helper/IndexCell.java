@@ -24,119 +24,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
 
-public class IndexCell {
-	public HashMap<Integer, DataObject> storedObjects;
+public abstract class IndexCell {
 
-	public HashMap<String, Integer> allDataTextInCell; //keyword, count of distinct objects
-	public HashMap<String, Integer> allQueryTextInCell; //keyword, count of distinct queries
-	public ArrayList<Query> storedQueries;
-	public ArrayList<Query> outerEvaluatorQueries;
-	public HashMap<String, HashMap<String,ArrayList<Query>>> queriesInvertedList;//src,keyword,Query
-
-	public Rectangle bounds;
-
-	public Integer dataObjectCount;
-	public Integer queryCount;
-	//this is for testing spatial objects only
-	public Boolean spatialOnlyFlag;
-
-	public IndexCellType indexCellType;
-	//used by multilevel index
-	public Rectangle boundsNoBoundaries;
-
-	public Integer level;
-	public IndexCellCoordinates globalCoordinates;
-	//used by pyramid index
-	public IndexCell[] children;
-
-	public IndexCell parent;
-	public Integer numberOfChildren;
-	public Integer coverQueryCount;
-
-	public Integer indexCellCost;
-	public boolean transmitted;
-	public Long minExpireTime;
 	public enum IndexCellType {
 		Grid, Multi_Level_Grid, Pyramid
 	}
 
 	public IndexCell() {
-		storedObjects = null;
-		allDataTextInCell = null;
-		allQueryTextInCell = null;
-		storedQueries = null;
-		outerEvaluatorQueries = null;
-		queriesInvertedList = null;
-		this.bounds = null;
-		this.dataObjectCount = 0;
-		this.queryCount = 0;
-		this.boundsNoBoundaries = null;
-		this.spatialOnlyFlag = null;
-		this.level = null;
-		children = null;
-		parent = null;
-		numberOfChildren = 0;
-		this.coverQueryCount = 0;
-		indexCellCost = 0;
-		transmitted = false;
-		minExpireTime = Long.MAX_VALUE;
-	}
-
-	public IndexCell(Rectangle bounds, Boolean spatialOnlyFlag, Integer level) {
-		storedObjects = null;
-		allDataTextInCell = null;
-		allQueryTextInCell = null;
-		storedQueries = null;
-		outerEvaluatorQueries = null;
-		queriesInvertedList = null;
-		this.bounds = bounds;
-		this.dataObjectCount = 0;
-		this.queryCount = 0;
-		indexCellCost = 0;
-		this.boundsNoBoundaries = new Rectangle(new Point(bounds.getMin().getX() + .0001, bounds.getMin().getY() + .0001), new Point(bounds.getMax().getX() - .0001, bounds.getMax().getY() - .0001));
-		this.spatialOnlyFlag = spatialOnlyFlag;
-		this.level = level;
-		//used by multilevel index
-		children = null;
-		parent = null;
-		numberOfChildren = 0;
-		indexCellCost = 0;
-		this.transmitted = false;
-		this.coverQueryCount = 0;
-		this.minExpireTime = Long.MAX_VALUE;
-
-	}
-
-	public IndexCell(Rectangle bounds, Boolean spatialOnlyFlag, Integer level, IndexCellCoordinates globalCoordinates) {
-		storedObjects = null;
-		allDataTextInCell = null;
-		allQueryTextInCell = null;
-		storedQueries = null;
-		outerEvaluatorQueries = null;
-		queriesInvertedList = null;
-		this.bounds = bounds;
-		this.dataObjectCount = 0;
-		this.queryCount = 0;
-		this.boundsNoBoundaries = new Rectangle(new Point(bounds.getMin().getX() + .0001, bounds.getMin().getY() + .0001), new Point(bounds.getMax().getX() - .0001, bounds.getMax().getY() - .0001));
-		this.spatialOnlyFlag = spatialOnlyFlag;
-		this.level = level;
-		//used by multilevel index
-		this.transmitted = false;
-		children = null;
-		parent = null;
-		numberOfChildren = 0;
-		this.coverQueryCount = 0;
-		this.globalCoordinates = globalCoordinates;
-		indexCellCost = 0;
-		this.minExpireTime = Long.MAX_VALUE;
 	}
 
 	/**
@@ -145,142 +45,16 @@ public class IndexCell {
 	 * 
 	 * @param dataObject
 	 */
-	public void addDataObject(DataObject dataObject) {
-		if (storedObjects == null)
-			storedObjects = new HashMap<Integer, DataObject>();
-		if (allDataTextInCell == null)
-			allDataTextInCell = new HashMap<String, Integer>();
-		storedObjects.put(dataObject.getObjectId(), dataObject);
-		dataObjectCount++;
-		if (!spatialOnlyFlag)
-			for (String s : dataObject.getObjectText()) {
-				if (allDataTextInCell.containsKey(s))
-					allDataTextInCell.put(s, allDataTextInCell.get(s) + 1);
-				else
-					allDataTextInCell.put(s, 1);
-			}
-	}
 
-	public IndexCell addDataObjectRecusrive(DataObject dataObject) {
-		if (storedObjects == null)
-			storedObjects = new HashMap<Integer, DataObject>();
-		if (allDataTextInCell == null)
-			allDataTextInCell = new HashMap<String, Integer>();
-		storedObjects.put(dataObject.getObjectId(), dataObject);
-		dataObjectCount++;
-		if (!spatialOnlyFlag)
-			for (String s : dataObject.getObjectText()) {
-				if (allDataTextInCell.containsKey(s))
-					allDataTextInCell.put(s, allDataTextInCell.get(s) + 1);
-				else
-					allDataTextInCell.put(s, 1);
-			}
-		return this;
-	}
+	public abstract void addQuery(Query query);
 
-	public void addDataObjectStatics(DataObject dataObject) {
-		if (allDataTextInCell == null)
-			allDataTextInCell = new HashMap<String, Integer>();
-		dataObjectCount++;
-		if (!spatialOnlyFlag)
-			for (String s : dataObject.getObjectText()) {
-				if (allDataTextInCell.containsKey(s))
-					allDataTextInCell.put(s, allDataTextInCell.get(s) + 1);
-				else
-					allDataTextInCell.put(s, 1);
-			}
-	}
+	public abstract boolean cellOverlapsSpatiall(Rectangle rectangle);
 
-	public void addQuery(Query query) {
-		query.added = false;
-		query.visitied = 0;
-		if (storedQueries == null)
-			storedQueries = new ArrayList<Query>();
+	public abstract boolean cellOverlapsTextually(ArrayList<String> textList);
 
-		if (!storedQueries.contains(query)) {
-			queryCount++;
-			storedQueries.add(query);
-		}
-		if (query.getRemoveTime() < minExpireTime)
-			minExpireTime = query.getRemoveTime();
-		if (!spatialOnlyFlag) {
-			if (queriesInvertedList == null) {
-				queriesInvertedList = new HashMap<String, HashMap<String, ArrayList<Query>>>();
-				queriesInvertedList.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
-			} else if (!queriesInvertedList.containsKey(query.getSrcId()))
-				queriesInvertedList.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
-			for (String keyword : query.getQueryText()) {
-				if (!queriesInvertedList.get(query.getSrcId()).containsKey(keyword))
-					queriesInvertedList.get(query.getSrcId()).put(keyword, new ArrayList<Query>());
-				queriesInvertedList.get(query.getSrcId()).get(keyword).add(query);
-			}
-		}
+	public abstract void dropQuery(Query query);
 
-	}
-
-	public boolean cellOverlapsSpatiall(Rectangle rectangle) {
-		return SpatialHelper.overlapsSpatially(bounds, rectangle);
-	}
-
-	public boolean cellOverlapsTextually(ArrayList<String> textList) {
-		if (spatialOnlyFlag)
-			return true;
-		if (allDataTextInCell.size() != 0)
-			return TextHelpers.overlapsTextually(allDataTextInCell, textList);
-		return false;
-	}
-
-	public DataObject dropDataObject(Integer id) {
-		if (storedObjects == null)
-			return null;
-		if (dataObjectCount > 0)
-			dataObjectCount--;
-		DataObject obj = storedObjects.get(id);
-		storedObjects.remove(id);
-		return obj;
-	}
-
-	public void dropQuery(Query query) {
-		if (storedQueries == null)
-			return;
-		int i = 0;
-		boolean found = false;
-		for (i = 0; i < storedQueries.size(); i++) {
-			if (query.getSrcId().equals(storedQueries.get(i).getSrcId()) && query.getQueryId().equals(storedQueries.get(i).getQueryId())) {
-				found = true;
-				break;
-			}
-		}
-
-		if (found) {
-			Query q = storedQueries.remove(i);
-			removeQueryFromInvertedList(q);
-			queryCount--;
-		}
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (o == this)
-			return true;
-		if (!(o instanceof IndexCell))
-			return false;
-		IndexCell c = (IndexCell) o;
-		return (c.getBounds().equals(this.getBounds()));
-	}
-
-	public Integer estimateDataObjectCountAll(ArrayList<String> keywords) {
-		Integer min = Integer.MAX_VALUE;
-		for (String keyword : keywords) {
-			if (!allDataTextInCell.containsKey(keyword)) {
-				min = 0;
-				break;
-			} else if (allDataTextInCell.get(keyword) < min)
-				min = allDataTextInCell.get(keyword);
-		}
-		return min;
-	}
-	
+	public abstract boolean equals(Object o);
 
 	/**
 	 * 
@@ -289,237 +63,58 @@ public class IndexCell {
 	 * 
 	 * @param keywords
 	 */
-	public Integer estimateDataObjectCountAny(ArrayList<String> keywords) {
+	public abstract Integer estimateDataObjectCountAny(ArrayList<String> keywords);
 
-		Integer sum = 0;
-		for (String keyword : keywords) {
-			if (!allDataTextInCell.containsKey(keyword)) {
-				continue;
-			}
-			sum += allDataTextInCell.get(keyword);
-		}
-		return sum;
-	}
+	public abstract ArrayList<Query> findandRemoveExpriedQueries();
 
-	public ArrayList<Query> findandRemoveExpriedQueries() {
-		Long nowTime = (new Date()).getTime();
-		if (nowTime < minExpireTime||storedQueries==null||storedQueries.size()==0)
-			return null;
-		minExpireTime = Long.MAX_VALUE;
-		Iterator<Query> itr = storedQueries.iterator();
-		ArrayList<Query> expriedList = new ArrayList<Query>();
-		while (itr.hasNext()) {
-			Query q = itr.next();
-			if (q.getRemoveTime() < nowTime) {
-				removeQueryFromInvertedList(q);
-				expriedList.add(q);
-				queryCount--;
-				itr.remove();
-				
-			} else if (q.getRemoveTime() < minExpireTime)
-				minExpireTime = q.getRemoveTime();
+	public abstract ArrayList<List<Query>> geSpatiotTextualOverlappingQueries(Point p, ArrayList<String> keywords);
 
-		}
-		return expriedList;
-	}
+	public abstract Rectangle getBounds();
 
-	public synchronized ArrayList<List<Query>> geSpatiotTextualOverlappingQueries(Point p, ArrayList<String> keywords) {
-		ArrayList<List<Query>> result = new ArrayList<List<Query>>();
-		if (queriesInvertedList == null)
-			return result;
-		Iterator itr = queriesInvertedList.entrySet().iterator();
-		while (itr.hasNext()) {
-			//HashSet<Integer> queries = new HashSet<Integer>();
-			ArrayList<Query> finalQueries = new ArrayList<Query>();
-			ArrayList<Query> tempQueries = new ArrayList<Query>();
-			String queryScrId;
-			Map.Entry entry = (Map.Entry) itr.next();
-			HashMap<String, ArrayList<Query>> srcQueryList = (HashMap<String, ArrayList<Query>>) entry.getValue();
-			queryScrId = (String) entry.getKey();
-			for (String keyword : keywords) {
-				List<Query> validQueries = srcQueryList.get(keyword);
-				if (validQueries != null)
-					try {
-						for (Query q : validQueries) {
+	public abstract HashMap<String, List<Query>> getTextualOverlappingQueries(ArrayList<String> keywords);
 
-							if (SpatialHelper.overlapsSpatially(p, q.getSpatialRange())) {
-								if (TextualPredicate.OVERlAPS.equals(q.getTextualPredicate())) {
-									if (q.added != true) {
-										q.added = true;
-										finalQueries.add(q);
-									}
-								} else if (TextualPredicate.CONTAINS.equals(q.getTextualPredicate())) {
-									if (q.visitied == 0)
-										tempQueries.add(q);
-									q.visitied++;
-									if (q.visitied >= q.getQueryText().size()) {
-										if (q.added != true&&TextHelpers.containsTextually(keywords, q.getQueryText())) {
-											q.added = true;
-											finalQueries.add(q);
-										}
-									}
-								}
-							}
+	public abstract void removeQueryFromInvertedList(Query query);
 
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-			}
-			for (Query q : finalQueries) {
-				q.added = false;
-			}
-			for (Query q : tempQueries) {
-				q.visitied = 0;
-			}
-			result.add(finalQueries);
-		}
-		return result;
-	}
+	public abstract void setBounds(Rectangle bounds);
 
-	public HashMap<String, Integer> getAllDataTextInCell() {
-		return allDataTextInCell;
-	}
+	public abstract void setStoredQueries(ArrayList<Query> storedQueries);
 
-	public HashMap<String, Integer> getAllQueryTextInCell() {
-		return allQueryTextInCell;
-	}
+	public abstract List<Query> getQueries();
 
-	public Rectangle getBounds() {
-		return bounds;
-	}
+	public abstract HashMap<String, HashMap<String, ArrayList<Query>>> getQueriesInvertedList();
 
-	public DataObject getDataObject(Integer id) {
-		return storedObjects.get(id);
-	}
+	public abstract void setQueriesInvertedList(HashMap<String, HashMap<String, ArrayList<Query>>> queriesInvertedList);
 
-	public Integer getDataObjectCount() {
-		return dataObjectCount;
-	}
+	public abstract IndexCellCoordinates getGlobalCoordinates();
 
-	public Integer getLevel() {
-		return level;
-	}
+	public abstract void setGlobalCoordinates(IndexCellCoordinates globalCoordinates);
 
-	public ArrayList<Query> getOuterEvaluatorQueries() {
-		return outerEvaluatorQueries;
-	}
+	public abstract Integer getIndexCellCost() ;
+	public abstract void setIndexCellCost(Integer indexCellCost);
 
-	public ArrayList<Query> getQueries() {
-		return storedQueries;
-	}
+	public abstract boolean isTransmitted() ;
+	public abstract void setTransmitted(boolean transmitted) ;
 
-	public Boolean getSpatialOnlyFlag() {
-		return spatialOnlyFlag;
-	}
+	public abstract Long getMinExpireTime() ;
 
-	public ArrayList<DataObject> getSpatioTextualOverlappingDataObjects(Query query) {
-		ArrayList<DataObject> qulifiedObjects = new ArrayList<DataObject>();
-		if (storedObjects == null)
-			return qulifiedObjects;
-		Iterator<Entry<Integer, DataObject>> it = storedObjects.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<Integer, DataObject> entry = (Map.Entry<Integer, DataObject>) it.next();
-			DataObject dataObject = (DataObject) entry.getValue();
-			if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), query.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate()))
-				qulifiedObjects.add((DataObject) entry.getValue());
-		}
-		return qulifiedObjects;
-	}
+	public abstract void setMinExpireTime(Long minExpireTime);
 
-	public HashMap<Integer, DataObject> getStoredObjects() {
-		return storedObjects;
-	}
+	public abstract ArrayList<Query> getStoredQueries();
 
-	public ArrayList<DataObject> getStoredObjects(Rectangle rect, ArrayList<String> keywords, TextualPredicate textualPredicate) {
+	public abstract List<DataObject> getStoredObjects();
 
-		ArrayList<DataObject> resultObjects = new ArrayList<DataObject>();
-		for (DataObject dataObject : storedObjects.values())
-			if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), rect) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), keywords, textualPredicate)) {
-				resultObjects.add(dataObject);
-			}
-		return resultObjects;
-	}
+	public abstract void setStoredObjects(com.sun.tools.javac.util.List<DataObject> objects) ;
+	public abstract Integer getDataObjectCount();
 
-	public List<Query> getStoredQueries() {
-		return storedQueries;
-	}
+	public abstract DataObject dropDataObject(Integer id);
+	public abstract HashMap<String, Integer> getAllDataTextInCell() ;
 
-	public HashMap<String, List<Query>> getTextualOverlappingQueries(ArrayList<String> keywords) {
-		HashMap<String, List<Query>> result = new HashMap<String, List<Query>>();
-		Iterator itr = queriesInvertedList.entrySet().iterator();
-		while (itr.hasNext()) {
-			HashSet<Query> queries = new HashSet<Query>();
-			String queryScrId;
-			Map.Entry entry = (Map.Entry) itr.next();
-			HashMap<String, ArrayList<Query>> srcQueryList = (HashMap<String, ArrayList<Query>>) entry.getValue();
-			queryScrId = (String) entry.getKey();
-			for (String keyword : keywords) {
-				ArrayList<Query> validQueries = srcQueryList.get(keyword);
-				if (validQueries != null)
-					for (Query q : validQueries)
-						queries.add(q);
-			}
+	public abstract List<DataObject> getStoredObjects(Rectangle range, ArrayList<String> keywords, TextualPredicate predicate) ;
 
-			ArrayList<Query> finalQueries = new ArrayList<Query>(queries);
-			result.put(queryScrId, finalQueries);
-		}
-		return result;
-	}
+	public abstract DataObject getDataObject(Integer id) ;
 
-	public void removeQueryFromInvertedList(Query query) {
-		if (!spatialOnlyFlag) {
-			for (String keyword : query.getQueryText()) {
-				List<Query> queries = queriesInvertedList.get(query.getSrcId()).get(keyword);
-				int j = 0;
-				Iterator<Query> itr = queries.iterator();
-				while(itr.hasNext()){
-					Query q = itr.next();
-					if (query.getQueryId().equals(q.getQueryId())){
-						itr.remove();
-						break;
-					}
-				}
-				
+	public abstract void addDataObject(DataObject id) ;
 
-			}
-		}
-	}
-
-	public void setAllDataTextInCell(HashMap<String, Integer> allDataTextInCell) {
-		this.allDataTextInCell = allDataTextInCell;
-	}
-
-	public void setAllQueryTextInCell(HashMap<String, Integer> allQueryTextInCell) {
-		this.allQueryTextInCell = allQueryTextInCell;
-	}
-
-	public void setBounds(Rectangle bounds) {
-		this.bounds = bounds;
-	}
-
-	public void setDataObjectCount(Integer dataObjectCount) {
-		this.dataObjectCount = dataObjectCount;
-	}
-
-	public void setLevel(Integer level) {
-		this.level = level;
-	}
-
-	public void setOuterEvaluatorQueries(ArrayList<Query> outerEvaluatorQueries) {
-		this.outerEvaluatorQueries = outerEvaluatorQueries;
-	}
-
-	public void setSpatialOnlyFlag(Boolean spatialOnlyFlag) {
-		this.spatialOnlyFlag = spatialOnlyFlag;
-	}
-
-	public void setStoredObjects(HashMap<Integer, DataObject> storedObjects) {
-		this.storedObjects = storedObjects;
-	}
-
-	public void setStoredQueries(ArrayList<Query> storedQueries) {
-		this.storedQueries = storedQueries;
-	}
+	public abstract int estimateDataObjectCountAll(ArrayList<String> keywords);
 
 }

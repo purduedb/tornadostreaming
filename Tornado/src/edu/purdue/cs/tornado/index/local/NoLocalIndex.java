@@ -6,9 +6,12 @@ import java.util.List;
 import java.util.Set;
 
 import edu.purdue.cs.tornado.helper.IndexCell;
+import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
+import edu.purdue.cs.tornado.index.local.hybridgrid.GridIndexCell;
+import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
 
@@ -33,7 +36,7 @@ public class NoLocalIndex extends LocalHybridIndex {
 		this.dataSourcesInformation = dataSourcesInformation;
 		this.selfBounds = selfBounds;
 
-		singleIndexCell = new IndexCell(selfBounds, false, 0);
+		singleIndexCell = new GridIndexCell(selfBounds, false, 0);
 		globalKNNQueries = new ArrayList<Query>();
 
 	}
@@ -46,7 +49,6 @@ public class NoLocalIndex extends LocalHybridIndex {
 
 	@Override
 	public IndexCell addDataObject(DataObject dataObject) {
-		singleIndexCell.addDataObject(dataObject);
 		return singleIndexCell;
 	}
 
@@ -58,27 +60,27 @@ public class NoLocalIndex extends LocalHybridIndex {
 
 	@Override
 	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords) {
-		return singleIndexCell.getDataObjectCount();
+		return null;
 	}
 
 	@Override
 	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords, Rectangle rect) {
-		return singleIndexCell.getDataObjectCount();
+		return null;
 	}
 
 	@Override
 	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords) {
-		return singleIndexCell.getDataObjectCount();
+		return null;
 	}
 
 	@Override
 	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords, Rectangle rect) {
-		return singleIndexCell.getDataObjectCount();
+		return null;
 	}
 
 	@Override
 	public Integer getCountPerRec(Rectangle rec) {
-		return singleIndexCell.getDataObjectCount();
+		return null;
 	}
 
 	@Override
@@ -201,6 +203,24 @@ public class NoLocalIndex extends LocalHybridIndex {
 	public void cleanUp() {
 		// TODO Auto-generated method stub
 		
+	}
+
+	@Override
+	public ArrayList<IndexCell> getIndexCellsFromPartition(Cell partition) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IndexCellCoordinates mapDataPointToPartition(Point point) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IndexCell getIndexCellFromCoordinates(IndexCellCoordinates indexCell) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

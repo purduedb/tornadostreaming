@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.purdue.cs.tornado.index.local;
+package edu.purdue.cs.tornado.index.local.hybridgrid;
 
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -26,6 +26,7 @@ import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
+import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 
 public class LocalKNNGridIndexIterator extends LocalIndexKNNIterator{
 	private LocalHybridGridIndex gridIndex;

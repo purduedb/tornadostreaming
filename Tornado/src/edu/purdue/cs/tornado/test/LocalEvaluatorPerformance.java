@@ -28,10 +28,8 @@ import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
-import edu.purdue.cs.tornado.index.local.LocalHybridGridIndex;
-import edu.purdue.cs.tornado.index.local.LocalHybridMultiGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
-import edu.purdue.cs.tornado.index.local.LocalQuadTree;
+import edu.purdue.cs.tornado.index.local.hybridgrid.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.loadbalance.Partition;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.JoinQuery;
@@ -113,16 +111,16 @@ public class LocalEvaluatorPerformance {
 //		testVolatileRangeQuad(100000, 50.0, 10,10 , 100,writer);
 //		System.gc();
 //		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,20 , 100,writer2);
+//		testPersisentRangeHybridQuad(100000, 50.0, 10,20 , 100,writer2);
 		System.gc();
 		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 100,writer2);
+//		testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 100,writer2);
 		System.gc();
 		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,500 , 100,writer2);
+//		testPersisentRangeHybridQuad(100000, 50.0, 10,500 , 100,writer2);
 		System.gc();
 		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,1000 , 100,writer2);
+//		testPersisentRangeHybridQuad(100000, 50.0, 10,1000 , 100,writer2);
 		System.gc();
 		System.gc();
 		writer2.close();
@@ -131,22 +129,22 @@ public class LocalEvaluatorPerformance {
 		writer2.println("Test the effect of split threshold on the quad tree performance: persistance data objects on snapshot queries 100000");
 		writer2.println("split threashold:"+100+"  spatial range:"+50.0+", number of keywords:"+10+"*********************************************");
 		writer2.println("number of queries,number of keywords,spatial range,Split Threashold, max level, Query time, Data object time");
-		testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 5,writer2);
+	//	testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 5,writer2);
 		System.gc();
 		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 10,writer2);
+	//	testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 10,writer2);
 		System.gc();
 		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 20,writer2);
+	//	testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 20,writer2);
 		System.gc();
 		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 100,writer2);
+	//	testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 100,writer2);
 		System.gc();
 		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 500,writer2);
+	//	testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 500,writer2);
 		System.gc();
 		System.gc();
-		testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 1000,writer2);
+	//	testPersisentRangeHybridQuad(100000, 50.0, 10,100 , 1000,writer2);
 		System.gc();
 		System.gc();
 		writer2.close();
@@ -308,16 +306,16 @@ public class LocalEvaluatorPerformance {
 		writer.println("********Quad tree***********");	
 		System.gc();
 		System.gc();
-		testVolatileRangeQuad(100000, 10.0, 10,100 , 100,writer);
+	//	testVolatileRangeQuad(100000, 10.0, 10,100 , 100,writer);
 		System.gc();
 		System.gc();
-		testVolatileRangeQuad(100000, 50.0, 10,100 , 100,writer);
+	//	testVolatileRangeQuad(100000, 50.0, 10,100 , 100,writer);
 		System.gc();
 		System.gc();
-		testVolatileRangeQuad(100000, 100.0, 10,100 , 100,writer);
+	//	testVolatileRangeQuad(100000, 100.0, 10,100 , 100,writer);
 		System.gc();
 		System.gc();
-		testVolatileRangeQuad(100000, 500.0, 10,100 , 100,writer);
+	//	testVolatileRangeQuad(100000, 500.0, 10,100 , 100,writer);
 //		System.gc();
 //		System.gc();
 //		testVolatileRangeQuad(100000, 1000.0, 10,100 , 100,writer);
@@ -452,7 +450,7 @@ public class LocalEvaluatorPerformance {
 		HashMap<String , DataSourceInformation> dataSourcesInformation = getDataSourcesInformation(); 
 		
 		
-		dataSourcesInformation.get("Tweets").localHybridIndex = new LocalHybridMultiGridIndex(dataSourcesInformation.get("Tweets").getSelfBounds(), dataSourcesInformation.get("Tweets"), fineGrid, fineGrid, false);
+		dataSourcesInformation.get("Tweets").localHybridIndex = null;//new LocalHybridMultiGridIndex(dataSourcesInformation.get("Tweets").getSelfBounds(), dataSourcesInformation.get("Tweets"), fineGrid, fineGrid, false);
 		SpatioTextualEvaluatorBolt localEvaluator = new SpatioTextualEvaluatorBolt("TornadoTest",LocalIndexType.HYBRID_GRID,GlobalIndexType.GRID,null,fineGridGran);
 		localEvaluator.setSourcesInformations(dataSourcesInformation);
 		HashMap<String, HashMap<Integer, Query>>queryInformationHashMap = new HashMap<String, HashMap<Integer, Query>>();
@@ -484,6 +482,7 @@ public class LocalEvaluatorPerformance {
 		localEvaluator=null;
 		dataSourcesInformation=null;
 	}
+	/**
 	static void testVolatileRangeQuad(Integer numberOfqueries, Double spatialRange, Integer numberOfKeywords,Integer splitThreshold, Integer maxLevel,PrintWriter writer ){
 		System.out.println("*****************************************************************************************************************************************");
 		System.out.println("***********************Testing the performance of volatile objects on a hybrid Quad tree**********************************************");
@@ -528,7 +527,7 @@ public class LocalEvaluatorPerformance {
 		queries=null;
 		localEvaluator=null;
 		dataSourcesInformation=null;
-	}
+	}*/
 	static void testPersisentRangeGrid(Integer fineGrid,Integer numberOfqueries, Double spatialRange, Integer numberOfKeywords,PrintWriter writer){
 		System.out.println("*****************************************************************************************************************************************");
 		System.out.println("***********************Testing the performance of persistent objects on a hybrid grid**********************************************");
@@ -597,7 +596,7 @@ public class LocalEvaluatorPerformance {
 		HashMap<String , DataSourceInformation> dataSourcesInformation = getDataSourcesInformation(); 
 		
 		
-		dataSourcesInformation.get("Tweets").localHybridIndex = new LocalHybridMultiGridIndex(dataSourcesInformation.get("Tweets").getSelfBounds(), dataSourcesInformation.get("Tweets"), fineGrid, fineGrid, false);
+		dataSourcesInformation.get("Tweets").localHybridIndex = null;//new LocalHybridMultiGridIndex(dataSourcesInformation.get("Tweets").getSelfBounds(), dataSourcesInformation.get("Tweets"), fineGrid, fineGrid, false);
 		SpatioTextualEvaluatorBolt localEvaluator = new SpatioTextualEvaluatorBolt("TornadoTest",LocalIndexType.HYBRID_GRID,GlobalIndexType.GRID,null,fineGridGran);
 		localEvaluator.setSourcesInformations(dataSourcesInformation);
 		HashMap<String, HashMap<Integer, Query>>queryInformationHashMap = new HashMap<String, HashMap<Integer, Query>>();
@@ -636,7 +635,7 @@ public class LocalEvaluatorPerformance {
 		localEvaluator=null;
 		dataSourcesInformation=null;
 	}
-	static void testPersisentRangeHybridQuad(Integer numberOfqueries, Double spatialRange, Integer numberOfKeywords,Integer splitThreshold, Integer maxLevel,PrintWriter writer){
+	/*static void testPersisentRangeHybridQuad(Integer numberOfqueries, Double spatialRange, Integer numberOfKeywords,Integer splitThreshold, Integer maxLevel,PrintWriter writer){
 		System.out.println("*****************************************************************************************************************************************");
 		System.out.println("***********************Testing the performance of persistent objects on a hybrid Quad tree**********************************************");
 		System.out.println("***********************Snapshot filter query Max level:"+maxLevel+" split threshold"+splitThreshold+", spatial range:"+spatialRange+", number of keywords:"+numberOfKeywords+"*********************************************");
@@ -689,7 +688,7 @@ public class LocalEvaluatorPerformance {
 		localEvaluator=null;
 		dataSourcesInformation=null;
 	}
-	
+	*/
 	static void testVolatileJoinGrid(){
 		ArrayList<DataObject> tweets =readTweets("Tweets");
 		ArrayList<Query> queries =addQueries("/media/D/googleDrive/walid research/datasets/querykeywordssorted/tweetsQueries.csv","querySrc",10000,5,

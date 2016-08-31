@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.purdue.cs.tornado.index.local;
+package edu.purdue.cs.tornado.index.local.hybridgrid;
 
 import java.util.ArrayList;
 import java.util.ArrayList;
@@ -36,12 +36,13 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
+import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.KNNQuery;
 import edu.purdue.cs.tornado.messages.Query;
 
-public class LocalHybridPyramidIndex extends LocalHybridIndex {
+public class LocalHybridGridIndex extends LocalHybridIndex {
 	//	private Integer localXcellCount;
 	//	private Integer localYcellCount;
 	public Double localXstep;
@@ -62,15 +63,15 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	public HashMap<String, Integer> overallQueryTextSummery;
 	public boolean textUpdated;
 
-	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer fineGridGran) {
+	public LocalHybridGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer fineGridGran) {
 		this(selfBounds, dataSourcesInformation, fineGridGran, fineGridGran, false, 0);
 	}
 
-	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity) {
+	public LocalHybridGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity) {
 		this(selfBounds, dataSourcesInformation, xGridGranularity, yGridGranularity, false, 0);
 	}
 
-	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity, Boolean spatialOnlyFlag, Integer level) {
+	public LocalHybridGridIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity, Boolean spatialOnlyFlag, Integer level) {
 		super();
 		this.spatialOnlyFlag = spatialOnlyFlag;
 		this.allDataCount = 0;
@@ -109,11 +110,11 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 			IndexCell indexCell = getIndexCellFromCoordinates(indexCellCoordinate);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
 			if (indexCell == null) {
-				indexCell = new IndexCell(getBoundForIndexCell(indexCellCoordinate), spatialOnlyFlag, level, indexCellCoordinate);
+				indexCell = new GridIndexCell(getBoundForIndexCell(indexCellCoordinate), spatialOnlyFlag, level, indexCellCoordinate);
 				addIndexCellFromCoordinates(indexCellCoordinate, indexCell);
 
 			}
-			if (!indexCell.transmitted){
+			if (!indexCell.isTransmitted()){
 				indexCell.addQuery(query);
 				for (String s : query.getQueryText()) {
 					if (!overallQueryTextSummery.containsKey(s))
@@ -133,7 +134,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		IndexCellCoordinates cellCoordinates = mapDataPointToPartition(dataObject.getLocation());
 		IndexCell indexCell = getIndexCellFromCoordinates(cellCoordinates);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
 		if (indexCell == null) {
-			indexCell = new IndexCell(getBoundForIndexCell(cellCoordinates), spatialOnlyFlag, level, cellCoordinates);
+			indexCell = new GridIndexCell(getBoundForIndexCell(cellCoordinates), spatialOnlyFlag, level, cellCoordinates);
 
 			addIndexCellFromCoordinates(cellCoordinates, indexCell);
 
@@ -143,18 +144,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		return indexCell;
 	}
 
-	public IndexCell addDataObjectStatics(DataObject dataObject) {
-		IndexCellCoordinates cellCoordinates = mapDataPointToPartition(dataObject.getLocation());
-		IndexCell indexCell = getIndexCellFromCoordinates(cellCoordinates);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
-		if (indexCell == null) {
-			indexCell = new IndexCell(getBoundForIndexCell(cellCoordinates), spatialOnlyFlag, level);
-			addIndexCellFromCoordinates(cellCoordinates, indexCell);
-
-		}
-		indexCell.addDataObjectStatics(dataObject);
-		allDataCount++;
-		return indexCell;
-	}
+	
 
 	private void addIndexCellFromCoordinates(IndexCellCoordinates indexCellCoordinate, IndexCell indexCell) {
 		if (!index.containsKey(indexCellCoordinate.getX())) {
@@ -288,11 +278,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		IndexCell indexCell = getIndexCellFromCoordinates(indexCellCoordinates);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
 		if (indexCell == null) {
 
-			indexCell = new IndexCell(getBoundForIndexCell(indexCellCoordinates), spatialOnlyFlag, level, indexCellCoordinates);
-			if (withChildren) {
-				indexCell.children = new IndexCell[4];
-				indexCell.children[0] = indexCell.children[1] = indexCell.children[2] = indexCell.children[3] = null;
-			}
+			indexCell = new GridIndexCell(getBoundForIndexCell(indexCellCoordinates), spatialOnlyFlag, level, indexCellCoordinates);
 			addIndexCellFromCoordinates(indexCellCoordinates, indexCell);
 
 		}
@@ -421,11 +407,11 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	}
 
 	public LocalKNNGridIndexIterator KNNIterator(Point focalPoint, Double distance) {
-		return null;
+		return new LocalKNNGridIndexIterator(this, focalPoint, distance);
 	}
 
 	public LocalKNNGridIndexIterator LocalKNNIterator(Point focalPoint) {
-		return null;
+		return new LocalKNNGridIndexIterator(this, focalPoint);
 	}
 
 	public IndexCell mapDataObjectToIndexCell(DataObject dataObject) {
@@ -598,9 +584,9 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 	public void addIndexCellsFromPartition(ArrayList<IndexCell> indexCells, boolean textAware) {
 		for (IndexCell indexCell : indexCells) {
-			if (!index.containsKey(indexCell.globalCoordinates.getX()))
-				index.put(indexCell.globalCoordinates.getX(), new HashMap<Integer, IndexCell>());
-			index.get(indexCell.globalCoordinates.getX()).put(indexCell.globalCoordinates.getY(), indexCell);
+			if (!index.containsKey(indexCell.getGlobalCoordinates().getX()))
+				index.put(indexCell.getGlobalCoordinates().getX(), new HashMap<Integer, IndexCell>());
+			index.get(indexCell.getGlobalCoordinates().getX()).put(indexCell.getGlobalCoordinates().getY(), indexCell);
 			if (textAware)
 				addTextSummeryFromIndexCell(indexCell);
 		}
@@ -608,9 +594,9 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 	public void addIndexCellsFromPartition(IndexCell indexCell, boolean textAware) {
 
-		if (!index.containsKey(indexCell.globalCoordinates.getX()))
-			index.put(indexCell.globalCoordinates.getX(), new HashMap<Integer, IndexCell>());
-		index.get(indexCell.globalCoordinates.getX()).put(indexCell.globalCoordinates.getY(), indexCell);
+		if (!index.containsKey(indexCell.getGlobalCoordinates().getX()))
+			index.put(indexCell.getGlobalCoordinates().getX(), new HashMap<Integer, IndexCell>());
+		index.get(indexCell.getGlobalCoordinates().getX()).put(indexCell.getGlobalCoordinates().getY(), indexCell);
 		if (textAware)
 			addTextSummeryFromIndexCell(indexCell);
 
@@ -629,7 +615,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	}
 
 	public void removeTextSummeryFromIndexCell(IndexCell cell) {
-		for (Entry<String, HashMap<String,ArrayList<Query>>> e : cell.queriesInvertedList.entrySet()) {
+		for (Entry<String, HashMap<String,ArrayList<Query>>> e : cell.getQueriesInvertedList().entrySet()) {
 			Iterator<Entry<String, ArrayList<Query>>> itr = e.getValue().entrySet().iterator();
 			while (itr.hasNext()) {
 				Entry<String, ArrayList<Query>> entry = itr.next();
@@ -649,9 +635,9 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	}
 
 	public void addTextSummeryFromIndexCell(IndexCell cell) {
-		if (cell.queriesInvertedList == null)
+		if (cell.getQueriesInvertedList() == null)
 			return;
-		for (Entry<String, HashMap<String, ArrayList<Query>>> e : cell.queriesInvertedList.entrySet()) {
+		for (Entry<String, HashMap<String, ArrayList<Query>>> e : cell.getQueriesInvertedList().entrySet()) {
 			Iterator<Entry<String, ArrayList<Query>>> itr = e.getValue().entrySet().iterator();
 			while (itr.hasNext()) {
 				Entry<String, ArrayList<Query>> entry = itr.next();
@@ -679,7 +665,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 					if (index.get(i).containsKey(j)) {
 						IndexCell cell = index.get(i).get(j);
 						ArrayList<Query> expiredQueries = cell.findandRemoveExpriedQueries();
-						if(cell.storedQueries.size()!=0)
+						if(cell.getStoredQueries().size()!=0)
 							hasQueries=true;
 						if (expiredQueries != null) {
 							for (Query query : expiredQueries) {

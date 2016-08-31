@@ -307,11 +307,9 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			ArrayList<IndexCell> indexCellList = it.next();
 			for (IndexCell indexCell : indexCellList) {
 				if (TextHelpers.evaluateTextualPredicate(indexCell.getAllDataTextInCell(), query.getQueryText(), query.getTextualPredicate())) {//indexCell.cellOverlapsTextually(query.getQueryText())) {
-					HashMap<Integer, DataObject> indexedDataObjectsMap = indexCell.getStoredObjects();
-					Iterator dataObjectIterator = indexedDataObjectsMap.entrySet().iterator();
-					while (dataObjectIterator.hasNext()) {
-						Map.Entry entry = (Map.Entry) dataObjectIterator.next();
-						DataObject dataObject = (DataObject) entry.getValue();
+					List <DataObject> indexedDataObjectsMap = indexCell.getStoredObjects();
+					Iterator dataObjectIterator = indexedDataObjectsMap.iterator();
+					for (DataObject dataObject:indexedDataObjectsMap) {
 						if (TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate())) {
 							changes.addAll(query.processDataObject(dataObject));
 						}
@@ -790,7 +788,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			for (IndexCell indexCell : relevantIndexCells1) {
 				Collection<DataObject> allIndexCellDataObjects = indexCell.getStoredObjects(query.getSpatialRange(), query.getQueryText(), query.getTextualPredicate());
 				if (allIndexCellDataObjects != null && allIndexCellDataObjects.size() != 0) {
-					Rectangle relevantRect = SpatialHelper.expand(indexCell.bounds, query.getDistance());
+					Rectangle relevantRect = SpatialHelper.expand(indexCell.getBounds(), query.getDistance());
 					relevantRect = SpatialHelper.spatialIntersect(relevantRect, query.getSpatialRange());
 					ArrayList<IndexCell> relevantIndexCells2 = sourcesInformations.get(query.getDataSrc2()).getOverlappingIndexCellWithData(relevantRect, query.getQueryText2());
 					ArrayList<DataObject> allIndexCellDataObjects2 = new ArrayList<DataObject>();
@@ -854,7 +852,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		ArrayList<IndexCell> relevantIndexCells = sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().getOverlappingIndexCellWithData(query.getSpatialRange(), query.getQueryText());
 		if (relevantIndexCells != null)
 			for (IndexCell indexCell : relevantIndexCells) {
-				Collection<DataObject> allIndexCellDataObjects = indexCell.getStoredObjects().values();
+				Collection<DataObject> allIndexCellDataObjects = indexCell.getStoredObjects();
 				for (DataObject dataObject : allIndexCellDataObjects) {
 					this.visitedDataObjectCount++;
 					if (SpatialHelper.overlapsSpatially(dataObject.getLocation(), query.getSpatialRange()) && TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), query.getQueryText(), query.getTextualPredicate()))
@@ -1190,11 +1188,8 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 				//this cell contains data that is relevant to the incoming data object 
 				//iterate over all data objects to find matching 
 				//this is the the theta join operator 
-				HashMap<Integer, DataObject> storedObjects = indexCell.getStoredObjects();
-				Iterator it = storedObjects.entrySet().iterator();
-				while (it.hasNext()) {
-					Map.Entry entry = (Map.Entry) it.next();
-					DataObject storedDataObject = (DataObject) entry.getValue();
+				List< DataObject> storedObjects = indexCell.getStoredObjects();
+				for (DataObject storedDataObject:storedObjects) {
 					if (TextHelpers.evaluateTextualPredicate(dataObject.getObjectText(), storedDataObject.getObjectText(), q.getJoinTextualPredicate())
 							&& (otherDataSource.equals(q.getDataSrc2()) && TextHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText2(), q.getTextualPredicate2())
 									|| otherDataSource.equals(q.getDataSrc()) && TextHelpers.evaluateTextualPredicate(storedDataObject.getObjectText(), q.getQueryText(), q.getTextualPredicate()))

@@ -25,12 +25,11 @@ import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
-import edu.purdue.cs.tornado.index.local.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
-import edu.purdue.cs.tornado.index.local.LocalHybridMultiGridIndex;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.index.local.LocalTextIndex;
 import edu.purdue.cs.tornado.index.local.LocalTextInvertedListIndex;
+import edu.purdue.cs.tornado.index.local.hybridgrid.LocalHybridGridIndex;
 import edu.purdue.cs.tornado.loadbalance.Partition;
 import edu.purdue.cs.tornado.messages.DataObject;
 public class TestBuildingBlocksEvaluator {
@@ -77,12 +76,12 @@ public class TestBuildingBlocksEvaluator {
 		Rectangle entireSpace = new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange));
 		LocalHybridGridIndex spatialGridIndex = new LocalHybridGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, true, 0);
 		LocalHybridGridIndex hybridGridIndex = new LocalHybridGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, false, 0);
-		LocalHybridMultiGridIndex spatialMultiLevelGridIndex = new LocalHybridMultiGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, true);
-		LocalHybridMultiGridIndex hybridMultiLevelGridIndex = new LocalHybridMultiGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, false);
+		LocalHybridGridIndex spatialMultiLevelGridIndex = null;//new LocalHybridMultiGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, true);
+		LocalHybridGridIndex hybridMultiLevelGridIndex = null;// new LocalHybridMultiGridIndex(entireSpace , dataSourcesInformation, SpatioTextualConstants.defaultFineGridGranularityX, SpatioTextualConstants.defaultFineGridGranularityY, false);
 		System.gc();
 		System.gc();
 		System.out.println("-------------Begin indexing files----------------");
-		Long hybridMultiLevelGridIndexTime = insertInTextHybridIndex(hybridMultiLevelGridIndex,allObjects);
+		Long hybridMultiLevelGridIndexTime = new Long(0);//insertInTextHybridIndex(hybridMultiLevelGridIndex,allObjects);
 		System.out.println("Hybrid multi-level time:"+hybridMultiLevelGridIndexTime/allObjects.size());
 		hybridMultiLevelGridIndex=null;
 		System.gc();
@@ -102,7 +101,7 @@ public class TestBuildingBlocksEvaluator {
 		hybridGridIndex=null;
 		System.gc();
 		System.gc();
-		Long spatialMultiLevelGridIndexTime = insertInTextHybridIndex(spatialMultiLevelGridIndex,allObjects);
+		Long spatialMultiLevelGridIndexTime =new Long(0);// insertInTextHybridIndex(spatialMultiLevelGridIndex,allObjects);
 		System.out.println("Spatial multi-level time:"+spatialMultiLevelGridIndexTime/allObjects.size());
 		spatialMultiLevelGridIndex=null;
 		System.gc();

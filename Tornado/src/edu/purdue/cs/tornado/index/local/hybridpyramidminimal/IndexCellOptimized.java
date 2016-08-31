@@ -17,7 +17,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package edu.purdue.cs.tornado.helper;
+package edu.purdue.cs.tornado.index.local.hybridpyramidminimal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,8 +26,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import clojure.lang.Obj;
-import edu.purdue.cs.tornado.index.local.LocalHybridPyramidGridIndexOptimized;
+import edu.purdue.cs.tornado.helper.KeyWordTrieIndex;
+import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.Rectangle;
+import edu.purdue.cs.tornado.helper.SpatialHelper;
+import edu.purdue.cs.tornado.helper.TextHelpers;
+import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.MinimalRangeQuery;
 import edu.purdue.cs.tornado.messages.Query;
