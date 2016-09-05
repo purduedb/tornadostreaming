@@ -13,3 +13,36 @@ Spatial range, query insert time, object time, index size,,,,,,
 Number of queries,2500000,Number of objects,1000000,Number of keywords,3,Max grid granualitry,1024text perdicate,CONTAINS
 Spatial range, query insert time, object time, index size
 1.0,2153,2893,69902,990946,131696
+Number of queries,2500000,Number of objects,1000000,Number of keywords,3,Max grid granualitry,1024text perdicate,CONTAINS
+Spatial range, query insert time, object time, index size
+1.0,2450,3961,335,869,69902,990946,131696
+Number of queries,2500000,Number of objects,1000000,Number of keywords,3,Max grid granualitry,1024text perdicate,CONTAINS
+Spatial range, query insert time, object time, index size
+1.0,2502,3440,69902,990946,131696
+5.0,2683,3262,87657,1507158,281040
+10.0,3293,2681,94020,1831193,403881
+Number of queries,2500000,Number of objects,1000000,Number of keywords,3,Max grid granualitry,1024text perdicate,CONTAINS
+Spatial range, query insert time, object time, index size
+1.0,2320,2828,69323,152994,69323
+5.0,2576,2916,86488,173880,86488
+10.0,3122,2516,92685,188399,92685
+Number of queries,2500000,Number of objects,1000000,Number of keywords,3,Max grid granualitry,1024text perdicate,CONTAINS
+Spatial range, query insert time, object time, index size
+Number of queries,2500000,Number of objects,1000000,Number of keywords,3,Max grid granualitry,1024text perdicate,CONTAINS
+Spatial range, query insert time, object time, index size
+100.0,3424,6268,116913,8856233,2135594
+500.0,3918,8479,147351,14386154,3741109
+1000.0,4184,8991,180943,15935867,4031642
+5000.0,3597,8994,475951,18856695,4009452
+Number of queries,2500000,Number of objects,1000000,Number of keywords,3,Max grid granualitry,1024text perdicate,CONTAINS
+Spatial range, query insert time, object time, index size
+100.0,3305,6635,114451,262392,114451
+500.0,3768,10249,142237,375308,142237
+1000.0,4184,11519,174510,518465,174510
+5000.0,3566,12490,472900,1958230,472900
+Number of queries,2500000,Number of objects,1000000,Number of keywords,3,Max grid granualitry,1024text perdicate,CONTAINS
+Spatial range, query insert time, object time, index size
+100.0,3538,7384,116913,8856233,2135594
+500.0,3951,9545,147351,14386154,3741109
+1000.0,4424,10565,180943,15935867,4031642
+5000.0,3819,9955,475951,18856695,4009452

@@ -391,7 +391,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 		}
 	}
 
-	private Query buildQuery_old(String line) {
+	private Query buildQueryOld(String line) {
 		//String[] tweetParts = line.split(",");
 		try {
 			int from = 0, to = 0;

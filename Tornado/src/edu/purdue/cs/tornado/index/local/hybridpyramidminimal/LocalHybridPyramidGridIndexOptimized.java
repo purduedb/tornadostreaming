@@ -42,6 +42,7 @@ public class LocalHybridPyramidGridIndexOptimized {
 	public Rectangle selfBounds;
 	public int gridGranularity;
 	public int maxLevel;
+	
 	public HashMap<String, Integer> overallQueryTextSummery;
 	public static int totalVisited = 0;
 	public static int spatialOverlappingQuries = 0;

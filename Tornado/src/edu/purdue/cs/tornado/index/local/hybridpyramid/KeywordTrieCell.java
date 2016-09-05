@@ -1,27 +1,28 @@
-package edu.purdue.cs.tornado.helper;
+package edu.purdue.cs.tornado.index.local.hybridpyramid;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import edu.purdue.cs.tornado.messages.MinimalRangeQuery;
+import edu.purdue.cs.tornado.helper.TextHelpers;
+import edu.purdue.cs.tornado.messages.Query;
 
 public class KeywordTrieCell {
 	public HashMap<String, KeywordTrieCell> trieCells;
-	public LinkedList<MinimalRangeQuery> storedQueries;
-	public ArrayList<MinimalRangeQuery> verifiableQueries;
+	public LinkedList<Query> storedQueries;
+	public LinkedList<Query> verifiableQueries;
 
 	public KeywordTrieCell() {
-		storedQueries = null;// new ArrayList<MinimalRangeQuery>();// new ArrayList<MinimalRangeQuery>();
+		storedQueries = null;// new ArrayList<Query>();// new ArrayList<Query>();
 		verifiableQueries = null;//
 		trieCells = null;
 	}
 
-	public void find(ArrayList<String> keywords, int start, LinkedList<MinimalRangeQuery> result, int level) {
+	public void find(ArrayList<String> keywords, int start, LinkedList<Query> result, int level) {
 		if (storedQueries != null)
 			result.addAll(storedQueries);
 		if (verifiableQueries != null)
-			for (MinimalRangeQuery q : verifiableQueries) {
+			for (Query q : verifiableQueries) {
 				if (TextHelpers.containsTextually(keywords, q.getQueryText()))
 					result.add(q);
 			}
@@ -35,7 +36,7 @@ public class KeywordTrieCell {
 			}
 	}
 
-	public void findOld(ArrayList<String> keywords, int start, ArrayList<MinimalRangeQuery> result) {
+	public void findOld(ArrayList<String> keywords, int start, ArrayList<Query> result) {
 		if (storedQueries != null)
 			result.addAll(storedQueries);
 

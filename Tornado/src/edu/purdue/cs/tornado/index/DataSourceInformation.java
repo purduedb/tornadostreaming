@@ -33,6 +33,7 @@ import edu.purdue.cs.tornado.index.local.LocalTextIndex;
 import edu.purdue.cs.tornado.index.local.LocalTextInvertedListIndex;
 import edu.purdue.cs.tornado.index.local.NoLocalIndex;
 import edu.purdue.cs.tornado.index.local.hybridgrid.LocalHybridGridIndex;
+import edu.purdue.cs.tornado.index.local.hybridpyramid.LocalHybridPyramidIndex;
 import edu.purdue.cs.tornado.messages.DataObject;
 
 /**
@@ -77,6 +78,10 @@ public class DataSourceInformation {
 				break;
 			case HYBRID_GRID:
 				this.localHybridIndex = new LocalHybridGridIndex(selfBounds, this,fineGridGran);
+				break;
+				
+			case HYBRID_PYRAMID:
+				this.localHybridIndex = new LocalHybridPyramidIndex(selfBounds, this,fineGridGran);
 				break;
 			
 			case SPATIAL_GRID:

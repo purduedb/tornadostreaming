@@ -32,53 +32,52 @@ import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
+import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
+import edu.purdue.cs.tornado.index.local.hybridpyramidminimal.KeyWordTrieIndexMinimal;
+import edu.purdue.cs.tornado.index.local.hybridpyramidminimal.LocalHybridPyramidGridIndexOptimized;
 import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class PyramidIndexCell extends IndexCell {
+	public static final int DEFAULT_GRANULATITY =1024;
 	private ArrayList<Query> storedQueries;
-	private HashMap<String, HashMap<String, ArrayList<Query>>> queriesInvertedList;//src,keyword,Query
+	private HashMap<String, HashMap<String, ArrayList<Query>>> rareAndOverlapKeywords;//src,keyword,Query
 	private Rectangle bounds;
-	private IndexCellCoordinates globalCoordinates;
+	private Integer globalCoordinates;
 	private Integer indexCellCost;
 	private boolean transmitted;
 	private Long minExpireTime;
+	private KeyWordTrieIndex trieIndex;
+	int level;
+	int granularity;
 
-	
 	public PyramidIndexCell() {
 		super();
 		storedQueries = null;
-		queriesInvertedList = null;
+		rareAndOverlapKeywords = null;
 		this.bounds = null;
 		indexCellCost = 0;
 		transmitted = false;
 		minExpireTime = Long.MAX_VALUE;
+		level=0;
+		granularity = DEFAULT_GRANULATITY;
 	}
 
-	public PyramidIndexCell(Rectangle bounds, Boolean spatialOnlyFlag, Integer level) {
-		super();
-		storedQueries = null;
-		queriesInvertedList = null;
-		this.bounds = bounds;
-		indexCellCost = 0;
-		//used by multilevel index
-		indexCellCost = 0;
-		this.transmitted = false;
-		this.minExpireTime = Long.MAX_VALUE;
+	
 
-	}
-
-	public PyramidIndexCell(Rectangle bounds, Boolean spatialOnlyFlag, Integer level, IndexCellCoordinates globalCoordinates) {
+	public PyramidIndexCell(Rectangle bounds, Integer globalCoordinates,int level, int granulrity) {
 		storedQueries = null;
-		queriesInvertedList = null;
+		rareAndOverlapKeywords = null;
 		this.bounds = bounds;
-		//used by multilevel index
 		this.transmitted = false;
 		this.globalCoordinates = globalCoordinates;
 		indexCellCost = 0;
 		this.minExpireTime = Long.MAX_VALUE;
+		this.level=level;
+		this.granularity = granulrity;
 	}
 
 	/**
@@ -100,17 +99,51 @@ public class PyramidIndexCell extends IndexCell {
 		if (query.getRemoveTime() < minExpireTime)
 			minExpireTime = query.getRemoveTime();
 
-		if (queriesInvertedList == null) {
-			queriesInvertedList = new HashMap<String, HashMap<String, ArrayList<Query>>>();
-			queriesInvertedList.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
-		} else if (!queriesInvertedList.containsKey(query.getSrcId()))
-			queriesInvertedList.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
+		if (rareAndOverlapKeywords == null) {
+			rareAndOverlapKeywords = new HashMap<String, HashMap<String, ArrayList<Query>>>();
+			rareAndOverlapKeywords.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
+		} else if (!rareAndOverlapKeywords.containsKey(query.getSrcId()))
+			rareAndOverlapKeywords.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
 		for (String keyword : query.getQueryText()) {
-			if (!queriesInvertedList.get(query.getSrcId()).containsKey(keyword))
-				queriesInvertedList.get(query.getSrcId()).put(keyword, new ArrayList<Query>());
-			queriesInvertedList.get(query.getSrcId()).get(keyword).add(query);
+			if (!rareAndOverlapKeywords.get(query.getSrcId()).containsKey(keyword))
+				rareAndOverlapKeywords.get(query.getSrcId()).put(keyword, new ArrayList<Query>());
+			rareAndOverlapKeywords.get(query.getSrcId()).get(keyword).add(query);
 		}
 
+	}
+
+	public void addQuery(String keyword, Query query) {
+		query.added = false;
+		query.visitied = 0;
+		if (storedQueries == null)
+			storedQueries = new ArrayList<Query>();
+
+		if (!storedQueries.contains(query)) {
+			storedQueries.add(query);
+		}
+		if (query.getRemoveTime() < minExpireTime)
+			minExpireTime = query.getRemoveTime();
+
+		if (rareAndOverlapKeywords == null) {
+			rareAndOverlapKeywords = new HashMap<String, HashMap<String, ArrayList<Query>>>();
+			rareAndOverlapKeywords.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
+		} else if (!rareAndOverlapKeywords.containsKey(query.getSrcId()))
+			rareAndOverlapKeywords.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
+
+		if (!rareAndOverlapKeywords.containsKey(keyword)) {
+			rareAndOverlapKeywords.get(query.getSrcId()).put(keyword, new ArrayList<Query>());
+			rareAndOverlapKeywords.get(query.getSrcId()).get(keyword).add(query);
+		} else if (rareAndOverlapKeywords.get(query.getSrcId()).get(keyword).size() < KeyWordTrieIndex.SPLIT_THRESHOLD_FREQ || query.getQueryText().size() == 1) {
+			rareAndOverlapKeywords.get(query.getSrcId()).get(keyword).add(query);
+		} else {
+			if (trieIndex == null) {
+				trieIndex = new KeyWordTrieIndex();
+			}
+			trieIndex.insert(query.getQueryText(), query);
+			//	trieIndex.insert(new ArrayList<String>(query.getQueryText().subList(0, 2)), query);
+		}
+
+		//	trieIndex.insert( keyword,query);
 	}
 
 	public boolean cellOverlapsSpatiall(Rectangle rectangle) {
@@ -136,6 +169,8 @@ public class PyramidIndexCell extends IndexCell {
 		if (found) {
 			Query q = storedQueries.remove(i);
 			removeQueryFromInvertedList(q);
+
+			removeQueryFromTrie(q);
 		}
 	}
 
@@ -173,6 +208,7 @@ public class PyramidIndexCell extends IndexCell {
 			Query q = itr.next();
 			if (q.getRemoveTime() < nowTime) {
 				removeQueryFromInvertedList(q);
+				removeQueryFromTrie(q);
 				expriedList.add(q);
 				itr.remove();
 
@@ -185,40 +221,51 @@ public class PyramidIndexCell extends IndexCell {
 
 	public synchronized ArrayList<List<Query>> geSpatiotTextualOverlappingQueries(Point p, ArrayList<String> keywords) {
 		ArrayList<List<Query>> result = new ArrayList<List<Query>>();
-		if (queriesInvertedList == null)
+		if (rareAndOverlapKeywords == null)
 			return result;
-		Iterator itr = queriesInvertedList.entrySet().iterator();
+		Iterator itr = rareAndOverlapKeywords.entrySet().iterator();
 		while (itr.hasNext()) {
-			//HashSet<Integer> queries = new HashSet<Integer>();
 			ArrayList<Query> finalQueries = new ArrayList<Query>();
 			ArrayList<Query> tempQueries = new ArrayList<Query>();
 			String queryScrId;
 			Map.Entry entry = (Map.Entry) itr.next();
 			HashMap<String, ArrayList<Query>> srcQueryList = (HashMap<String, ArrayList<Query>>) entry.getValue();
-			queryScrId = (String) entry.getKey();
-			for (String keyword : keywords) {
-				List<Query> validQueries = srcQueryList.get(keyword);
-				if (validQueries != null)
-					try {
-						for (Query q : validQueries) {
 
-							if (SpatialHelper.overlapsSpatially(p, q.getSpatialRange())) {
-								if (TextualPredicate.OVERlAPS.equals(q.getTextualPredicate())) {
-									if (q.added != true) {
-										q.added = true;
-										finalQueries.add(q);
-									}
-								} else if (TextualPredicate.CONTAINS.equals(q.getTextualPredicate())) {
-									if (q.visitied == 0)
-										tempQueries.add(q);
-									q.visitied++;
-									if (q.visitied >= q.getQueryText().size()) {
-										if (q.added != true && TextHelpers.containsTextually(keywords, q.getQueryText())) {
+			if (srcQueryList != null)
+				for (String keyword : keywords) {
+					List<Query> validQueries = srcQueryList.get(keyword);
+					if (validQueries != null)
+						try {
+							for (Query q : validQueries) {
+								LocalHybridPyramidGridIndexOptimized.totalVisited++;
+								if (SpatialHelper.overlapsSpatially(p, q.getSpatialRange())) {
+									LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries++;
+									if (TextualPredicate.OVERlAPS.equals(q.getTextualPredicate())) {
+										if (q.added != true) {
 											q.added = true;
 											finalQueries.add(q);
 										}
+									} else if (TextualPredicate.CONTAINS.equals(q.getTextualPredicate())) {
+										if (TextHelpers.containsTextually(keywords, q.getQueryText()))
+											finalQueries.add(q);
 									}
 								}
+
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+
+				}
+			if (trieIndex != null) {
+				List<Query> validQueries = trieIndex.find(keywords);
+				if (validQueries != null)
+					try {
+						for (Query q : validQueries) {
+							LocalHybridPyramidGridIndexOptimized.totalVisited++;
+							if (SpatialHelper.overlapsSpatially(p, q.getSpatialRange())) {
+								LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries++;
+								finalQueries.add(q);
 							}
 
 						}
@@ -228,9 +275,7 @@ public class PyramidIndexCell extends IndexCell {
 			}
 			for (Query q : finalQueries) {
 				q.added = false;
-			}
-			for (Query q : tempQueries) {
-				q.visitied = 0;
+
 			}
 			result.add(finalQueries);
 		}
@@ -242,31 +287,13 @@ public class PyramidIndexCell extends IndexCell {
 	}
 
 	public HashMap<String, List<Query>> getTextualOverlappingQueries(ArrayList<String> keywords) {
-		HashMap<String, List<Query>> result = new HashMap<String, List<Query>>();
-		Iterator itr = queriesInvertedList.entrySet().iterator();
-		while (itr.hasNext()) {
-			HashSet<Query> queries = new HashSet<Query>();
-			String queryScrId;
-			Map.Entry entry = (Map.Entry) itr.next();
-			HashMap<String, ArrayList<Query>> srcQueryList = (HashMap<String, ArrayList<Query>>) entry.getValue();
-			queryScrId = (String) entry.getKey();
-			for (String keyword : keywords) {
-				ArrayList<Query> validQueries = srcQueryList.get(keyword);
-				if (validQueries != null)
-					for (Query q : validQueries)
-						queries.add(q);
-			}
-
-			ArrayList<Query> finalQueries = new ArrayList<Query>(queries);
-			result.put(queryScrId, finalQueries);
-		}
-		return result;
+		return null;
 	}
 
 	public void removeQueryFromInvertedList(Query query) {
 
 		for (String keyword : query.getQueryText()) {
-			List<Query> queries = queriesInvertedList.get(query.getSrcId()).get(keyword);
+			List<Query> queries = rareAndOverlapKeywords.get(query.getSrcId()).get(keyword);
 			int j = 0;
 			Iterator<Query> itr = queries.iterator();
 			while (itr.hasNext()) {
@@ -278,6 +305,11 @@ public class PyramidIndexCell extends IndexCell {
 			}
 
 		}
+
+	}
+	public void removeQueryFromTrie(Query query) {
+
+		//TODO
 
 	}
 
@@ -294,21 +326,27 @@ public class PyramidIndexCell extends IndexCell {
 	}
 
 	public HashMap<String, HashMap<String, ArrayList<Query>>> getQueriesInvertedList() {
-		return queriesInvertedList;
+		return rareAndOverlapKeywords;
 	}
 
 	public void setQueriesInvertedList(HashMap<String, HashMap<String, ArrayList<Query>>> queriesInvertedList) {
-		this.queriesInvertedList = queriesInvertedList;
+		this.rareAndOverlapKeywords = queriesInvertedList;
 	}
 
 	public IndexCellCoordinates getGlobalCoordinates() {
-		return globalCoordinates;
+		return null;
 	}
 
 	public void setGlobalCoordinates(IndexCellCoordinates globalCoordinates) {
-		this.globalCoordinates = globalCoordinates;
+		this.globalCoordinates = mapToRawMajor(globalCoordinates.x, globalCoordinates.y);
+	}
+	public Integer mapToRawMajor(int x, int y) {
+		return y * granularity + x;
 	}
 
+	public Integer mapToRawMajor(int x, int y, int gridGranularity) {
+		return y * gridGranularity + x;
+	}
 	public Integer getIndexCellCost() {
 		return indexCellCost;
 	}

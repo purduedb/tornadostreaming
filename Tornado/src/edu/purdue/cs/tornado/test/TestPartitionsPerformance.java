@@ -23,7 +23,6 @@ import edu.purdue.cs.tornado.evaluator.SpatioTextualEvaluatorBolt;
 import edu.purdue.cs.tornado.experimental.TornadoExperimentsSequence;
 import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.DataSourceType;
-import edu.purdue.cs.tornado.helper.KeyWordTrieIndex;
 import edu.purdue.cs.tornado.helper.LatLong;
 import edu.purdue.cs.tornado.helper.ObjectSizeCalculator;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
@@ -46,6 +45,7 @@ import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.index.local.NoLocalIndex;
 import edu.purdue.cs.tornado.index.local.hybridgrid.LocalHybridGridIndex;
+import edu.purdue.cs.tornado.index.local.hybridpyramidminimal.KeyWordTrieIndexMinimal;
 import edu.purdue.cs.tornado.index.local.hybridpyramidminimal.LocalHybridPyramidGridIndexOptimized;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
@@ -72,8 +72,8 @@ public class TestPartitionsPerformance {
 
 		//testGlocalIndexPerformance();
 		//testPartitions();
-		testLocalIndexPerformance();
-		//testlocalIndexPerformanceSpatialRange();
+		//testLocalIndexPerformance();
+		testlocalIndexPerformanceSpatialRange();
 		//testlocalIndexPerformanceNumberOfKeywords();
 		//testlocalIndexPerformanceNumberOfQueries();
 
@@ -88,20 +88,20 @@ public class TestPartitionsPerformance {
 
 		finegGridGran = 1024;
 		ArrayList<Double> spatialRanges = new ArrayList<Double>();
-		spatialRanges.add(1.0);
-		spatialRanges.add(5.0);
-		spatialRanges.add(10.0);
-		spatialRanges.add(50.0);
-//		spatialRanges.add(100.0);
-//		spatialRanges.add(500.0);
-//		spatialRanges.add(1000.0);
-//		spatialRanges.add(5000.0);
+//		spatialRanges.add(1.0);
+//		spatialRanges.add(5.0);
+//		spatialRanges.add(10.0);
+//		spatialRanges.add(50.0);
+		spatialRanges.add(100.0);
+		spatialRanges.add(500.0);
+		spatialRanges.add(1000.0);
+		spatialRanges.add(5000.0);
 
 		Integer numberOfDataObjects = 1000000;
 		Integer numberOfQueries = 2500000;
 		Integer numberOfKeywords = 3;
 		
-		Integer maxLevel=1;
+		Integer maxLevel=11;
 		TextualPredicate txtPredicate = TextualPredicate.CONTAINS;
 		ArrayList<DataObject> dataObjects = readDataObjects(tweetsFile, numberOfDataObjects);
 		TornadoExperimentsSequence.appendToFile(outputFile,
@@ -131,7 +131,7 @@ public class TestPartitionsPerformance {
 			
 			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
 					finegGridGran,maxLevel);
-			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+			result += testLocalPyramid(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
 			TornadoExperimentsSequence.appendToFile(outputFile, result);
 			localHybridPyramidIndex = null;
 			System.gc();
@@ -206,7 +206,7 @@ public class TestPartitionsPerformance {
 			System.out.println("Hybrid Pyramid grid");
 			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
 					finegGridGran,maxLevel);
-			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+			result += testLocalPyramid(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
 			TornadoExperimentsSequence.appendToFile(outputFile, result);
 			localHybridPyramidIndex = null;
 			System.gc();
@@ -231,7 +231,7 @@ public class TestPartitionsPerformance {
 			System.out.println("Hybrid Pyramid grid");
 			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
 					finegGridGran,maxLevel);
-			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+			result += testLocalPyramid(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
 			TornadoExperimentsSequence.appendToFile(outputFile, result);
 			localHybridPyramidIndex = null;
 			System.gc();
@@ -276,7 +276,7 @@ public class TestPartitionsPerformance {
 			System.out.println("Hybrid Pyramid grid");
 			LocalHybridPyramidGridIndexOptimized localHybridPyramidIndex = new LocalHybridPyramidGridIndexOptimized(new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.yMaxRange)), null,
 					finegGridGran,maxLevel);
-			result += testLocal(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
+			result += testLocalPyramid(dataObjects, queries, localHybridPyramidIndex, LocalIndexType.HYBRID_GRID);
 			TornadoExperimentsSequence.appendToFile(outputFile, result);
 			localHybridPyramidIndex = null;
 			System.gc();
@@ -421,7 +421,7 @@ public class TestPartitionsPerformance {
 	}
 
 	public static void testKeywordTrie(ArrayList<DataObject> dataObjects, ArrayList<MinimalRangeQuery> queries) {
-		KeyWordTrieIndex localIndex = new KeyWordTrieIndex();
+		KeyWordTrieIndexMinimal localIndex = new KeyWordTrieIndexMinimal();
 		Stopwatch stopwatch = Stopwatch.createStarted();
 		Long dataProcessingDuration;
 
@@ -814,7 +814,7 @@ public class TestPartitionsPerformance {
 	}
 
 	
-	static String testLocal(ArrayList<DataObject> dataObjects, ArrayList<MinimalRangeQuery> queries, LocalHybridPyramidGridIndexOptimized localIndex, LocalIndexType localIndexType) throws Exception {
+	static String testLocalPyramid(ArrayList<DataObject> dataObjects, ArrayList<MinimalRangeQuery> queries, LocalHybridPyramidGridIndexOptimized localIndex, LocalIndexType localIndexType) throws Exception {
 
 		String toReturn = "";
 		Long dataProcessingDuration;
@@ -832,8 +832,8 @@ public class TestPartitionsPerformance {
 
 		queryRegisterationduration = stopwatch.elapsed(TimeUnit.NANOSECONDS);
 
-		long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
-		System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
+//		long queriesSize = ObjectSizeCalculator.getObjectSize(queries);
+//		System.out.println("Queries size =" + queriesSize / 1024 / 1024 + " MB");
 
 		System.out.println("Query register Time per query (nanos)= " + queryRegisterationduration / queries.size());
 		System.out.println("Total query evalautors= " + queryTasks);
@@ -861,8 +861,8 @@ public class TestPartitionsPerformance {
 		System.gc();
 		System.gc();
 		dataProcessingDuration = stopwatch.elapsed(TimeUnit.NANOSECONDS);
-		long indexMemorySize = ObjectSizeCalculator.getObjectSize(localIndex) - queriesSize;
-		System.out.println("Local index size =" + indexMemorySize / 1024 / 1024 + " MB");
+//		long indexMemorySize = ObjectSizeCalculator.getObjectSize(localIndex) - queriesSize;
+//		System.out.println("Local index size =" + indexMemorySize / 1024 / 1024 + " MB");
 		System.gc();
 		System.gc();
 		Integer maxData = 0, maxDataIndex = 0, maxQuery = 0, maxQueryIndex = 0, maxEmitted = 0, maxEmittedIndex = 0;
@@ -872,8 +872,8 @@ public class TestPartitionsPerformance {
 				+ "total query count = " + querycount+ "total visted  = " + LocalHybridPyramidGridIndexOptimized.totalVisited+ "totalspatial overlapping  = " + LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries);
 
 		toReturn = toReturn + (queryRegisterationduration / queries.size()) + "," + (dataProcessingDuration / dataObjects.size()) + "," +
-		(indexMemorySize / 1024 / 1024)+ ","+
-				(queriesSize / 1024 / 1024)+","+
+//		(indexMemorySize / 1024 / 1024)+ ","+
+//				(queriesSize / 1024 / 1024)+","+
 	querycount+","+LocalHybridPyramidGridIndexOptimized.totalVisited+","+LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries;
 		dataObjects = null;
 		queries = null;

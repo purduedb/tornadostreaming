@@ -1,14 +1,13 @@
-package edu.purdue.cs.tornado.helper;
+package edu.purdue.cs.tornado.index.local.hybridpyramid;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 
-import edu.purdue.cs.tornado.messages.MinimalRangeQuery;
+import edu.purdue.cs.tornado.messages.Query;
 
 public class KeyWordTrieIndex {
-	KeywordTrieCell root;
+	public KeywordTrieCell root;
 	public static int SPLIT_THRESHOLD = 5;
 	public static int SPLIT_THRESHOLD_FREQ = 5;
 	int size = 0;
@@ -16,12 +15,12 @@ public class KeyWordTrieIndex {
 	public KeyWordTrieIndex() {
 		root = new KeywordTrieCell();
 		root.trieCells = new HashMap<String, KeywordTrieCell>();
-		index = new HashMap<String, HashMap<String, ArrayList<MinimalRangeQuery>>>();
+		index = new HashMap<String, HashMap<String, ArrayList<Query>>>();
 	}
 
-	HashMap<String, HashMap<String, ArrayList<MinimalRangeQuery>>> index;
+	HashMap<String, HashMap<String, ArrayList<Query>>> index;
 
-	public void insert(ArrayList<String> keywordList, MinimalRangeQuery q) {
+	public void insert(ArrayList<String> keywordList, Query q) {
 		KeywordTrieCell currentCell = root;
 		size++;
 		int i = 0;
@@ -38,13 +37,13 @@ public class KeyWordTrieIndex {
 			currentCell = cell;
 			if (currentCell.trieCells == null && i<keywordList.size()-1&&(currentCell.verifiableQueries == null || currentCell.verifiableQueries.size() <= SPLIT_THRESHOLD)) {
 				if (currentCell.verifiableQueries == null)
-					currentCell.verifiableQueries = new ArrayList<MinimalRangeQuery>();
+					currentCell.verifiableQueries = new LinkedList<Query>();
 				currentCell.verifiableQueries.add(q);
 				return;
 			} else if (currentCell.trieCells == null &&currentCell.verifiableQueries!=null&&currentCell.verifiableQueries.size() > SPLIT_THRESHOLD) {
 				currentCell.trieCells = new HashMap<String, KeywordTrieCell>();
 				//expand one more keyword
-				for (MinimalRangeQuery otherQuery : currentCell.verifiableQueries) {
+				for (Query otherQuery : currentCell.verifiableQueries) {
 					KeywordTrieCell otherCell = currentCell.trieCells.get(otherQuery.getQueryText().get(i + 1));
 					if (otherCell == null) {
 						otherCell = new KeywordTrieCell();
@@ -52,11 +51,11 @@ public class KeyWordTrieIndex {
 					}
 					if (i + 1 == otherQuery.getQueryText().size() - 1) {//last keyword
 						if (otherCell.storedQueries == null)
-							otherCell.storedQueries = new LinkedList<MinimalRangeQuery>();
+							otherCell.storedQueries = new LinkedList<Query>();
 						otherCell.storedQueries.add(otherQuery);
 					} else {
 						if (otherCell.verifiableQueries == null)
-							otherCell.verifiableQueries = new ArrayList<MinimalRangeQuery>();
+							otherCell.verifiableQueries = new LinkedList<Query>();
 						otherCell.verifiableQueries.add(otherQuery);
 					}
 					currentCell.trieCells.put(keyword, otherCell);
@@ -67,28 +66,28 @@ public class KeyWordTrieIndex {
 			//				
 		}
 		if (currentCell.storedQueries == null)
-			currentCell.storedQueries = new LinkedList<MinimalRangeQuery>();
+			currentCell.storedQueries = new LinkedList<Query>();
 		currentCell.storedQueries.add(q);
 
 	}
 
-	public void insertTwoLevelsOnly(ArrayList<String> keywordList, MinimalRangeQuery q) {
+	public void insertTwoLevelsOnly(ArrayList<String> keywordList, Query q) {
 		String k1 = keywordList.get(0);
 		String k2 = keywordList.get(1);
-		HashMap<String, ArrayList<MinimalRangeQuery>> innerMap = index.get(k1);
+		HashMap<String, ArrayList<Query>> innerMap = index.get(k1);
 		if (innerMap == null) {
-			innerMap = new HashMap<String, ArrayList<MinimalRangeQuery>>();
+			innerMap = new HashMap<String, ArrayList<Query>>();
 			index.put(k1, innerMap);
 		}
-		ArrayList<MinimalRangeQuery> queries = innerMap.get(k2);
+		ArrayList<Query> queries = innerMap.get(k2);
 		if (queries == null) {
-			queries = new ArrayList<MinimalRangeQuery>();
+			queries = new ArrayList<Query>();
 			innerMap.put(k2, queries);
 		}
 		queries.add(q);
 	}
 
-	public void insertOld1(ArrayList<String> keywordList, MinimalRangeQuery q) {
+	public void insertOld1(ArrayList<String> keywordList, Query q) {
 		KeywordTrieCell currentCell = root;
 
 		for (String keyword : keywordList) {
@@ -104,12 +103,12 @@ public class KeyWordTrieIndex {
 			currentCell = cell;
 		}
 		if (currentCell.storedQueries == null)
-			currentCell.storedQueries = new LinkedList<MinimalRangeQuery>();
+			currentCell.storedQueries = new LinkedList<Query>();
 		currentCell.storedQueries.add(q);
 		size++;
 	}
 
-	public void insertOld2(String keyword, MinimalRangeQuery q) {
+	public void insertOld2(String keyword, Query q) {
 		KeywordTrieCell currentCell = root;
 		int level = 0;
 		size++;
@@ -118,8 +117,8 @@ public class KeyWordTrieIndex {
 			currentCell.storedQueries.add(q);
 			if (currentCell.storedQueries.size() > SPLIT_THRESHOLD) {
 				currentCell.trieCells = new HashMap<String, KeywordTrieCell>();
-				LinkedList<MinimalRangeQuery> remainingQueries = new LinkedList<MinimalRangeQuery>();
-				for (MinimalRangeQuery query : currentCell.storedQueries) {
+				LinkedList<Query> remainingQueries = new LinkedList<Query>();
+				for (Query query : currentCell.storedQueries) {
 					if (query.getQueryText().size() > level) {
 						if (!currentCell.trieCells.containsKey(query.getQueryText().get(level))) {
 
@@ -150,11 +149,11 @@ public class KeyWordTrieIndex {
 
 	}
 
-	public ArrayList<MinimalRangeQuery> findOLd(ArrayList<String> keywordList) {
-		ArrayList<MinimalRangeQuery> candidate = new ArrayList<MinimalRangeQuery>();
+	public ArrayList<Query> findOLd(ArrayList<String> keywordList) {
+		ArrayList<Query> candidate = new ArrayList<Query>();
 		for (int i = 0; i < keywordList.size(); i++) {
 			if (index.containsKey(keywordList.get(i))) {
-				HashMap<String, ArrayList<MinimalRangeQuery>> innerMap = index.get(keywordList.get(i));
+				HashMap<String, ArrayList<Query>> innerMap = index.get(keywordList.get(i));
 				for (int j = i + 1; j < keywordList.size(); j++) {
 					if (innerMap.containsKey(keywordList.get(j))) {
 						candidate.addAll(innerMap.get(keywordList.get(j)));
@@ -165,8 +164,8 @@ public class KeyWordTrieIndex {
 		return candidate;
 	}
 
-	public LinkedList<MinimalRangeQuery> find(ArrayList<String> keywordList) {
-		LinkedList<MinimalRangeQuery> result = new LinkedList<MinimalRangeQuery>();
+	public LinkedList<Query> find(ArrayList<String> keywordList) {
+		LinkedList<Query> result = new LinkedList<Query>();
 		root.find(keywordList, 0, result, 0);
 		return result;
 	}

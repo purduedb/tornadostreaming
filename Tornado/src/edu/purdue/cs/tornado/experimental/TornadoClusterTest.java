@@ -220,9 +220,9 @@ public class TornadoClusterTest {
 		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 100.0, 1000, 5, 0, 0, FileSpout.LFS);
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
-		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_64_prio.ser");
+		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
 		builder.addSpatioTextualProcessor("tornado", 3, 16, 
-				partitions,GlobalIndexType.PARTITIONED_TEXT_AWARE, LocalIndexType.HYBRID_GRID,64)
+				partitions,GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_PYRAMID,1024)
 		.addVolatileSpatioTextualInput(tweetsSource)
 				//			.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POIHDFSSource", staticSourceConf)
 				//	.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POILFSDataSource", staticSourceConf)

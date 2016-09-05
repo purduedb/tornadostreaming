@@ -21,7 +21,6 @@ package edu.purdue.cs.tornado.index.local.hybridpyramid;
 
 import java.util.ArrayList;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -31,273 +30,216 @@ import java.util.Map.Entry;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
-import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
+import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.DataSourceInformation;
 import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
-import edu.purdue.cs.tornado.index.local.hybridgrid.GridIndexCell;
 import edu.purdue.cs.tornado.index.local.hybridgrid.LocalKNNGridIndexIterator;
+import edu.purdue.cs.tornado.index.local.hybridpyramidminimal.IndexCellOptimized;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
-import edu.purdue.cs.tornado.messages.KNNQuery;
+import edu.purdue.cs.tornado.messages.MinimalRangeQuery;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class LocalHybridPyramidIndex extends LocalHybridIndex {
-	//	private Integer localXcellCount;
-	//	private Integer localYcellCount;
-	public Double localXstep;
-	public Double localYstep;
+	public double localXstep;
+	public double localYstep;
 
-	public HashMap<Integer, HashMap<Integer, IndexCell>> index;
+	public HashMap<Integer, PyramidIndexCell>[] index;
 	public Rectangle selfBounds;
+	
+	
+	public int gridGranularity;
+	public int maxLevel;
+	public HashMap<String, Integer> overallQueryTextSummery;
 	public DataSourceInformation dataSourcesInformation;
-	public ArrayList<Query> globalKNNQueries;
-	public Integer xGridGranularity;
-	public Integer yGridGranularity;
-	public Boolean spatialOnlyFlag;
-	public Integer allDataCount;
-	public Integer level;
 	public Cell myPartition;
 	public Integer fineGridGran;
-
-	public HashMap<String, Integer> overallQueryTextSummery;
+	public int minInsertedLevel;
+	public int maxInsertedLevel;
+	
 	public boolean textUpdated;
 
 	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer fineGridGran) {
-		this(selfBounds, dataSourcesInformation, fineGridGran, fineGridGran, false, 0);
+		this(selfBounds, dataSourcesInformation, fineGridGran, fineGridGran, false, null);
 	}
 
 	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity) {
-		this(selfBounds, dataSourcesInformation, xGridGranularity, yGridGranularity, false, 0);
+		this(selfBounds, dataSourcesInformation, xGridGranularity, yGridGranularity, false, null);
 	}
 
-	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity, Boolean spatialOnlyFlag, Integer level) {
+	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer xGridGranularity, Integer yGridGranularity, Boolean spatialOnlyFlag, Integer mLevel) {
 		super();
-		this.spatialOnlyFlag = spatialOnlyFlag;
-		this.allDataCount = 0;
 		this.dataSourcesInformation = dataSourcesInformation;
 		this.selfBounds = selfBounds;
 		Double globalXrange = SpatioTextualConstants.xMaxRange;
 		Double globalYrange = SpatioTextualConstants.yMaxRange;
-		this.xGridGranularity = xGridGranularity;
-		this.yGridGranularity = yGridGranularity;
-		this.localXstep = (globalXrange / this.xGridGranularity);
-		this.localYstep = (globalYrange / this.yGridGranularity);
-		this.textUpdated = false;
-		//		this.localXcellCount = (int) ((selfBounds.getMax().getX() - selfBounds.getMin().getX()) / localXstep);
-		//		this.localYcellCount = (int) ((selfBounds.getMax().getY() - selfBounds.getMin().getY()) / localYstep);
-		this.index = new HashMap<Integer, HashMap<Integer, IndexCell>>();
-		this.globalKNNQueries = new ArrayList<Query>();
-		this.level = level;
+		this.gridGranularity = xGridGranularity;
+		this.localXstep = (globalXrange / this.gridGranularity);
+		this.localYstep = (globalYrange / this.gridGranularity);
+		if(mLevel!=null){
+		this.maxLevel = Math.min((int) (Math.log(gridGranularity) / Math.log(2)), mLevel);
+		}else {
+			this.maxLevel =  (int)(Math.log(gridGranularity) / Math.log(2));
+		}
+		this.index = new HashMap[maxLevel + 1];
+		this.minInsertedLevel = -1;
+		this.maxInsertedLevel = -1;
+		for (int i = 0; i <= maxLevel; i++)
+			index[i] = new HashMap<Integer, PyramidIndexCell>();
 		overallQueryTextSummery = new HashMap<String, Integer>();
+		
 		this.myPartition = new Cell((int) (selfBounds.getMin().getY() / localYstep), (int) (selfBounds.getMax().getY() / localYstep), (int) (selfBounds.getMin().getX() / localXstep), (int) (selfBounds.getMax().getX() / localXstep));
+	}
+
+	public Integer mapToRawMajor(int x, int y) {
+		return y * gridGranularity + x;
+	}
+
+	public Integer mapToRawMajor(int x, int y, int gridGranularity) {
+		return y * gridGranularity + x;
 	}
 
 	public Boolean addContinousQuery(Query query) {
 		Boolean completed = true;
-		if (query.getQueryType().equals(QueryType.queryTextualKNN)) {
+		int xMinCell = (int) (query.getSpatialRange().getMin().getX() / localXstep);
+		int yMinCell = (int) (query.getSpatialRange().getMin().getY() / localYstep);
+		int xMaxCell = (int) (query.getSpatialRange().getMax().getX() / localXstep);
+		int yMaxCell = (int) (query.getSpatialRange().getMax().getY() / localYstep);
 
-			// initially assume that the incomming KKN query for a
-			// volatile data object will go to global data entry for this bolt
-			if (dataSourcesInformation.isVolatile()) {
-				((KNNQuery)query).resetKNNStructures();
-				globalKNNQueries.add(query);
-			}
+		int maxCellSpan = Math.max(xMaxCell - xMinCell, yMaxCell - yMinCell);
+
+		int level = maxCellSpan == 0 ? 0 : (int) (Math.log(maxCellSpan) / Math.log(2));
+		level = Math.min(level, maxLevel);
+
+		int levelGranuality = (int) (gridGranularity / Math.pow(2, level));
+		double levelStep = (SpatioTextualConstants.xMaxRange / levelGranuality);
+
+		int levelxMinCell = (int) (query.getSpatialRange().getMin().getX() / levelStep);
+		int levelyMinCell = (int) (query.getSpatialRange().getMin().getY() / levelStep);
+		int levelxMaxCell = (int) (query.getSpatialRange().getMax().getX() / levelStep);
+		int levelyMaxCell = (int) (query.getSpatialRange().getMax().getY() / levelStep);
+
+		if ((levelxMaxCell - levelxMinCell >= 1 || levelyMaxCell - levelyMinCell >= 1) && level < maxLevel) {
+			level++;
+			levelGranuality = (int) (gridGranularity / Math.pow(2, level));
+			levelStep = (SpatioTextualConstants.xMaxRange / levelGranuality);
+
+			levelxMinCell = (int) (query.getSpatialRange().getMin().getX() / levelStep);
+			levelyMinCell = (int) (query.getSpatialRange().getMin().getY() / levelStep);
+			levelxMaxCell = (int) (query.getSpatialRange().getMax().getX() / levelStep);
+			levelyMaxCell = (int) (query.getSpatialRange().getMax().getY() / levelStep);
 		}
-
-		ArrayList<IndexCellCoordinates> indexCells = mapQueryToPartitions(query);
-		for (IndexCellCoordinates indexCellCoordinate : indexCells) {
-
-			IndexCell indexCell = getIndexCellFromCoordinates(indexCellCoordinate);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
-			if (indexCell == null) {
-				indexCell = new GridIndexCell(getBoundForIndexCell(indexCellCoordinate), spatialOnlyFlag, level, indexCellCoordinate);
-				addIndexCellFromCoordinates(indexCellCoordinate, indexCell);
+		if (minInsertedLevel == -1)
+			minInsertedLevel = maxInsertedLevel = level;
+		if (level < minInsertedLevel)
+			minInsertedLevel = level;
+		if (level > maxInsertedLevel)
+			maxInsertedLevel = level;
+		String minkeyword = null;
+		int minCount = Integer.MAX_VALUE;
+		if (query.getTextualPredicate().equals(TextualPredicate.OVERlAPS)) {
+			for (String keyword : query.getQueryText()) {
+				Integer count = overallQueryTextSummery.get(keyword);
+				if (count == null)
+					count = 1;
+				else
+					count++;
 
 			}
-			if (!indexCell.isTransmitted()){
-				indexCell.addQuery(query);
-				for (String s : query.getQueryText()) {
-					if (!overallQueryTextSummery.containsKey(s))
-						overallQueryTextSummery.put(s, 1);
-					else
-						overallQueryTextSummery.put(s, overallQueryTextSummery.get(s) + 1);
+		} else if (query.getTextualPredicate().equals(TextualPredicate.CONTAINS)) {
+			for (String keyword : query.getQueryText()) {
+				Integer count = overallQueryTextSummery.get(keyword);
+				if (count == null) {
+					count = 0;
+					overallQueryTextSummery.put(keyword, count);
+					minkeyword = keyword;
+					minCount = 0;
+					break;
+
+				} else if (count < minCount) {
+					minCount = count;
+					minkeyword = keyword;
 				}
-			}else
 
-				completed = false;
-		}
+			}
+			minCount++;
+			overallQueryTextSummery.put(minkeyword, minCount);
+		} else if (query.getTextualPredicate().equals(TextualPredicate.BOOLEAN_EXPR)){
 		
+		}
+
+		HashMap<Integer, PyramidIndexCell> levelIndex = index[level];
+		Integer coodinate = 0;
+		for (Integer i = levelxMinCell; i <= levelxMaxCell; i++) {
+			for (Integer j = levelyMinCell; j <= levelyMaxCell; j++) {
+				coodinate = mapToRawMajor(i, j, levelGranuality);
+				if (!levelIndex.containsKey(coodinate))
+					levelIndex.put(coodinate, new PyramidIndexCell(getBoundForIndexCell(coodinate, levelGranuality, levelStep), coodinate,level, levelGranuality));
+				if (query.getTextualPredicate().equals(TextualPredicate.OVERlAPS))
+					levelIndex.get(coodinate).addQuery(query);
+				else if (query.getTextualPredicate().equals(TextualPredicate.CONTAINS)) {
+					levelIndex.get(coodinate).addQuery(minkeyword, query);
+				}
+			}
+
+		}
+
 		return completed;
+
 	}
 
 	public IndexCell addDataObject(DataObject dataObject) {
-		IndexCellCoordinates cellCoordinates = mapDataPointToPartition(dataObject.getLocation());
-		IndexCell indexCell = getIndexCellFromCoordinates(cellCoordinates);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
-		if (indexCell == null) {
-			indexCell = new GridIndexCell(getBoundForIndexCell(cellCoordinates), spatialOnlyFlag, level, cellCoordinates);
-
-			addIndexCellFromCoordinates(cellCoordinates, indexCell);
-
-		}
-		indexCell.addDataObject(dataObject);
-		allDataCount++;
-		return indexCell;
+		return null;
 	}
 
 	
 
-	private void addIndexCellFromCoordinates(IndexCellCoordinates indexCellCoordinate, IndexCell indexCell) {
-		if (!index.containsKey(indexCellCoordinate.getX())) {
-			HashMap<Integer, IndexCell> yCellList = new HashMap<Integer, IndexCell>();
-			index.put(indexCellCoordinate.getX(), yCellList);
-		}
-		index.get(indexCellCoordinate.getX()).put(indexCellCoordinate.getY(), indexCell);
-	}
 
 	public Boolean dropContinousQuery(Query query) {
-		//first check inside the globalNKK list and if found return 
-		if (query.getQueryType().equals(QueryType.queryTextualKNN)) {
-			int i = 0;
-			boolean found = false;
-			for (i = 0; i < globalKNNQueries.size(); i++) {
-				if (query.getSrcId().equals(globalKNNQueries.get(i).getSrcId()) && query.getQueryId().equals(globalKNNQueries.get(i).getQueryId())) {
-					found = true;
-					break;
-				}
-			}
-			if (found) {
-				globalKNNQueries.remove(i);
-				return true;
-			}
-		}
-		ArrayList<IndexCellCoordinates> indexCells = mapQueryToPartitions(query);
-		for (IndexCellCoordinates indexCell : indexCells) {
-			if (indexCell == null)
-				continue;
-			index.get(indexCell.getX()).get(indexCell.getY()).dropQuery(query);
-
-		}
-		for (String s : query.getQueryText()) {
-			if (overallQueryTextSummery.containsKey(s)) {
-				int remainingCount = overallQueryTextSummery.get(s) - indexCells.size();
-				if (remainingCount > 0)
-					overallQueryTextSummery.put(s, remainingCount);
-				else if (remainingCount <= 0){
-					overallQueryTextSummery.remove(s);
-					textUpdated = true;
-				}
-
-			}
-
-		}
 		return true;
 	}
 
-	Rectangle getBoundForIndexCell(IndexCellCoordinates indexCellCoordinates) {
-		Integer i = indexCellCoordinates.getX();
-		Integer j = indexCellCoordinates.getY();
-		Rectangle bounds = new Rectangle(new Point(i * localXstep + selfBounds.getMin().getX(), j * localYstep + selfBounds.getMin().getY()),
-				new Point((i + 1) * localXstep + selfBounds.getMin().getX(), (j + 1) * localYstep + selfBounds.getMin().getY()));
+	Rectangle getBoundForIndexCell(int indexCellCoordinates, int gridGranulaity, double step) {
+		Integer i = indexCellCoordinates % gridGranulaity;
+		Integer j = indexCellCoordinates / gridGranulaity;
+		Rectangle bounds = new Rectangle(new Point(i * step, j * step), new Point((i + 1) * step, (j + 1) * step));
 		return bounds;
 	}
 
-	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords) {
-		if (spatialOnlyFlag)
-			return allDataCount;
-		Integer sum = 0;
-		ArrayList<IndexCellCoordinates> indexCells = mapRecToIndexCells(selfBounds);
-		for (IndexCellCoordinates indexCoordinate : indexCells) {
-			IndexCell indexCell = getIndexCellFromCoordinates(indexCoordinate);
-			if (indexCell == null)
-				continue;
-			sum += indexCell.estimateDataObjectCountAll(keywords);
 
-		}
-		return sum;
+	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords) {
+		return 0;
 	}
 
 	@Override
 	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords, Rectangle rect) {
 		Integer sum = 0;
-		ArrayList<IndexCellCoordinates> indexCells = mapRecToIndexCells(rect);
-		for (IndexCellCoordinates indexCoordinate : indexCells) {
-			IndexCell indexCell = getIndexCellFromCoordinates(indexCoordinate);
-			if (indexCell == null)
-				continue;
-			sum += indexCell.estimateDataObjectCountAll(keywords);
-		}
 		return sum;
 	}
-
-	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords) {
-		if (spatialOnlyFlag)
-			return allDataCount;
-		Integer sum = 0;
-		ArrayList<IndexCellCoordinates> indexCells = mapRecToIndexCells(selfBounds);
-		for (IndexCellCoordinates indexCoordinate : indexCells) {
-			IndexCell indexCell = getIndexCellFromCoordinates(indexCoordinate);
-			if (indexCell == null)
-				continue;
-			sum += indexCell.estimateDataObjectCountAny(keywords);
-		}
-		return sum;
-	}
-
 	@Override
 	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords, Rectangle rect) {
 		Integer sum = 0;
-		ArrayList<IndexCellCoordinates> indexCells = mapRecToIndexCells(rect);
-		for (IndexCellCoordinates indexCoordinate : indexCells) {
-			IndexCell indexCell = getIndexCellFromCoordinates(indexCoordinate);
-			if (indexCell == null)
-				continue;
-			sum += indexCell.estimateDataObjectCountAny(keywords);
-		}
+		
 		return sum;
 	}
 
 	public Integer getCountPerRec(Rectangle rec) {
 		Integer sum = 0;
-		ArrayList<IndexCellCoordinates> indexCells = mapRecToIndexCells(rec);
-		for (IndexCellCoordinates indexCoordinate : indexCells) {
-			IndexCell indexCell = getIndexCellFromCoordinates(indexCoordinate);
-			if (indexCell == null)
-				continue;
-			sum += indexCell.getDataObjectCount();
-		}
 		return sum;
 
 	}
 
-	public HashMap<Integer, HashMap<Integer, IndexCell>> getIndex() {
-		return index;
-	}
+//	public HashMap<Integer, HashMap<Integer, IndexCell>> getIndex() {
+//		return index;
+//	}
 
-	public IndexCell getIndexCellCreateIfNull(IndexCellCoordinates indexCellCoordinates, Boolean withChildren) {
 
-		IndexCell indexCell = getIndexCellFromCoordinates(indexCellCoordinates);//index.get(cellCoordinates.getX()).get(cellCoordinates.getY());
-		if (indexCell == null) {
-
-			indexCell = new GridIndexCell(getBoundForIndexCell(indexCellCoordinates), spatialOnlyFlag, level, indexCellCoordinates);
-			addIndexCellFromCoordinates(indexCellCoordinates, indexCell);
-
-		}
-		return indexCell;
-	}
-
-	public IndexCell getIndexCellCreateIfNull(Point point, Boolean withChildren) {
-		IndexCellCoordinates indexCellCoordinates = mapDataPointToPartition(point);
-		return getIndexCellCreateIfNull(indexCellCoordinates, withChildren);
-
-	}
 
 	public IndexCell getIndexCellFromCoordinates(IndexCellCoordinates indexCell) {
-		if (index.get(indexCell.getX()) == null) {
-			return null;
-		}
-		return index.get(indexCell.getX()).get(indexCell.getY());
+		return null;
 	}
 
 	public Double getLocalXstep() {
@@ -315,11 +257,8 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	}
 
 	public ArrayList<IndexCell> getOverlappingIndexCells(Rectangle rectangle) {
-		ArrayList<IndexCellCoordinates> relevantIndexCellCorredinates = mapRecToIndexCells(rectangle);
-		ArrayList<IndexCell> relevantIndexCells = new ArrayList<IndexCell>();
-		for (IndexCellCoordinates indexCellCoordinate : relevantIndexCellCorredinates)
-			relevantIndexCells.add(index.get(indexCellCoordinate.getX()).get(indexCellCoordinate.getY()));
-		return relevantIndexCells;
+		//TODO 
+		return null;
 
 	}
 
@@ -330,31 +269,12 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 	@Override
 	public ArrayList<IndexCell> getOverlappingIndexCellWithData(Rectangle rectangle) {
-		ArrayList<IndexCellCoordinates> relevantIndexCellCorredinates = mapRecToIndexCells(rectangle);
-		ArrayList<IndexCell> relevantIndexCells = new ArrayList<IndexCell>();
-		for (IndexCellCoordinates indexCellCoordinate : relevantIndexCellCorredinates) {
-			IndexCell indexCell = getIndexCellFromCoordinates(indexCellCoordinate);
-			if (indexCell != null && indexCell.getDataObjectCount() > 0)
-				relevantIndexCells.add(indexCell);
-		}
-		return relevantIndexCells;
+		return null;
 	}
 
 	@Override
 	public ArrayList<IndexCell> getOverlappingIndexCellWithData(Rectangle rectangle, ArrayList<String> keywords) {
-		if (spatialOnlyFlag)
-			return getOverlappingIndexCellWithData(rectangle);
-		else {
-			ArrayList<IndexCellCoordinates> relevantIndexCellCorredinates = mapRecToIndexCells(rectangle);
-			ArrayList<IndexCell> relevantIndexCells = new ArrayList<IndexCell>();
-			for (IndexCellCoordinates indexCellCoordinate : relevantIndexCellCorredinates) {
-				IndexCell indexCell = getIndexCellFromCoordinates(indexCellCoordinate);
-				if (indexCell != null && indexCell.getDataObjectCount() > 0 && TextHelpers.overlapsTextually(indexCell.getAllDataTextInCell(), keywords))
-					relevantIndexCells.add(indexCell);
-			}
-			return relevantIndexCells;
-		}
-
+			return null;
 	}
 
 	/**
@@ -370,12 +290,8 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		//this hashmap is based on query source id , query id itself
 		HashMap<String, Query> queriesMap = new HashMap<String, Query>();
 
-		//first consider all global KNN queries 
-		for (Query q : globalKNNQueries) {
-			String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
-			if (!queriesMap.containsKey(unqQueryId))
-				queriesMap.put(unqQueryId, q);
-		}
+		
+		
 		ArrayList<IndexCell> relevantIndexCells;
 		if (fromNeighbour) {
 			relevantIndexCells = getOverlappingIndexCells(dataObject.getRelevantArea());
@@ -430,23 +346,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	 * @param y
 	 * @return
 	 */
-	public IndexCellCoordinates mapDataPointToPartition(Point point) {
-		Double x = point.getX();
-		Double y = point.getY();
-
-		//		Integer xCell = (int) ((x - selfBounds.getMin().getX()) / localXstep);
-		//		Integer yCell = (int) ((y - selfBounds.getMin().getY()) / localYstep);
-		Integer xCell = (int) ((x) / localXstep);
-		Integer yCell = (int) ((y) / localYstep);
-		//		if (xCell >= localXcellCount)
-		//			xCell = localXcellCount - 1;
-		//		if (yCell >= localYcellCount)
-		//			yCell = localYcellCount - 1;
-
-		IndexCellCoordinates indexCellCoordinate = new IndexCellCoordinates(xCell, yCell);
-
-		return indexCellCoordinate;
-	}
+	
 
 	/**
 	 * This function maps a query to a set of index cells that overlap the
@@ -457,77 +357,8 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	 * @param query
 	 * @return
 	 */
-	private ArrayList<IndexCellCoordinates> mapQueryToPartitions(Query query) {
-		ArrayList<IndexCellCoordinates> partitions = new ArrayList<IndexCellCoordinates>();
-		if (QueryType.queryTextualRange.equals(query.getQueryType()) || QueryType.queryTextualSpatialJoin.equals(query.getQueryType())) {
-			//			if (query.getSpatialRange().getMin().getX() > selfBounds.getMax().getX() || query.getSpatialRange().getMin().getY() > selfBounds.getMax().getY() || query.getSpatialRange().getMax().getX() < selfBounds.getMin().getX()
-			//					|| query.getSpatialRange().getMax().getY() < selfBounds.getMin().getY()) {
-			//				System.err.println("Error query:" + query.getSrcId() + "  is outside the range of this bolt ");
-			//			} else {
-			partitions = mapRecToIndexCells(query.getSpatialRange());
-			//			}
-		} else if (QueryType.queryTextualKNN.equals(query.getQueryType())) {
-			partitions.add(mapDataPointToPartition(((KNNQuery)query).getFocalPoint()));
-		}
-		return partitions;
-	}
-
-	private ArrayList<IndexCellCoordinates> mapRecToIndexCells(Rectangle rectangle) {
-		ArrayList<IndexCellCoordinates> partitions = new ArrayList<IndexCellCoordinates>();
-		double xmin, ymin, xmax, ymax;
-
-		//		if (rectangle == null || selfBounds == null)
-		//			return partitions;
-		//
-		//		if (rectangle.getMin().getX() < selfBounds.getMin().getX())
-		//			xmin = selfBounds.getMin().getX();
-		//		else
-		//			xmin = rectangle.getMin().getX();
-		//
-		//		if (rectangle.getMin().getY() < selfBounds.getMin().getY())
-		//			ymin = selfBounds.getMin().getY();
-		//		else
-		//			ymin = rectangle.getMin().getY();
-		//
-		//		if (rectangle.getMax().getX() > selfBounds.getMax().getX())
-		//			xmax = selfBounds.getMax().getX();//to prevent exceeding index range
-		//		else
-		//			xmax = rectangle.getMax().getX();
-		//
-		//		if (rectangle.getMax().getY() > selfBounds.getMax().getY())
-		//			ymax = selfBounds.getMax().getY();//to prevent exceeding index range
-		//		else
-		//			ymax = rectangle.getMax().getY();
-		//
-		//		if (xmax == selfBounds.getMax().getX())
-		//			xmax = selfBounds.getMax().getX() - 1;
-		//		if (ymax == selfBounds.getMax().getY())
-		//			ymax = selfBounds.getMax().getY() - 1;
-
-		//		xmin -= selfBounds.getMin().getX();
-		//		ymin -= selfBounds.getMin().getY();
-		//		xmax -= selfBounds.getMin().getX();
-		//		ymax -= selfBounds.getMin().getY();
-
-		int xMinCell = (int) (rectangle.getMin().getX() / localXstep);
-		int yMinCell = (int) (rectangle.getMin().getY() / localYstep);
-		int xMaxCell = (int) (rectangle.getMax().getX() / localXstep);
-		int yMaxCell = (int) (rectangle.getMax().getY() / localYstep);
-
-//		for (Integer xCell = Math.max(xMinCell, myPartition.getLeft());  xCell < Math.min(xMaxCell,myPartition.getRight()); xCell++)
-//			for (Integer yCell = Math.max(yMinCell,myPartition.getBottom()); yCell < Math.min(yMaxCell,myPartition.getTop()); yCell++) {
-//				IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
-//				partitions.add(indexCell);
-//			}
-
-		for (Integer xCell = xMinCell;  xCell <= xMaxCell; xCell++)
-		for (Integer yCell = yMinCell ;yCell <= yMaxCell; yCell++) {
-			IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
-			partitions.add(indexCell);
-		}
-		
-		return partitions;
-	}
+	
+	
 
 	public Integer getLocalXcellCount() {
 		return (int) this.myPartition.dimensions[0];
@@ -543,65 +374,57 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 	//TODO we need to find a better way to update a query 
 	public Boolean updateContinousQuery(Query oldQuery, Query query) {
-		dropContinousQuery(oldQuery);
-		addContinousQuery(query);
 		return true;
 	}
-
+	public Integer mapDataPointToPartition(Point point, double step, int granularity) {
+		Double x = point.getX();
+		Double y = point.getY();
+		Integer xCell = (int) ((x) / step);
+		Integer yCell = (int) ((y) / step);
+		Integer indexCellCoordinate = mapToRawMajor(xCell, yCell, granularity);
+		return indexCellCoordinate;
+	}
 	@Override
 	public ArrayList<List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
 
-		IndexCellCoordinates cellCoordinates = mapDataPointToPartition(dataObject.getLocation());
-		IndexCell indexCell = getIndexCellFromCoordinates(cellCoordinates);
-		if (indexCell == null)
-			return null;
-		ArrayList<List<Query>> result = indexCell.geSpatiotTextualOverlappingQueries(dataObject.getLocation(), dataObject.getObjectText());
+		double step = localXstep;
+		ArrayList<List<Query>> result = new ArrayList<List<Query>>();
+		result.add(new ArrayList<Query>());
+		int granualrity = this.gridGranularity;
+		if (minInsertedLevel == -1)
+			return result;
+		for (int level = 0; level <= maxLevel; level++) {
+			if (level >= minInsertedLevel && level <= maxInsertedLevel) {
+				HashMap<Integer, PyramidIndexCell> levelIndex = index[level];
+				Integer cellCoordinates = mapDataPointToPartition(dataObject.getLocation(), step, granualrity);
+				PyramidIndexCell indexCellOptimized = levelIndex.get(cellCoordinates);
+				if (indexCellOptimized != null) {
+					ArrayList<List<Query>> results2 = indexCellOptimized.geSpatiotTextualOverlappingQueries(dataObject.getLocation(), dataObject.getObjectText());
+					result.get(0).addAll(results2.get(0));
+				}
+			}
+			step *= 2;
+			granualrity /= 2;
+		}
 
 		return result;
 	}
 
 	public ArrayList<IndexCell> getIndexCellsFromPartition(Cell partition) {
-		ArrayList<IndexCell> result = new ArrayList<IndexCell>();
-		for (int i = partition.getLeft(); i < partition.getRight(); i++)
-			if (index.containsKey(i)) {
-				for (int j = partition.getBottom(); j < partition.getTop(); j++)
-					if (index.get(i).containsKey(j))
-						result.add(index.get(i).get(j));
-			}
-		return result;
+		return null;
 	}
 
 	public void removeIndexCellsFromPartition(Cell partition, boolean textAware) {
-		for (int i = partition.getLeft(); i < partition.getRight(); i++)
-			if (index.containsKey(i)) {
-				for (int j = partition.getBottom(); j < partition.getTop(); j++)
-					if (index.get(i).containsKey(j)) {
-						IndexCell cell = index.get(i).remove(j);
-						if (textAware)
-							removeTextSummeryFromIndexCell(cell);
-					}
-				index.remove(i);
-			}
+		
 	}
 
 	public void addIndexCellsFromPartition(ArrayList<IndexCell> indexCells, boolean textAware) {
-		for (IndexCell indexCell : indexCells) {
-			if (!index.containsKey(indexCell.getGlobalCoordinates().getX()))
-				index.put(indexCell.getGlobalCoordinates().getX(), new HashMap<Integer, IndexCell>());
-			index.get(indexCell.getGlobalCoordinates().getX()).put(indexCell.getGlobalCoordinates().getY(), indexCell);
-			if (textAware)
-				addTextSummeryFromIndexCell(indexCell);
-		}
+	
 	}
 
 	public void addIndexCellsFromPartition(IndexCell indexCell, boolean textAware) {
 
-		if (!index.containsKey(indexCell.getGlobalCoordinates().getX()))
-			index.put(indexCell.getGlobalCoordinates().getX(), new HashMap<Integer, IndexCell>());
-		index.get(indexCell.getGlobalCoordinates().getX()).put(indexCell.getGlobalCoordinates().getY(), indexCell);
-		if (textAware)
-			addTextSummeryFromIndexCell(indexCell);
-
+	
 	}
 
 	@Override
@@ -659,39 +482,20 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 	@Override
 	public void cleanUp() {
-		beginCleanUpTime = (new Date()).getTime();
-		Boolean hasQueries= false;
-		for (int i = myPartition.getLeft(); i < myPartition.getRight(); i++)
-			if (index.containsKey(i)) {
-				for (int j = myPartition.getBottom(); j < myPartition.getTop(); j++)
-					if (index.get(i).containsKey(j)) {
-						IndexCell cell = index.get(i).get(j);
-						ArrayList<Query> expiredQueries = cell.findandRemoveExpriedQueries();
-						if(cell.getStoredQueries().size()!=0)
-							hasQueries=true;
-						if (expiredQueries != null) {
-							for (Query query : expiredQueries) {
-								for (String s : query.getQueryText()) {
-									if (overallQueryTextSummery.containsKey(s)) {
-										int remainingCount = overallQueryTextSummery.get(s) - 1;
-										if (remainingCount > 0)
-											overallQueryTextSummery.put(s, remainingCount);
-										else if (remainingCount <= 0){
-											overallQueryTextSummery.remove(s);
-											textUpdated = true;
-										}
-
-									}
-
-								}
-							}
-						}
-					}
-
-			}
-//		if(hasQueries==false &&!overallQueryTextSummery.isEmpty())
-//			System.err.println("There is an error in cleaning");
+		//TODO
 		
+	}
+
+	@Override
+	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IndexCellCoordinates mapDataPointToPartition(Point point) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
