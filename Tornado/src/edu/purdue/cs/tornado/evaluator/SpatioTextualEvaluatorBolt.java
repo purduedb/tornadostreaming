@@ -59,6 +59,7 @@ import edu.purdue.cs.tornado.index.global.GlobalIndexType;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndex;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndexLowerSpace;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedTextAwareIndex;
+import edu.purdue.cs.tornado.index.global.RandomTextRouting;
 import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.loadbalance.Cell;
@@ -1053,7 +1054,8 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			globalIndex = new GlobalOptimizedPartitionedIndexLowerSpace(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
 		else if (globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE || globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD)
 			globalIndex = new GlobalOptimizedPartitionedTextAwareIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
-
+		else if (globalIndexType == GlobalIndexType.RANDOM_TEXT)
+			globalIndex = new RandomTextRouting(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
 		else
 			globalIndex = new GlobalGridIndex(numberOfEvaluatorTasks, evaluatorBoltTasks);
 		//**************************************************************************************

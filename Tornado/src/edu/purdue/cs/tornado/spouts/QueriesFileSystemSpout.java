@@ -142,22 +142,13 @@ public class QueriesFileSystemSpout extends FileSpout {
 		}
 		q.setQueryId(i + selfTaskIndex * totalQueryCountVal);
 		i = i + 1;
-//		this.collector.emit(new Values(q.getQueryType(), q.getQueryId(), q.getFocalPoint().getX(), q.getFocalPoint().getY(), q.getSpatialRange().getMin().getX(), q.getSpatialRange().getMin().getY(), q.getSpatialRange().getMax().getX(),
-//				q.getSpatialRange().getMax().getY(), q.getK(), TextHelpers.convertArrayListOfStringToText(q.getQueryText()), TextHelpers.convertArrayListOfStringToText(q.getQueryText2()), q.getTimeStamp(), q.getDataSrc(), q.getDataSrc2(),
-//				q.getCommand(), q.getDistance(), q.getTextualPredicate(), q.getTextualPredicate2(), q.getJoinTextualPredicate(),q.getRemoveTime()
-//
-//		));
-		this.collector.emit(
-				new Values(
-				q.getQueryType(),
-				q.getQueryId(), 
-				q.getSpatialRange().getMin().getX(), q.getSpatialRange().getMin().getY(), q.getSpatialRange().getMax().getX(),	q.getSpatialRange().getMax().getY(),  
-				TextHelpers.convertArrayListOfStringToText(q.getQueryText()), 
-				q.getTimeStamp(),
-				q.getDataSrc(), 
-				q.getCommand(),  
-				q.getTextualPredicate(),
-				q.getRemoveTime()
+		//		this.collector.emit(new Values(q.getQueryType(), q.getQueryId(), q.getFocalPoint().getX(), q.getFocalPoint().getY(), q.getSpatialRange().getMin().getX(), q.getSpatialRange().getMin().getY(), q.getSpatialRange().getMax().getX(),
+		//				q.getSpatialRange().getMax().getY(), q.getK(), TextHelpers.convertArrayListOfStringToText(q.getQueryText()), TextHelpers.convertArrayListOfStringToText(q.getQueryText2()), q.getTimeStamp(), q.getDataSrc(), q.getDataSrc2(),
+		//				q.getCommand(), q.getDistance(), q.getTextualPredicate(), q.getTextualPredicate2(), q.getJoinTextualPredicate(),q.getRemoveTime()
+		//
+		//		));
+		this.collector.emit(new Values(q.getQueryType(), q.getQueryId(), q.getSpatialRange().getMin().getX(), q.getSpatialRange().getMin().getY(), q.getSpatialRange().getMax().getX(), q.getSpatialRange().getMax().getY(),
+				TextHelpers.convertArrayListOfStringToText(q.getQueryText()), q.getTimeStamp(), q.getDataSrc(), q.getCommand(), q.getTextualPredicate(), q.getRemoveTime(), q.getComplexQueryText()
 
 		));
 
@@ -165,9 +156,9 @@ public class QueriesFileSystemSpout extends FileSpout {
 
 	}
 
-	public  Query buildQuery(String line, String scId, int keywordCount, String data1, String data2, Double distance, QueryType queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
+	public Query buildQuery(String line, String scId, int keywordCount, String data1, String data2, Double distance, QueryType queryType, Double spatialRangeVal, TextualPredicate textualPredicate1, TextualPredicate textualPredicate2,
 			Integer k) {
-		if (previousLocations == null||selfTaskId==null ||selfTaskIndex==null) {
+		if (previousLocations == null || selfTaskId == null || selfTaskIndex == null) {
 			previousLocations = new ArrayList<LatLong>();
 			r = new RandomGenerator(0);
 			selfTaskId = 0;
@@ -192,7 +183,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 		return q;
 	}
 
-	public  Query buildQueryslow(String line) {
+	public Query buildQueryslow(String line) {
 		String[] tweetParts = line.split(",");
 		if (tweetParts.length < 5) {
 			System.out.println("Improper tweet format <5:" + line);
@@ -260,24 +251,24 @@ public class QueriesFileSystemSpout extends FileSpout {
 			q.setTextualPredicate(textualPredicate1);
 			q.setQueryText(queryText1);
 		} else if (queryType.equals(QueryType.queryTextualKNN)) {
-			((KNNQuery)q).setFocalPoint(xy);
-			((KNNQuery)q).setTextualPredicate(textualPredicate1);
-			((KNNQuery)q).setQueryText(queryText1);
-			((KNNQuery)q).setK(k);
+			((KNNQuery) q).setFocalPoint(xy);
+			((KNNQuery) q).setTextualPredicate(textualPredicate1);
+			((KNNQuery) q).setQueryText(queryText1);
+			((KNNQuery) q).setK(k);
 		} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
-			((JoinQuery)q).setDataSrc2(dataSrc2);
-			((JoinQuery)q).setSpatialRange(new Rectangle(xy, new Point(xy.getX() + spatialRangeVal, xy.getY() + spatialRangeVal)));
-			((JoinQuery)q).setTextualPredicate(textualPredicate1);
-			((JoinQuery)q).setTextualPredicate2(textualPredicate2);
-			((JoinQuery)q).setQueryText(queryText1);
-			((JoinQuery)q).setQueryText(queryText2);
-			((JoinQuery)q).setDistance(distance);
+			((JoinQuery) q).setDataSrc2(dataSrc2);
+			((JoinQuery) q).setSpatialRange(new Rectangle(xy, new Point(xy.getX() + spatialRangeVal, xy.getY() + spatialRangeVal)));
+			((JoinQuery) q).setTextualPredicate(textualPredicate1);
+			((JoinQuery) q).setTextualPredicate2(textualPredicate2);
+			((JoinQuery) q).setQueryText(queryText1);
+			((JoinQuery) q).setQueryText(queryText2);
+			((JoinQuery) q).setDistance(distance);
 		}
 		return q;
 
 	}
 
-	public  Query buildQuery(String line) {
+	public Query buildQuery(String line) {
 		//String[] tweetParts = line.split(",");
 		try {
 			int from = 0, to = 0;
@@ -312,7 +303,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 
 			if (lat < SpatioTextualConstants.minLat || lat > SpatioTextualConstants.maxLat || lon < SpatioTextualConstants.minLong || lon > SpatioTextualConstants.maxLong
 					|| (Double.compare(lat, 0.0) == 0 && Double.compare(lon, 0.0) == 0)) {
-				
+
 				if (previousLocations.size() > 0) {
 					latLong = previousLocations.get(r.nextInt(previousLocations.size()));
 					prevLocCount++;
@@ -323,7 +314,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 			} else {
 				latLong = new LatLong(lat, lon);
 				previousLocations.add(latLong);
-				
+
 			}
 			from = to;
 			to = line.indexOf(',', from + 1);
@@ -333,12 +324,12 @@ public class QueriesFileSystemSpout extends FileSpout {
 			String textContent = line.substring(from + 1);
 			ArrayList<String> queryText1 = new ArrayList<String>();
 			ArrayList<String> textList = TextHelpers.transformIntoSortedArrayListOfString(textContent);
-			if (textList.size() <keywordCountVal) {
+			if (textList.size() < keywordCountVal) {
 				//return null;
 				if (previousTextList == null)
 					return null;
 				textList.addAll(previousTextList);
-			} else  {
+			} else {
 				previousTextList = textList;
 			}
 
@@ -347,11 +338,11 @@ public class QueriesFileSystemSpout extends FileSpout {
 				queryText1.add(textList.get(r.nextInt(textList.size())));
 				//queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
 			}
-//			for (int j = 0; j < keywordCountVal; j++) {
-//
-//				queryText1.add(textList.get(j));
-//			//	queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
-//			}
+			//			for (int j = 0; j < keywordCountVal; j++) {
+			//
+			//				queryText1.add(textList.get(j));
+			//			//	queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
+			//			}
 			Integer id = i + selfTaskIndex * totalQueryCountVal;
 			Point xy = SpatialHelper.convertFromLatLonToXYPoint(latLong);
 			Date date = new Date();
@@ -359,29 +350,59 @@ public class QueriesFileSystemSpout extends FileSpout {
 			Query q = new Query();
 			q.setQueryId(id);
 			q.setCommand(Command.addCommand);
-		//	q.setContinousQuery(true);
+			//	q.setContinousQuery(true);
 			q.setDataSrc(dataSrc1);
-		//	q.setDistance(distance);
+			//	q.setDistance(distance);
 			q.setQueryType(queryType);
 			q.setTimeStamp(date.getTime());
 			q.setRemoveTime(Long.MAX_VALUE);
 			if (queryType.equals(QueryType.queryTextualRange)) {
 				q.setSpatialRange(new Rectangle(xy, new Point(xy.getX() + spatialRangeVal, xy.getY() + spatialRangeVal)));
 				q.setTextualPredicate(textualPredicate1);
-				q.setQueryText(queryText1);
+				if (TextualPredicate.BOOLEAN_EXPR.equals(textualPredicate1)) {
+					if (keywordCountVal == 1) {
+						q.setTextualPredicate(TextualPredicate.OVERlAPS);
+						q.setQueryText(queryText1);
+					} else if (keywordCountVal == 2) {
+						q.setTextualPredicate(TextualPredicate.CONTAINS);
+						q.setQueryText(queryText1);
+					} else {
+						ArrayList<ArrayList<String>> complexKeywords = new ArrayList<ArrayList<String>>();
+						int howManySplitsSecontions = r.nextInt(Math.max(keywordCountVal / 2, 2));
+						int start = 0;
+						int batchSize = keywordCountVal / (howManySplitsSecontions + 1);
+						int j = 0;
+						for (; j < howManySplitsSecontions; j++) {
+							complexKeywords.add(new ArrayList<String>());
+							for (int k = 0; k < batchSize; k++) {
+								complexKeywords.get(j).add(queryText1.get(start++));
+							}
+						}
+						//add the remaing keywords in the last batch;
+						while (complexKeywords.size() <= howManySplitsSecontions) {
+							complexKeywords.add(new ArrayList<String>());
+						}
+						while (start < keywordCountVal)
+							complexKeywords.get(j).add(queryText1.get(start++));
+						q.setComplexQueryText(complexKeywords);
+					}
+
+				} else {
+					q.setQueryText(queryText1);
+				}
 			} else if (queryType.equals(QueryType.queryTextualKNN)) {
-				((KNNQuery)q).setFocalPoint(xy);
-				((KNNQuery)q).setTextualPredicate(textualPredicate1);
-				((KNNQuery)q).setQueryText(queryText1);
-				((KNNQuery)q).setK(k);
+				((KNNQuery) q).setFocalPoint(xy);
+				((KNNQuery) q).setTextualPredicate(textualPredicate1);
+				((KNNQuery) q).setQueryText(queryText1);
+				((KNNQuery) q).setK(k);
 			} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
-				((JoinQuery)q).setDataSrc2(dataSrc2);
-				((JoinQuery)q).setSpatialRange(new Rectangle(xy, new Point(xy.getX() + spatialRangeVal, xy.getY() + spatialRangeVal)));
-				((JoinQuery)q).setTextualPredicate(textualPredicate1);
-				((JoinQuery)q).setTextualPredicate2(textualPredicate2);
-				((JoinQuery)q).setQueryText(queryText1);
-				((JoinQuery)q).setQueryText(queryText2);
-				((JoinQuery)q).setDistance(distance);
+				((JoinQuery) q).setDataSrc2(dataSrc2);
+				((JoinQuery) q).setSpatialRange(new Rectangle(xy, new Point(xy.getX() + spatialRangeVal, xy.getY() + spatialRangeVal)));
+				((JoinQuery) q).setTextualPredicate(textualPredicate1);
+				((JoinQuery) q).setTextualPredicate2(textualPredicate2);
+				((JoinQuery) q).setQueryText(queryText1);
+				((JoinQuery) q).setQueryText(queryText2);
+				((JoinQuery) q).setDistance(distance);
 			}
 			return q;
 		} catch (Exception e) {
@@ -426,7 +447,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 
 			if (lat < SpatioTextualConstants.minLat || lat > SpatioTextualConstants.maxLat || lon < SpatioTextualConstants.minLong || lon > SpatioTextualConstants.maxLong
 					|| (Double.compare(lat, 0.0) == 0 && Double.compare(lon, 0.0) == 0)) {
-				
+
 				if (previousLocations.size() > 0) {
 					latLong = previousLocations.get(r.nextInt(previousLocations.size()));
 					prevLocCount++;
@@ -437,7 +458,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 			} else {
 				latLong = new LatLong(lat, lon);
 				previousLocations.add(latLong);
-				
+
 			}
 			from = to;
 			to = line.indexOf(',', from + 1);
@@ -449,20 +470,20 @@ public class QueriesFileSystemSpout extends FileSpout {
 			String textContent = line.substring(from + 1);
 			ArrayList<String> queryText1 = new ArrayList<String>();
 			ArrayList<String> textList = TextHelpers.transformIntoSortedArrayListOfString(textContent);
-			if (textList.size() <keywordCountVal) {
+			if (textList.size() < keywordCountVal) {
 				return null;
-//				if (previousTextList == null)
-//					return null;
-//				textList.addAll(previousTextList);
-			} else  {
+				//				if (previousTextList == null)
+				//					return null;
+				//				textList.addAll(previousTextList);
+			} else {
 				previousTextList = textList;
 			}
 
-//			for (int j = 0; j < keywordCountVal; j++) {
-//
-//				queryText1.add(textList.get(r.nextInt(textList.size())));
-//				//queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
-//			}
+			//			for (int j = 0; j < keywordCountVal; j++) {
+			//
+			//				queryText1.add(textList.get(r.nextInt(textList.size())));
+			//				//queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
+			//			}
 			for (int j = 0; j < keywordCountVal; j++) {
 
 				queryText1.add(textList.get(j));
@@ -475,9 +496,9 @@ public class QueriesFileSystemSpout extends FileSpout {
 			Query q = new Query();
 			q.setQueryId(id);
 			q.setCommand(Command.addCommand);
-		//	q.setContinousQuery(true);
+			//	q.setContinousQuery(true);
 			q.setDataSrc(dataSrc1);
-		//	q.setDistance(distance);
+			//	q.setDistance(distance);
 			q.setQueryType(queryType);
 			q.setTimeStamp(date.getTime());
 			q.setRemoveTime(Long.MAX_VALUE);
@@ -486,18 +507,18 @@ public class QueriesFileSystemSpout extends FileSpout {
 				q.setTextualPredicate(textualPredicate1);
 				q.setQueryText(queryText1);
 			} else if (queryType.equals(QueryType.queryTextualKNN)) {
-				((KNNQuery)q).setFocalPoint(xy);
-				((KNNQuery)q).setTextualPredicate(textualPredicate1);
-				((KNNQuery)q).setQueryText(queryText1);
-				((KNNQuery)q).setK(k);
+				((KNNQuery) q).setFocalPoint(xy);
+				((KNNQuery) q).setTextualPredicate(textualPredicate1);
+				((KNNQuery) q).setQueryText(queryText1);
+				((KNNQuery) q).setK(k);
 			} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
-				((JoinQuery)q).setDataSrc2(dataSrc2);
-				((JoinQuery)q).setSpatialRange(new Rectangle(xy, new Point(xy.getX() + spatialRangeVal, xy.getY() + spatialRangeVal)));
-				((JoinQuery)q).setTextualPredicate(textualPredicate1);
-				((JoinQuery)q).setTextualPredicate2(textualPredicate2);
-				((JoinQuery)q).setQueryText(queryText1);
-				((JoinQuery)q).setQueryText(queryText2);
-				((JoinQuery)q).setDistance(distance);
+				((JoinQuery) q).setDataSrc2(dataSrc2);
+				((JoinQuery) q).setSpatialRange(new Rectangle(xy, new Point(xy.getX() + spatialRangeVal, xy.getY() + spatialRangeVal)));
+				((JoinQuery) q).setTextualPredicate(textualPredicate1);
+				((JoinQuery) q).setTextualPredicate2(textualPredicate2);
+				((JoinQuery) q).setQueryText(queryText1);
+				((JoinQuery) q).setQueryText(queryText2);
+				((JoinQuery) q).setDistance(distance);
 			}
 			return q;
 		} catch (Exception e) {
@@ -575,11 +596,10 @@ public class QueriesFileSystemSpout extends FileSpout {
 		if (spoutConf.containsKey(SpatioTextualConstants.kField))
 			this.k = (Integer) spoutConf.get(SpatioTextualConstants.kField);
 
-		if (spoutConf.containsKey(SpatioTextualConstants.queryTypeField)){
+		if (spoutConf.containsKey(SpatioTextualConstants.queryTypeField)) {
 			this.queryType = ((QueryType) spoutConf.get(SpatioTextualConstants.queryTypeField));
-			
-		}
-		else
+
+		} else
 			this.queryType = QueryType.queryTextualRange;
 
 		if (spoutConf.containsKey(SpatioTextualConstants.dataSrc))
@@ -609,24 +629,17 @@ public class QueriesFileSystemSpout extends FileSpout {
 		r = new RandomGenerator(selfTaskIndex);
 		latLong = new LatLong();
 		previousLocations = new ArrayList<LatLong>();
-	
+
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-//		declarer.declare(new Fields(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryIdField, SpatioTextualConstants.focalXCoordField, SpatioTextualConstants.focalYCoordField, SpatioTextualConstants.queryXMinField,
-//				SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField, SpatioTextualConstants.queryYMaxField, SpatioTextualConstants.kField, SpatioTextualConstants.queryTextField,
-//				SpatioTextualConstants.queryText2Field, SpatioTextualConstants.queryTimeStampField, SpatioTextualConstants.dataSrc, SpatioTextualConstants.dataSrc2, SpatioTextualConstants.queryCommand, SpatioTextualConstants.queryDistance,
-//				SpatioTextualConstants.textualPredicate, SpatioTextualConstants.textualPredicate2, SpatioTextualConstants.joinTextualPredicate, SpatioTextualConstants.removeTime));
-		declarer.declare(new Fields(
-				SpatioTextualConstants.queryTypeField, 
-				SpatioTextualConstants.queryIdField,
-				SpatioTextualConstants.queryXMinField,				SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField, SpatioTextualConstants.queryYMaxField,
-				SpatioTextualConstants.queryTextField,
-				SpatioTextualConstants.queryTimeStampField,
-				SpatioTextualConstants.dataSrc, 
-				SpatioTextualConstants.queryCommand, 
-				SpatioTextualConstants.textualPredicate, 
-				SpatioTextualConstants.removeTime));
+		//		declarer.declare(new Fields(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryIdField, SpatioTextualConstants.focalXCoordField, SpatioTextualConstants.focalYCoordField, SpatioTextualConstants.queryXMinField,
+		//				SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField, SpatioTextualConstants.queryYMaxField, SpatioTextualConstants.kField, SpatioTextualConstants.queryTextField,
+		//				SpatioTextualConstants.queryText2Field, SpatioTextualConstants.queryTimeStampField, SpatioTextualConstants.dataSrc, SpatioTextualConstants.dataSrc2, SpatioTextualConstants.queryCommand, SpatioTextualConstants.queryDistance,
+		//				SpatioTextualConstants.textualPredicate, SpatioTextualConstants.textualPredicate2, SpatioTextualConstants.joinTextualPredicate, SpatioTextualConstants.removeTime));
+		declarer.declare(new Fields(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryIdField, SpatioTextualConstants.queryXMinField, SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField,
+				SpatioTextualConstants.queryYMaxField, SpatioTextualConstants.queryTextField, SpatioTextualConstants.queryTimeStampField, SpatioTextualConstants.dataSrc, SpatioTextualConstants.queryCommand,
+				SpatioTextualConstants.textualPredicate, SpatioTextualConstants.removeTime, SpatioTextualConstants.queryComplexTextField));
 
 		//declarer.declare(new Fields(SpatioTextualConstants.queryIdField, SpatioTextualConstants.query));
 	}

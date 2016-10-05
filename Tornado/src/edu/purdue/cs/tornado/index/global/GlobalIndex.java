@@ -27,6 +27,8 @@ import java.util.List;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.Query;
 
 public abstract class GlobalIndex {
 	protected Double xrange;
@@ -89,4 +91,7 @@ public abstract class GlobalIndex {
 	public abstract void dropTextFromTaskID(ArrayList<Integer> tasks, ArrayList<String> text);
 	public abstract Boolean verifyTextOverlap(Integer task, ArrayList<String> text);
 	public abstract Boolean isTextAware();
+	public abstract Boolean isTextOnlyIndex();
+	public abstract ArrayList<Integer> getTaskIDsContainingKeywordData(DataObject object);
+	public abstract ArrayList<Integer> getTaskIDsContainingKeywordQuery(Query query);
 }

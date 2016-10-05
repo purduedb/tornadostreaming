@@ -88,7 +88,7 @@ public class PyramidIndexCell extends IndexCell {
 	 */
 
 	public void addQuery(Query query) {
-		query.added = false;
+		query.added[0] = false;
 		query.visitied = 0;
 		if (storedQueries == null)
 			storedQueries = new ArrayList<Query>();
@@ -113,7 +113,7 @@ public class PyramidIndexCell extends IndexCell {
 	}
 
 	public void addQuery(String keyword, Query query) {
-		query.added = false;
+		query.added[0] = false;
 		query.visitied = 0;
 		if (storedQueries == null)
 			storedQueries = new ArrayList<Query>();
@@ -130,7 +130,7 @@ public class PyramidIndexCell extends IndexCell {
 		} else if (!rareAndOverlapKeywords.containsKey(query.getSrcId()))
 			rareAndOverlapKeywords.put(query.getSrcId(), new HashMap<String, ArrayList<Query>>());
 
-		if (!rareAndOverlapKeywords.containsKey(keyword)) {
+		if (!rareAndOverlapKeywords.get(query.getSrcId()).containsKey(keyword)) {
 			rareAndOverlapKeywords.get(query.getSrcId()).put(keyword, new ArrayList<Query>());
 			rareAndOverlapKeywords.get(query.getSrcId()).get(keyword).add(query);
 		} else if (rareAndOverlapKeywords.get(query.getSrcId()).get(keyword).size() < KeyWordTrieIndex.SPLIT_THRESHOLD_FREQ || query.getQueryText().size() == 1) {
@@ -241,13 +241,17 @@ public class PyramidIndexCell extends IndexCell {
 								if (SpatialHelper.overlapsSpatially(p, q.getSpatialRange())) {
 									LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries++;
 									if (TextualPredicate.OVERlAPS.equals(q.getTextualPredicate())) {
-										if (q.added != true) {
-											q.added = true;
+										if (q.added[0] != true) {
+											q.added[0] = true;
 											finalQueries.add(q);
 										}
 									} else if (TextualPredicate.CONTAINS.equals(q.getTextualPredicate())) {
-										if (TextHelpers.containsTextually(keywords, q.getQueryText()))
-											finalQueries.add(q);
+										if (TextHelpers.containsTextually(keywords, q.getQueryText())){
+											if (q.added[0] != true) {
+												q.added[0] = true;
+												finalQueries.add(q);
+											}
+										}
 									}
 								}
 
@@ -264,8 +268,11 @@ public class PyramidIndexCell extends IndexCell {
 						for (Query q : validQueries) {
 							LocalHybridPyramidGridIndexOptimized.totalVisited++;
 							if (SpatialHelper.overlapsSpatially(p, q.getSpatialRange())) {
-								LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries++;
-								finalQueries.add(q);
+							//	LocalHybridPyramidGridIndexOptimized.spatialOverlappingQuries++;
+								if (q.added[0] != true) {
+									q.added[0] = true;
+									finalQueries.add(q);
+								}
 							}
 
 						}
@@ -274,7 +281,7 @@ public class PyramidIndexCell extends IndexCell {
 					}
 			}
 			for (Query q : finalQueries) {
-				q.added = false;
+				q.added[0] = false;
 
 			}
 			result.add(finalQueries);

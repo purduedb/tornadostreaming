@@ -56,6 +56,7 @@ public class QuerySerializer extends  com.esotericsoftware.kryo.Serializer<Query
 	//	query.setJoinTextualPredicate(kryo.readObjectOrNull(input, TextualPredicate.class));
 	//	query.setFarthestDistance(kryo.readObjectOrNull(input, Double.class));
 		query.setRemoveTime(kryo.readObjectOrNull(input, Long.class));
+		query.setComplexQueryText(kryo.readObjectOrNull(input, ArrayList.class));
 		return query;
 	}
 
@@ -81,6 +82,7 @@ public class QuerySerializer extends  com.esotericsoftware.kryo.Serializer<Query
 	//	kryo.writeObjectOrNull(output, query.getJoinTextualPredicate(),TextualPredicate.class);
 	//	kryo.writeObjectOrNull(output, query.getFarthestDistance(),Double.class);
 		kryo.writeObjectOrNull(output, query.getRemoveTime(),Long.class);
+		kryo.writeObjectOrNull(output, query.getComplexQueryText(),ArrayList.class);
 	}
 
 }

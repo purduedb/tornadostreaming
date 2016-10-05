@@ -27,10 +27,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
+import clojure.string__init;
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
+import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
@@ -49,8 +51,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 	public HashMap<Integer, PyramidIndexCell>[] index;
 	public Rectangle selfBounds;
-	
-	
+
 	public int gridGranularity;
 	public int maxLevel;
 	public HashMap<String, Integer> overallQueryTextSummery;
@@ -60,6 +61,8 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	public int minInsertedLevel;
 	public int maxInsertedLevel;
 	
+	public Rectangle partitionToSend;
+
 	public boolean textUpdated;
 
 	public LocalHybridPyramidIndex(Rectangle selfBounds, DataSourceInformation dataSourcesInformation, Integer fineGridGran) {
@@ -79,10 +82,10 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		this.gridGranularity = xGridGranularity;
 		this.localXstep = (globalXrange / this.gridGranularity);
 		this.localYstep = (globalYrange / this.gridGranularity);
-		if(mLevel!=null){
-		this.maxLevel = Math.min((int) (Math.log(gridGranularity) / Math.log(2)), mLevel);
-		}else {
-			this.maxLevel =  (int)(Math.log(gridGranularity) / Math.log(2));
+		if (mLevel != null) {
+			this.maxLevel = Math.min((int) (Math.log(gridGranularity) / Math.log(2)), mLevel);
+		} else {
+			this.maxLevel = (int) (Math.log(gridGranularity) / Math.log(2));
 		}
 		this.index = new HashMap[maxLevel + 1];
 		this.minInsertedLevel = -1;
@@ -90,7 +93,8 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		for (int i = 0; i <= maxLevel; i++)
 			index[i] = new HashMap<Integer, PyramidIndexCell>();
 		overallQueryTextSummery = new HashMap<String, Integer>();
-		
+		this.partitionToSend = null;
+
 		this.myPartition = new Cell((int) (selfBounds.getMin().getY() / localYstep), (int) (selfBounds.getMax().getY() / localYstep), (int) (selfBounds.getMin().getX() / localXstep), (int) (selfBounds.getMax().getX() / localXstep));
 	}
 
@@ -140,6 +144,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 			maxInsertedLevel = level;
 		String minkeyword = null;
 		int minCount = Integer.MAX_VALUE;
+		ArrayList<String> minKeywords = new ArrayList<String>();
 		if (query.getTextualPredicate().equals(TextualPredicate.OVERlAPS)) {
 			for (String keyword : query.getQueryText()) {
 				Integer count = overallQueryTextSummery.get(keyword);
@@ -151,6 +156,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 			}
 		} else if (query.getTextualPredicate().equals(TextualPredicate.CONTAINS)) {
 			for (String keyword : query.getQueryText()) {
+
 				Integer count = overallQueryTextSummery.get(keyword);
 				if (count == null) {
 					count = 0;
@@ -167,8 +173,28 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 			}
 			minCount++;
 			overallQueryTextSummery.put(minkeyword, minCount);
-		} else if (query.getTextualPredicate().equals(TextualPredicate.BOOLEAN_EXPR)){
-		
+		} else if (query.getTextualPredicate().equals(TextualPredicate.BOOLEAN_EXPR)) {
+			for (ArrayList<String> keywords : query.getComplexQueryText()) {
+				minCount = Integer.MAX_VALUE;
+				for (String keyword : keywords) {
+					Integer count = overallQueryTextSummery.get(keyword);
+					if (count == null) {
+						count = 0;
+						overallQueryTextSummery.put(keyword, count);
+						minkeyword = keyword;
+						minCount = 0;
+						break;
+
+					} else if (count < minCount) {
+						minCount = count;
+						minkeyword = keyword;
+					}
+
+				}
+				minCount++;
+				overallQueryTextSummery.put(minkeyword, minCount);
+				minKeywords.add(minkeyword);
+			}
 		}
 
 		HashMap<Integer, PyramidIndexCell> levelIndex = index[level];
@@ -177,11 +203,23 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 			for (Integer j = levelyMinCell; j <= levelyMaxCell; j++) {
 				coodinate = mapToRawMajor(i, j, levelGranuality);
 				if (!levelIndex.containsKey(coodinate))
-					levelIndex.put(coodinate, new PyramidIndexCell(getBoundForIndexCell(coodinate, levelGranuality, levelStep), coodinate,level, levelGranuality));
-				if (query.getTextualPredicate().equals(TextualPredicate.OVERlAPS))
+					levelIndex.put(coodinate, new PyramidIndexCell(getBoundForIndexCell(coodinate, levelGranuality, levelStep), coodinate, level, levelGranuality));
+				if (query.getTextualPredicate().equals(TextualPredicate.OVERlAPS)){
 					levelIndex.get(coodinate).addQuery(query);
+				}
 				else if (query.getTextualPredicate().equals(TextualPredicate.CONTAINS)) {
 					levelIndex.get(coodinate).addQuery(minkeyword, query);
+				} else if (query.getTextualPredicate().equals(TextualPredicate.BOOLEAN_EXPR)) {
+					for (int l = 0; l < minKeywords.size(); l++) {
+						Query subQ = new Query(query);
+						subQ.setQueryText(query.getComplexQueryText().get(l));
+						subQ.added = query.added; //ensures that all subqueries share the same flag, to prevent duplicates 
+
+						subQ.setComplexQueryText(null);
+						subQ.setTextualPredicate(TextualPredicate.CONTAINS);
+						levelIndex.get(coodinate).addQuery(minKeywords.get(l), subQ);
+
+					}
 				}
 			}
 
@@ -191,12 +229,14 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 	}
 
+	boolean checkCompleted(Query query, Rectangle toSendRange,PyramidIndexCell indexCell){
+		if(toSendRange!=null){
+			if(SpatialHelper.overlapsSpatially(query.getSpatialRange(), toSendRange)))
+		}
+	}
 	public IndexCell addDataObject(DataObject dataObject) {
 		return null;
 	}
-
-	
-
 
 	public Boolean dropContinousQuery(Query query) {
 		return true;
@@ -209,7 +249,6 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		return bounds;
 	}
 
-
 	public Integer getCountPerKeywrodsAll(ArrayList<String> keywords) {
 		return 0;
 	}
@@ -219,10 +258,11 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		Integer sum = 0;
 		return sum;
 	}
+
 	@Override
 	public Integer getCountPerKeywrodsAny(ArrayList<String> keywords, Rectangle rect) {
 		Integer sum = 0;
-		
+
 		return sum;
 	}
 
@@ -231,11 +271,6 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		return sum;
 
 	}
-
-//	public HashMap<Integer, HashMap<Integer, IndexCell>> getIndex() {
-//		return index;
-//	}
-
 
 
 	public IndexCell getIndexCellFromCoordinates(IndexCellCoordinates indexCell) {
@@ -274,7 +309,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 
 	@Override
 	public ArrayList<IndexCell> getOverlappingIndexCellWithData(Rectangle rectangle, ArrayList<String> keywords) {
-			return null;
+		return null;
 	}
 
 	/**
@@ -290,15 +325,13 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		//this hashmap is based on query source id , query id itself
 		HashMap<String, Query> queriesMap = new HashMap<String, Query>();
 
-		
-		
 		ArrayList<IndexCell> relevantIndexCells;
 		if (fromNeighbour) {
 			relevantIndexCells = getOverlappingIndexCells(dataObject.getRelevantArea());
 			for (IndexCell indexCell : relevantIndexCells) {
 				if (indexCell == null || indexCell.getQueries() == null)
 					continue;
-			    List<Query> queries = indexCell.getQueries();
+				List<Query> queries = indexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -346,7 +379,6 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	 * @param y
 	 * @return
 	 */
-	
 
 	/**
 	 * This function maps a query to a set of index cells that overlap the
@@ -357,8 +389,6 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	 * @param query
 	 * @return
 	 */
-	
-	
 
 	public Integer getLocalXcellCount() {
 		return (int) this.myPartition.dimensions[0];
@@ -376,6 +406,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	public Boolean updateContinousQuery(Query oldQuery, Query query) {
 		return true;
 	}
+
 	public Integer mapDataPointToPartition(Point point, double step, int granularity) {
 		Double x = point.getX();
 		Double y = point.getY();
@@ -384,6 +415,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		Integer indexCellCoordinate = mapToRawMajor(xCell, yCell, granularity);
 		return indexCellCoordinate;
 	}
+
 	@Override
 	public ArrayList<List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
 
@@ -415,16 +447,15 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	}
 
 	public void removeIndexCellsFromPartition(Cell partition, boolean textAware) {
-		
+
 	}
 
 	public void addIndexCellsFromPartition(ArrayList<IndexCell> indexCells, boolean textAware) {
-	
+
 	}
 
 	public void addIndexCellsFromPartition(IndexCell indexCell, boolean textAware) {
 
-	
 	}
 
 	@Override
@@ -432,15 +463,15 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 		if (textUpdated) {
 			textUpdated = false;
 			HashSet<String> s = new HashSet<String>();
-			 s .addAll(overallQueryTextSummery.keySet());
+			s.addAll(overallQueryTextSummery.keySet());
 
-			 return s;
+			return s;
 		}
 		return null;
 	}
 
 	public void removeTextSummeryFromIndexCell(IndexCell cell) {
-		for (Entry<String, HashMap<String,ArrayList<Query>>> e : cell.getQueriesInvertedList().entrySet()) {
+		for (Entry<String, HashMap<String, ArrayList<Query>>> e : cell.getQueriesInvertedList().entrySet()) {
 			Iterator<Entry<String, ArrayList<Query>>> itr = e.getValue().entrySet().iterator();
 			while (itr.hasNext()) {
 				Entry<String, ArrayList<Query>> entry = itr.next();
@@ -448,7 +479,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 					int remainingCount = overallQueryTextSummery.get(entry.getKey()) - entry.getValue().size();
 					if (remainingCount > 0)
 						overallQueryTextSummery.put(entry.getKey(), remainingCount);
-					else  if (remainingCount<= 0){
+					else if (remainingCount <= 0) {
 						overallQueryTextSummery.remove(entry.getKey());
 						textUpdated = true;
 					}
@@ -467,11 +498,11 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 			while (itr.hasNext()) {
 				Entry<String, ArrayList<Query>> entry = itr.next();
 				if (!overallQueryTextSummery.containsKey(entry.getKey())) {
-					if( entry.getValue().size()!=0)
-					overallQueryTextSummery.put(entry.getKey(), entry.getValue().size());
+					if (entry.getValue().size() != 0)
+						overallQueryTextSummery.put(entry.getKey(), entry.getValue().size());
 				} else {
-					if(( overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size())!=0)
-					overallQueryTextSummery.put(entry.getKey(), overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size());
+					if ((overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size()) != 0)
+						overallQueryTextSummery.put(entry.getKey(), overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size());
 
 				}
 
@@ -483,7 +514,7 @@ public class LocalHybridPyramidIndex extends LocalHybridIndex {
 	@Override
 	public void cleanUp() {
 		//TODO
-		
+
 	}
 
 	@Override

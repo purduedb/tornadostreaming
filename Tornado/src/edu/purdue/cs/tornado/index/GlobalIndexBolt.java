@@ -50,6 +50,7 @@ import edu.purdue.cs.tornado.index.global.GlobalIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndexLowerSpace;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedTextAwareIndex;
+import edu.purdue.cs.tornado.index.global.RandomTextRouting;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.loadbalance.Partition;
 import edu.purdue.cs.tornado.messages.Control;
@@ -238,37 +239,43 @@ public class GlobalIndexBolt extends BaseRichBolt {
 			//or if it is a new data object
 			//			DataObjectList dataObjectList = new DataObjectList();
 			//			dataObjectList.addDataObject(dataObject);
-
-			Integer evalauatorTask = globalIndex.getTaskIDsContainingPoint(dataObject.getLocation());
-			if (sourcesInformations.get(source).isCurrent()) {
-				Integer previousEvalauatorTask = sourcesInformations.get(source).getDataLastBoltTasKInformation().get(dataObject.getObjectId());
-				//	sourcesInformations.get(source).getLastBoltTasKInformation().put(dataObject.getObjectId(), evalauatorTaskList);
-				if (!evalauatorTask.equals(previousEvalauatorTask)) {
-					//this means there are previous location information about this object and hence 
-					//we make sure that the command for this dataobject is an update 
-					DataObject removeDataObject = new DataObject();
-					removeDataObject.setCommand(Command.dropCommand);
-					removeDataObject.setObjectId(dataObject.getObjectId());
-					removeDataObject.setSrcId(dataObject.getSrcId());
-					DataObjectList removeDataObjectList = new DataObjectList();
-					removeDataObjectList.addDataObject(removeDataObject);
-					collector.emitDirect(previousEvalauatorTask, SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(removeDataObjectList));
-				}
-				sourcesInformations.get(source).getDataLastBoltTasKInformation().put(dataObject.getObjectId(), evalauatorTask);
-			}
-			//sending the new dataobject information to proper bolt task 
-			if (globalIndex.isTextAware()) {
-				if (globalIndex.verifyTextOverlap(evalauatorTask, dataObject.getObjectText())) {
-					//					if (ack)
-					//						collector.emitDirect(evalauatorTask, SpatioTextualConstants.getIndexBoltDataStreamId(id), input, new Values(dataObject));
-					//					else
+			if (globalIndex.isTextOnlyIndex()) {
+				ArrayList<Integer> evaluatorsTasks = globalIndex.getTaskIDsContainingKeywordData(dataObject);
+				for(Integer evalauatorTask: evaluatorsTasks)
 					collector.emitDirect(evalauatorTask, SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(dataObject));
-				} else {
-					//		_inputDataCountMetric.incr();
-				}
-			} else {
 
-				collector.emitDirect(evalauatorTask, SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(dataObject));
+			} else {
+				Integer evalauatorTask = globalIndex.getTaskIDsContainingPoint(dataObject.getLocation());
+				if (sourcesInformations.get(source).isCurrent()) {
+					Integer previousEvalauatorTask = sourcesInformations.get(source).getDataLastBoltTasKInformation().get(dataObject.getObjectId());
+					//	sourcesInformations.get(source).getLastBoltTasKInformation().put(dataObject.getObjectId(), evalauatorTaskList);
+					if (!evalauatorTask.equals(previousEvalauatorTask)) {
+						//this means there are previous location information about this object and hence 
+						//we make sure that the command for this dataobject is an update 
+						DataObject removeDataObject = new DataObject();
+						removeDataObject.setCommand(Command.dropCommand);
+						removeDataObject.setObjectId(dataObject.getObjectId());
+						removeDataObject.setSrcId(dataObject.getSrcId());
+						DataObjectList removeDataObjectList = new DataObjectList();
+						removeDataObjectList.addDataObject(removeDataObject);
+						collector.emitDirect(previousEvalauatorTask, SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(removeDataObjectList));
+					}
+					sourcesInformations.get(source).getDataLastBoltTasKInformation().put(dataObject.getObjectId(), evalauatorTask);
+				}
+				//sending the new dataobject information to proper bolt task 
+				if (globalIndex.isTextAware()) {
+					if (globalIndex.verifyTextOverlap(evalauatorTask, dataObject.getObjectText())) {
+						//					if (ack)
+						//						collector.emitDirect(evalauatorTask, SpatioTextualConstants.getIndexBoltDataStreamId(id), input, new Values(dataObject));
+						//					else
+						collector.emitDirect(evalauatorTask, SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(dataObject));
+					} else {
+						//		_inputDataCountMetric.incr();
+					}
+				} else {
+
+					collector.emitDirect(evalauatorTask, SpatioTextualConstants.getIndexBoltDataStreamId(id), new Values(dataObject));
+				}
 			}
 		}
 		return ack;
@@ -288,34 +295,43 @@ public class GlobalIndexBolt extends BaseRichBolt {
 	protected void handleQuery(Tuple input, String source) throws Exception {
 		// identify the evaluator bolt to submit your tuple to
 		//TODO add code handling for the special case of query update and query droping
-		QueryType queryType =(QueryType) input.getValueByField(SpatioTextualConstants.queryTypeField);
+		QueryType queryType = (QueryType) input.getValueByField(SpatioTextualConstants.queryTypeField);
 		//	Query query =(Query)input.getValueByField(SpatioTextualConstants.query); 
 		Query query = readQueryByType(input, queryType, source);
 
 		// update the last evaluator bolt information
-	//	if (sourcesInformations.get(source).isContinuous()) {
-			//	ArrayList<Integer> previousEvalauatorTaskList = sourcesInformations.get(source).getQueryLastBoltTasKInformation().get(query.getQueryId());
-			//			if (previousEvalauatorTaskList != null && Command.dropCommand.equals(query.getCommand())) {
-			//				for (Integer task : previousEvalauatorTaskList) {
-			//					collector.emitDirect(task, id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Values(query));
-			//				}
-			//				sourcesInformations.get(source).getQueryLastBoltTasKInformation().put(query.getQueryId(), null);
-			//			} else 
-			if (Command.addCommand.equals(query.getCommand())) {
-				ArrayList<Integer> evalauatorTaskList = mapQueryToPartitions(query);
+		//	if (sourcesInformations.get(source).isContinuous()) {
+		//	ArrayList<Integer> previousEvalauatorTaskList = sourcesInformations.get(source).getQueryLastBoltTasKInformation().get(query.getQueryId());
+		//			if (previousEvalauatorTaskList != null && Command.dropCommand.equals(query.getCommand())) {
+		//				for (Integer task : previousEvalauatorTaskList) {
+		//					collector.emitDirect(task, id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Values(query));
+		//				}
+		//				sourcesInformations.get(source).getQueryLastBoltTasKInformation().put(query.getQueryId(), null);
+		//			} else 
+		if (Command.addCommand.equals(query.getCommand())) {
+			ArrayList<Integer> evalauatorTaskList = null;
 
+			sourcesInformations.get(source).getQueryLastBoltTasKInformation().put(query.getQueryId(), evalauatorTaskList);
+			//				if (previousEvalauatorTaskList != null && previousEvalauatorTaskList.size() != 0) {
+			//					for (Integer task : previousEvalauatorTaskList) {
+			//						if (!evalauatorTaskList.contains(task)) {
+			//							Query removeQuery = new Query();
+			//							removeQuery.setCommand(Command.dropCommand);
+			//							removeQuery.setQueryId(query.getQueryId());
+			//							removeQuery.setSrcId(query.getSrcId());
+			//							collector.emitDirect(task, id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Values(removeQuery));
+			//						}
+			//					}
+			//				}
+			if (globalIndex.isTextOnlyIndex()) {
+				evalauatorTaskList = globalIndex.getTaskIDsContainingKeywordQuery(query);
 				sourcesInformations.get(source).getQueryLastBoltTasKInformation().put(query.getQueryId(), evalauatorTaskList);
-				//				if (previousEvalauatorTaskList != null && previousEvalauatorTaskList.size() != 0) {
-				//					for (Integer task : previousEvalauatorTaskList) {
-				//						if (!evalauatorTaskList.contains(task)) {
-				//							Query removeQuery = new Query();
-				//							removeQuery.setCommand(Command.dropCommand);
-				//							removeQuery.setQueryId(query.getQueryId());
-				//							removeQuery.setSrcId(query.getSrcId());
-				//							collector.emitDirect(task, id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, new Values(removeQuery));
-				//						}
-				//					}
-				//				}
+				for (Integer task : evalauatorTaskList)
+					collector.emitDirect(task, id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, input, new Values(query));
+
+			} else {
+				evalauatorTaskList = mapQueryToPartitions(query);
+				sourcesInformations.get(source).getQueryLastBoltTasKInformation().put(query.getQueryId(), evalauatorTaskList);
 				if (globalIndex.isTextAware()) {
 					HashSet<String> text = globalIndex.addTextToTaskID(evalauatorTaskList, query.getQueryText(), query.getTextualPredicate() == TextualPredicate.OVERlAPS, isForwardGlobalIndex());
 					if (isForwardGlobalIndex()) {
@@ -340,9 +356,9 @@ public class GlobalIndexBolt extends BaseRichBolt {
 				} else
 					for (Integer task : evalauatorTaskList)
 						collector.emitDirect(task, id + SpatioTextualConstants.Index_Bolt_STreamIDExtension_Query, input, new Values(query));
-
-			} else if (Command.updateCommand.equals(query.getCommand())) {
 			}
+		} else if (Command.updateCommand.equals(query.getCommand())) {
+		}
 		//		} else {//this query is snapshot
 		//				//just submit the query and do not maintain any information about it 
 		//			ArrayList<Integer> evalauatorTaskList = mapQueryToPartitions(query);
@@ -363,7 +379,7 @@ public class GlobalIndexBolt extends BaseRichBolt {
 	protected ArrayList<Integer> mapQueryToPartitions(Query query) throws Exception {
 		ArrayList<Integer> tasks = new ArrayList<Integer>();
 		if (QueryType.queryTextualKNN.equals(query.getQueryType())) {
-			tasks.add(globalIndex.getTaskIDsContainingPoint(((KNNQuery)query).getFocalPoint()));
+			tasks.add(globalIndex.getTaskIDsContainingPoint(((KNNQuery) query).getFocalPoint()));
 		} else if (QueryType.queryTextualRange.equals(query.getQueryType()) || QueryType.queryTextualSpatialJoin.equals(query.getQueryType())) {
 			tasks = globalIndex.getTaskIDsOverlappingRecangle(query.getSpatialRange());
 		}
@@ -417,6 +433,9 @@ public class GlobalIndexBolt extends BaseRichBolt {
 			globalIndex = new GlobalOptimizedPartitionedTextAwareIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
 			System.out.println("Starting a partitioned text aware based global index ");
 
+		} else if (globalIndexType == GlobalIndexType.RANDOM_TEXT) {
+			globalIndex = new RandomTextRouting(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
+			System.out.println("Starting a random text only  global index ");
 		} else {
 			globalIndex = new GlobalGridIndex(numberOfEvaluatorTasks, evaluatorBoltTasks);
 			System.out.println("Starting a grid based global index ");
@@ -497,6 +516,7 @@ public class GlobalIndexBolt extends BaseRichBolt {
 		query.setTimeStamp(input.getLongByField(SpatioTextualConstants.queryTimeStampField));
 		query.setDataSrc(input.getStringByField(SpatioTextualConstants.dataSrc));
 		query.setCommand((Command) input.getValueByField(SpatioTextualConstants.queryCommand));
+		query.setComplexQueryText((ArrayList<ArrayList<String>>) input.getValueByField(SpatioTextualConstants.queryComplexTextField));
 		String text = "", text2 = "";
 		if (input.contains(SpatioTextualConstants.textualPredicate)) {
 			query.setTextualPredicate((TextualPredicate) input.getValueByField(SpatioTextualConstants.textualPredicate));
@@ -519,9 +539,10 @@ public class GlobalIndexBolt extends BaseRichBolt {
 				//
 				//					query.setTextualPredicate(TextualPredicate.OVERlAPS);
 				//				}
-			} else {
-				query.setTextualPredicate(TextualPredicate.NONE);
 			}
+			//			else {
+			//				query.setTextualPredicate(TextualPredicate.NONE);
+			//			}
 			query.setQueryText(queryText);
 
 		}
@@ -551,10 +572,10 @@ public class GlobalIndexBolt extends BaseRichBolt {
 		//		}
 
 		if (QueryType.queryTextualKNN.equals(queryType)) {
-			((KNNQuery)query).setK(input.getIntegerByField(SpatioTextualConstants.kField));
-			((KNNQuery)query).getFocalPoint().setX(input.getDoubleByField(SpatioTextualConstants.focalXCoordField));
-			((KNNQuery)query).getFocalPoint().setY(input.getDoubleByField(SpatioTextualConstants.focalYCoordField));
-			((KNNQuery)query).setSpatialRange(new Rectangle(((KNNQuery)query).getFocalPoint(), ((KNNQuery)query).getFocalPoint()));
+			((KNNQuery) query).setK(input.getIntegerByField(SpatioTextualConstants.kField));
+			((KNNQuery) query).getFocalPoint().setX(input.getDoubleByField(SpatioTextualConstants.focalXCoordField));
+			((KNNQuery) query).getFocalPoint().setY(input.getDoubleByField(SpatioTextualConstants.focalYCoordField));
+			((KNNQuery) query).setSpatialRange(new Rectangle(((KNNQuery) query).getFocalPoint(), ((KNNQuery) query).getFocalPoint()));
 		} else if (QueryType.queryTextualRange.equals(queryType) || (QueryType.queryTextualSpatialJoin.equals(queryType))) {
 			Point min = new Point();
 			min.setX(input.getDoubleByField(SpatioTextualConstants.queryXMinField));
@@ -564,8 +585,8 @@ public class GlobalIndexBolt extends BaseRichBolt {
 			max.setY(input.getDoubleByField(SpatioTextualConstants.queryYMaxField));
 			query.setSpatialRange(new Rectangle(min, max));
 			if (QueryType.queryTextualSpatialJoin.equals(queryType)) {
-				((JoinQuery)query).setDataSrc2(input.getStringByField(SpatioTextualConstants.dataSrc2));
-				((JoinQuery)query).setDistance(input.getDoubleByField(SpatioTextualConstants.queryDistance));
+				((JoinQuery) query).setDataSrc2(input.getStringByField(SpatioTextualConstants.dataSrc2));
+				((JoinQuery) query).setDistance(input.getDoubleByField(SpatioTextualConstants.queryDistance));
 			}
 		}
 

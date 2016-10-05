@@ -23,6 +23,7 @@ import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
 import edu.purdue.cs.tornado.experimental.baseline.BaselineEvaluator;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.loadbalance.Cell;
@@ -217,12 +218,12 @@ public class TornadoClusterTest {
 		
 	
 		DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, 1, 0, 100000,1);
-		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 1, 100.0, 1000, 5, 0, 0, FileSpout.LFS);
+		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 10, 1000.0, 1000000,4, 0, 0, FileSpout.LFS,"/media/D/datasets/tweetsForQueries.csv",TextualPredicate.BOOLEAN_EXPR);
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
 		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
 		builder.addSpatioTextualProcessor("tornado", 3, 16, 
-				partitions,GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_PYRAMID,1024)
+				partitions,GlobalIndexType.RANDOM_TEXT, LocalIndexType.HYBRID_PYRAMID,1024)
 		.addVolatileSpatioTextualInput(tweetsSource)
 				//			.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POIHDFSSource", staticSourceConf)
 				//	.addStaticDataSource(POISource, "edu.purdue.cs.tornado.storage.POILFSDataSource", staticSourceConf)

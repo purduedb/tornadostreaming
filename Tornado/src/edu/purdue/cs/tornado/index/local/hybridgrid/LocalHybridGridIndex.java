@@ -100,7 +100,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 			// initially assume that the incomming KKN query for a
 			// volatile data object will go to global data entry for this bolt
 			if (dataSourcesInformation.isVolatile()) {
-				((KNNQuery)query).resetKNNStructures();
+				((KNNQuery) query).resetKNNStructures();
 				globalKNNQueries.add(query);
 			}
 		}
@@ -114,7 +114,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 				addIndexCellFromCoordinates(indexCellCoordinate, indexCell);
 
 			}
-			if (!indexCell.isTransmitted()){
+			if (!indexCell.isTransmitted()) {
 				indexCell.addQuery(query);
 				for (String s : query.getQueryText()) {
 					if (!overallQueryTextSummery.containsKey(s))
@@ -122,11 +122,11 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 					else
 						overallQueryTextSummery.put(s, overallQueryTextSummery.get(s) + 1);
 				}
-			}else
+			} else
 
 				completed = false;
 		}
-		
+
 		return completed;
 	}
 
@@ -143,8 +143,6 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		allDataCount++;
 		return indexCell;
 	}
-
-	
 
 	private void addIndexCellFromCoordinates(IndexCellCoordinates indexCellCoordinate, IndexCell indexCell) {
 		if (!index.containsKey(indexCellCoordinate.getX())) {
@@ -182,7 +180,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 				int remainingCount = overallQueryTextSummery.get(s) - indexCells.size();
 				if (remainingCount > 0)
 					overallQueryTextSummery.put(s, remainingCount);
-				else if (remainingCount <= 0){
+				else if (remainingCount <= 0) {
 					overallQueryTextSummery.remove(s);
 					textUpdated = true;
 				}
@@ -380,7 +378,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 			for (IndexCell indexCell : relevantIndexCells) {
 				if (indexCell == null || indexCell.getQueries() == null)
 					continue;
-			    List<Query> queries = indexCell.getQueries();
+				List<Query> queries = indexCell.getQueries();
 				for (Query q : queries) {
 					String unqQueryId = q.getUniqueIDFromQuerySourceAndQueryId();
 					if (!queriesMap.containsKey(unqQueryId))
@@ -465,7 +463,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 			partitions = mapRecToIndexCells(query.getSpatialRange());
 			//			}
 		} else if (QueryType.queryTextualKNN.equals(query.getQueryType())) {
-			partitions.add(mapDataPointToPartition(((KNNQuery)query).getFocalPoint()));
+			partitions.add(mapDataPointToPartition(((KNNQuery) query).getFocalPoint()));
 		}
 		return partitions;
 	}
@@ -512,18 +510,18 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		int xMaxCell = (int) (rectangle.getMax().getX() / localXstep);
 		int yMaxCell = (int) (rectangle.getMax().getY() / localYstep);
 
-//		for (Integer xCell = Math.max(xMinCell, myPartition.getLeft());  xCell < Math.min(xMaxCell,myPartition.getRight()); xCell++)
-//			for (Integer yCell = Math.max(yMinCell,myPartition.getBottom()); yCell < Math.min(yMaxCell,myPartition.getTop()); yCell++) {
-//				IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
-//				partitions.add(indexCell);
-//			}
+		//		for (Integer xCell = Math.max(xMinCell, myPartition.getLeft());  xCell < Math.min(xMaxCell,myPartition.getRight()); xCell++)
+		//			for (Integer yCell = Math.max(yMinCell,myPartition.getBottom()); yCell < Math.min(yMaxCell,myPartition.getTop()); yCell++) {
+		//				IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
+		//				partitions.add(indexCell);
+		//			}
 
-		for (Integer xCell = xMinCell;  xCell <= xMaxCell; xCell++)
-		for (Integer yCell = yMinCell ;yCell <= yMaxCell; yCell++) {
-			IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
-			partitions.add(indexCell);
-		}
-		
+		for (Integer xCell = xMinCell; xCell <= xMaxCell; xCell++)
+			for (Integer yCell = yMinCell; yCell <= yMaxCell; yCell++) {
+				IndexCellCoordinates indexCell = new IndexCellCoordinates(xCell, yCell);
+				partitions.add(indexCell);
+			}
+
 		return partitions;
 	}
 
@@ -607,15 +605,15 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 		if (textUpdated) {
 			textUpdated = false;
 			HashSet<String> s = new HashSet<String>();
-			 s .addAll(overallQueryTextSummery.keySet());
+			s.addAll(overallQueryTextSummery.keySet());
 
-			 return s;
+			return s;
 		}
 		return null;
 	}
 
 	public void removeTextSummeryFromIndexCell(IndexCell cell) {
-		for (Entry<String, HashMap<String,ArrayList<Query>>> e : cell.getQueriesInvertedList().entrySet()) {
+		for (Entry<String, HashMap<String, ArrayList<Query>>> e : cell.getQueriesInvertedList().entrySet()) {
 			Iterator<Entry<String, ArrayList<Query>>> itr = e.getValue().entrySet().iterator();
 			while (itr.hasNext()) {
 				Entry<String, ArrayList<Query>> entry = itr.next();
@@ -623,7 +621,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 					int remainingCount = overallQueryTextSummery.get(entry.getKey()) - entry.getValue().size();
 					if (remainingCount > 0)
 						overallQueryTextSummery.put(entry.getKey(), remainingCount);
-					else  if (remainingCount<= 0){
+					else if (remainingCount <= 0) {
 						overallQueryTextSummery.remove(entry.getKey());
 						textUpdated = true;
 					}
@@ -642,11 +640,11 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 			while (itr.hasNext()) {
 				Entry<String, ArrayList<Query>> entry = itr.next();
 				if (!overallQueryTextSummery.containsKey(entry.getKey())) {
-					if( entry.getValue().size()!=0)
-					overallQueryTextSummery.put(entry.getKey(), entry.getValue().size());
+					if (entry.getValue().size() != 0)
+						overallQueryTextSummery.put(entry.getKey(), entry.getValue().size());
 				} else {
-					if(( overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size())!=0)
-					overallQueryTextSummery.put(entry.getKey(), overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size());
+					if ((overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size()) != 0)
+						overallQueryTextSummery.put(entry.getKey(), overallQueryTextSummery.get(entry.getKey()) + entry.getValue().size());
 
 				}
 
@@ -658,15 +656,15 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 	@Override
 	public void cleanUp() {
 		beginCleanUpTime = (new Date()).getTime();
-		Boolean hasQueries= false;
+		Boolean hasQueries = false;
 		for (int i = myPartition.getLeft(); i < myPartition.getRight(); i++)
 			if (index.containsKey(i)) {
 				for (int j = myPartition.getBottom(); j < myPartition.getTop(); j++)
 					if (index.get(i).containsKey(j)) {
 						IndexCell cell = index.get(i).get(j);
 						ArrayList<Query> expiredQueries = cell.findandRemoveExpriedQueries();
-						if(cell.getStoredQueries().size()!=0)
-							hasQueries=true;
+						if (cell.getStoredQueries().size() != 0)
+							hasQueries = true;
 						if (expiredQueries != null) {
 							for (Query query : expiredQueries) {
 								for (String s : query.getQueryText()) {
@@ -674,7 +672,7 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 										int remainingCount = overallQueryTextSummery.get(s) - 1;
 										if (remainingCount > 0)
 											overallQueryTextSummery.put(s, remainingCount);
-										else if (remainingCount <= 0){
+										else if (remainingCount <= 0) {
 											overallQueryTextSummery.remove(s);
 											textUpdated = true;
 										}
@@ -687,9 +685,9 @@ public class LocalHybridGridIndex extends LocalHybridIndex {
 					}
 
 			}
-//		if(hasQueries==false &&!overallQueryTextSummery.isEmpty())
-//			System.err.println("There is an error in cleaning");
-		
+		//		if(hasQueries==false &&!overallQueryTextSummery.isEmpty())
+		//			System.err.println("There is an error in cleaning");
+
 	}
 
 }

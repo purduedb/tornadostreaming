@@ -1,6 +1,7 @@
 package edu.purdue.cs.tornado.index.global;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -14,6 +15,8 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.loadbalance.Partition;
+import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.Query;
 
 public class GlobalOptimizedPartitionedIndex extends GlobalIndex {
 	public Double xStep;
@@ -308,6 +311,21 @@ public class GlobalOptimizedPartitionedIndex extends GlobalIndex {
 	@Override
 	public Boolean isTextAware() {
 		return false;
+	}
+
+	@Override
+	public Boolean isTextOnlyIndex() {
+		return false;
+	}
+
+	@Override
+	public ArrayList<Integer> getTaskIDsContainingKeywordData(DataObject object) {
+		return null;
+	}
+
+	@Override
+	public ArrayList<Integer> getTaskIDsContainingKeywordQuery(Query query) {
+		return null;
 	}
 
 }

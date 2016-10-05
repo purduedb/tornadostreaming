@@ -76,30 +76,11 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 	Cell toClearCells;
 	Integer receipinetTaskId;
 
-	//boolean[][] incommingCells;
+
 
 	public DynamicEvalautorBolt(String id, LocalIndexType localIndexType, GlobalIndexType globalIndexType, ArrayList<Cell> partitions, Integer fineGridGran) {
 		super(id, localIndexType, globalIndexType, partitions, fineGridGran);
-//		this.totalCost=0;
-//		this.toClearCells = null;
-//		this.xColumnCost = new Integer[fineGridGran];
-//		this.yRowCost = new Integer[fineGridGran];
-//		this.xColumnCostUnMatched = new Integer[fineGridGran];
-//		this.yRowCostUnMatched = new Integer[fineGridGran];
-//		this.xColumnCostReported = new Integer[fineGridGran];
-//		this.yRowCostReported = new Integer[fineGridGran];
-//		totalCost = 0;
-//		totalCostUnMatched = 0;
-//		for (int i = 0; i < fineGridGran; i++) {
-//			this.xColumnCost[i] = 0;
-//			this.xColumnCostUnMatched[i] = 0;
-//			this.xColumnCostReported[i] = 0;
-//		}
-//		for (int i = 0; i < fineGridGran; i++) {
-//			this.yRowCost[i] = 0;
-//			this.yRowCostUnMatched[i] = 0;
-//			this.yRowCostReported[i] = 0;
-//		}
+
 	}
 
 	@Override

@@ -198,7 +198,7 @@ public class QuadTreeIndexCell {
 	}
 
 	public void addQuery(Query query) {
-		query.added = false;
+		query.added[0] = false;
 		query.visitied = 0;
 		if (storedQueries == null)
 			storedQueries = new ArrayList<Query>();
@@ -350,8 +350,8 @@ public class QuadTreeIndexCell {
 
 							if (SpatialHelper.overlapsSpatially(p, q.getSpatialRange())) {
 								if (TextualPredicate.OVERlAPS.equals(q.getTextualPredicate())) {
-									if (q.added != true) {
-										q.added = true;
+									if (q.added[0] != true) {
+										q.added[0] = true;
 										finalQueries.add(q);
 									}
 								} else if (TextualPredicate.CONTAINS.equals(q.getTextualPredicate())) {
@@ -359,8 +359,8 @@ public class QuadTreeIndexCell {
 										tempQueries.add(q);
 									q.visitied++;
 									if (q.visitied >= q.getQueryText().size()) {
-										if (q.added != true&&TextHelpers.containsTextually(keywords, q.getQueryText())) {
-											q.added = true;
+										if (q.added[0] != true&&TextHelpers.containsTextually(keywords, q.getQueryText())) {
+											q.added[0] = true;
 											finalQueries.add(q);
 										}
 									}
@@ -373,7 +373,7 @@ public class QuadTreeIndexCell {
 					}
 			}
 			for (Query q : finalQueries) {
-				q.added = false;
+				q.added[0] = false;
 			}
 			for (Query q : tempQueries) {
 				q.visitied = 0;

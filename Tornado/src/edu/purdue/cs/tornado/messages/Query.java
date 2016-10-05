@@ -31,7 +31,7 @@ import edu.purdue.cs.tornado.helper.TextualPredicate;
 public class Query {
 	private String srcId;
 	private Integer queryId;
-	public boolean added;
+	public boolean added[];//converted to boolean array of size 1 to allow call by refrence for subqueries and have them share all data, 
 	public int visitied;
 
 	protected QueryType queryType;
@@ -42,6 +42,7 @@ public class Query {
 	protected long removeTime;
 	protected Command command;
 	protected TextualPredicate textualPredicate;
+	protected ArrayList<ArrayList<String>> complexQueryText; //ors of ands DNF
 	public Long getRemoveTime() {
 		return removeTime;
 	}
@@ -80,18 +81,20 @@ public class Query {
 	//		this.localTopKIterator = localKNNIterator;
 	//	}
 	public Query() {
-		added = false;
+		added =new boolean[1];
+		added[0]=false;
 		visitied = 0;
 		//focalPoint = new Point();
 		queryText = new ArrayList<String>();
 		spatialRange = new Rectangle(new Point(), new Point());
 		//this.farthestDistance = maxFarthestDistance;
 		removeTime = Long.MAX_VALUE;
+		complexQueryText = null;
 		//resetKNNStructures();
 	}
 
 	public Query(Query q) {
-		added = false;
+		this.added = q.added;
 		visitied = 0;
 		this.queryId = q.queryId;
 		this.setCommand(q.command);
@@ -99,7 +102,7 @@ public class Query {
 		this.setDataSrc(q.dataSrc);
 		this.setQueryType(q.queryType);
 		this.setTimeStamp(q.timeStamp);
-		this.setSpatialRange(new Rectangle(q.spatialRange.getMin(), q.spatialRange.getMax()));
+		this.setSpatialRange(q.spatialRange);
 		this.setTextualPredicate(q.textualPredicate);
 		this.setQueryText(q.queryText);
 
@@ -149,6 +152,14 @@ public class Query {
 
 	public void setTimeStamp(Long timeStamp) {
 		this.timeStamp = timeStamp;
+	}
+
+	public ArrayList<ArrayList<String>> getComplexQueryText() {
+		return complexQueryText;
+	}
+
+	public void setComplexQueryText(ArrayList<ArrayList<String>> complexQueryText) {
+		this.complexQueryText = complexQueryText;
 	}
 
 	//	public Point getFocalPoint() {
@@ -204,6 +215,7 @@ public class Query {
 	public static String getQueryIdFromUniqueQuerySrcQueryId(String src_query_id) {
 		return src_query_id.split(SpatioTextualConstants.queryIdDelimiter)[1];
 	}
+	
 	// Returns a representation of the changes in the top-k list (if any).
 	//the incoming object must satisfy the KNN query textual predicate criteria
 	//TODO address the nature of volatile, current object, 

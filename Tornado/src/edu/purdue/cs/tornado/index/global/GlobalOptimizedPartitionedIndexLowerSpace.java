@@ -6,9 +6,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Stack;
 
-import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.Point;
@@ -16,6 +14,8 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.loadbalance.Partition;
+import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.Query;
 
 public class GlobalOptimizedPartitionedIndexLowerSpace extends GlobalIndex {
 	public Double xStep;
@@ -352,6 +352,21 @@ public class GlobalOptimizedPartitionedIndexLowerSpace extends GlobalIndex {
 	@Override
 	public Boolean isTextAware() {
 		return false;
+	}
+
+	@Override
+	public Boolean isTextOnlyIndex() {
+		return false;
+	}
+
+	@Override
+	public ArrayList<Integer> getTaskIDsContainingKeywordData(DataObject object) {
+		return null;
+	}
+
+	@Override
+	public ArrayList<Integer> getTaskIDsContainingKeywordQuery(Query query) {
+		return null;
 	}
 
 }

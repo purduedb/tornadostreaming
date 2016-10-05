@@ -31,6 +31,8 @@ import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.loadbalance.Partition;
+import edu.purdue.cs.tornado.messages.DataObject;
+import edu.purdue.cs.tornado.messages.Query;
 
 public class GlobalStaticPartitionedIndex extends GlobalIndex {
 
@@ -179,5 +181,20 @@ public class GlobalStaticPartitionedIndex extends GlobalIndex {
 	@Override
 	public Boolean isTextAware() {
 		return false;
+	}
+
+	@Override
+	public Boolean isTextOnlyIndex() {
+		return false;
+	}
+
+	@Override
+	public ArrayList<Integer> getTaskIDsContainingKeywordData(DataObject object) {
+		return null;
+	}
+
+	@Override
+	public ArrayList<Integer> getTaskIDsContainingKeywordQuery(Query query) {
+		return null;
 	}
 }

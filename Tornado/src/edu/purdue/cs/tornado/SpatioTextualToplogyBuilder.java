@@ -268,6 +268,8 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 			}else if (GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD == this.globalIndexType) {
 				//this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
+			} else if (GlobalIndexType.RANDOM_TEXT == this.globalIndexType) {
+				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
 			} 
 			else {
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
@@ -288,7 +290,10 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 			}else if (GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD == this.globalIndexType) {
 				//this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));
-			} else {
+			} else if (GlobalIndexType.RANDOM_TEXT == this.globalIndexType) {
+				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));
+			}
+			else {
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));
 			}
 

@@ -64,7 +64,6 @@ public class LocalHybridPyramidGridIndexOptimized {
 		for (int i = 0; i <= maxLevel; i++)
 			index[i] = new HashMap<Integer, IndexCellOptimized>();
 		overallQueryTextSummery = new HashMap<String, Integer>();
-		//		this.myPartition = new Cell((int) (selfBounds.getMin().getY() / localYstep), (int) (selfBounds.getMax().getY() / localYstep), (int) (selfBounds.getMin().getX() / localXstep), (int) (selfBounds.getMax().getX() / localXstep));
 	}
 
 	public Integer mapToRawMajor(int x, int y) {
@@ -146,26 +145,15 @@ public class LocalHybridPyramidGridIndexOptimized {
 		Integer coodinate = 0;
 		for (Integer i = levelxMinCell; i <= levelxMaxCell; i++) {
 			for (Integer j = levelyMinCell; j <= levelyMaxCell; j++) {
-				//	if (i == levelxMinCell && j == levelyMinCell) {
 				coodinate = mapToRawMajor(i, j, levelGranuality);
 				if (!levelIndex.containsKey(coodinate))
 					levelIndex.put(coodinate, new IndexCellOptimized(getBoundForIndexCell(coodinate, levelGranuality, levelStep), coodinate));
 				if (query.getTextualPredicate().equals(TextualPredicate.OVERlAPS))
 					levelIndex.get(coodinate).addInternalQuery(query);
 				else if (query.getTextualPredicate().equals(TextualPredicate.CONTAINS)) {
-					//	query.getQueryText().remove(minkeyword);
 					levelIndex.get(coodinate).addInternalQuery(minkeyword, query);
 
 				}
-				//				} 
-				//				else {
-				//					int slaveCoodinate = mapToRawMajor(i, j, levelGranuality);
-				//					if (!levelIndex.containsKey(slaveCoodinate))
-				//						levelIndex.put(slaveCoodinate, new IndexCellOptimized(getBoundForIndexCell(slaveCoodinate, levelGranuality, levelStep), slaveCoodinate));
-				//					if (levelIndex.get(slaveCoodinate).masterCells == null)
-				//						levelIndex.get(slaveCoodinate).masterCells = new HashSet<Integer>();
-				//					levelIndex.get(slaveCoodinate).masterCells.add(coodinate);
-				//				}
 			}
 
 		}
@@ -198,13 +186,6 @@ public class LocalHybridPyramidGridIndexOptimized {
 		return indexCellCoordinate;
 	}
 
-	//	public Integer getLocalXcellCount() {
-	//		return (int) this.myPartition.dimensions[0];
-	//	}
-	//
-	//	public Integer getLocalYcellCount() {
-	//		return (int) this.myPartition.dimensions[1];
-	//	}
 
 	public void setSelfBounds(Rectangle selfBounds) {
 		this.selfBounds = selfBounds;
@@ -226,13 +207,7 @@ public class LocalHybridPyramidGridIndexOptimized {
 				if (indexCellOptimized != null) {
 					ArrayList<List<MinimalRangeQuery>> results2 = indexCellOptimized.getInternalSpatiotTextualOverlappingQueries(dataObject.getLocation(), dataObject.getObjectText());
 					result.get(0).addAll(results2.get(0));
-					//				if (indexCellOptimized.masterCells != null) {
-					//					for (Integer masterCoordinate : indexCellOptimized.masterCells) {
-					//						IndexCellOptimized masterCellOptimized = levelIndex.get(masterCoordinate);
-					//						ArrayList<List<MinimalRangeQuery>> results3 = masterCellOptimized.getInternalSpatiotTextualOverlappingQueries(dataObject.getLocation(), dataObject.hashedText);
-					//						result.get(0).addAll(results3.get(0));
-					//					}
-					//				}
+					
 				}
 			}
 			step *= 2;
