@@ -262,9 +262,6 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 			if (GlobalIndexType.PARTITIONED_TEXT_AWARE == this.globalIndexType) {
 				this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
 				//this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
-			} else if (GlobalIndexType.DYNAMIC_AQWA == this.globalIndexType||GlobalIndexType.DYNAMIC_OPTIMIZED == this.globalIndexType){
-				//this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
-				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
 			}else if (GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD == this.globalIndexType) {
 				//this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, streamId, new Fields(SpatioTextualConstants.queryIdField));
@@ -284,9 +281,6 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 			if (GlobalIndexType.PARTITIONED_TEXT_AWARE == this.globalIndexType) {
 				this._boltDeclarer = this._boltDeclarer.allGrouping(componentId);
 				//this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));
-			} else if (GlobalIndexType.DYNAMIC_AQWA == this.globalIndexType||GlobalIndexType.DYNAMIC_OPTIMIZED == this.globalIndexType){
-			//	this._boltDeclarer = this._boltDeclarer.allGrouping(componentId);
-				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));
 			}else if (GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD == this.globalIndexType) {
 				//this._boltDeclarer = this._boltDeclarer.allGrouping(componentId, streamId);
 				this._boltDeclarer = this._boltDeclarer.fieldsGrouping(componentId, new Fields(SpatioTextualConstants.queryIdField));

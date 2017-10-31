@@ -1,0 +1,68 @@
+Folders Removed:
+- state
+- sentiment
+- output (Question, seems important?)
+- index.local.interfaces (also important?)
+- helper.interval
+
+
+Files Removed:
+- test > everything except TestPOIsStaticDataSource.java
+- spouts > everything except FileSpout.java, Queries*, Tweets*, TwitterFireHoseSpout.java
+- local > NoLocalIndex.java
+- helper > UInt32.java, MortonZCurve, CenterRightUpperCells.java, GoogleMapsProjection2.java, JsonHelper.java, KdTree.java, LineSegment.java, LHUCache.java, ObjectSizeCalculator.java
+- experimental > OldExperiments.java, TornadoExperimentsSequence.java
+- evaluator > Elavuator.java (Sounds important), Operator*, Query2.java, SpatialDistanceType.java, LogicalOperator.java. ArithmeticOperator.java, BooleanOperator.java, Geometry.java
+
+
+Personal Notes:
+- Without index.local.quadtree, there will be ArrayOutOfBounds error when emiting and building queries from QueriesFileSystemSpout
+- Same with GlobalGridIndex.java in index.global. 
+- Not sure what pom_2.xml is for
+- What about results? 
+- We will probably only be able to clear the comments and TODOs of the 4 main files this week if that's all right. 
+
+Errors: 
+- Sometimes, a while after the program is stopped:
+
+State change: CONNECTED
+Starting supervisor with id 6f8b580a-8905-4e7b-b64e-9020bd4ff983 at host Lenovo-PC
+Thread Thread[main,5,main] died
+java.lang.Error: Unresolved compilation problems: 
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<Query>, Class<QuerySerializer>)
+	QuerySerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<DataObject>, Class<DataObjectSerializer>)
+	DataObjectSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<DataObjectList>, Class<DataObjectListSerializer>)
+	DataObjectListSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<LoadBalanceMessage>, Class<LoadBalanceMessageSerializer>)
+	LoadBalanceMessageSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<Control>, Class<ControlSerializer>)
+	ControlSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<Point>, Class<PointSerializer>)
+	PointSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<Rectangle>, Class<RectangleSerializer>)
+	RectangleSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<CombinedTuple>, Class<CombinedTupleSerializer>)
+	CombinedTupleSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<ResultSetChange>, Class<ResultSetChangeSerializer>)
+	ResultSetChangeSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<Partition>, Class<PartitionSerializer>)
+	PartitionSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<Cell>, Class<CellSerializer>)
+	CellSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<GridIndexCell>, Class<GridIndexCellSerializer>)
+	GridIndexCellSerializer cannot be resolved to a type
+	The method registerSerialization(Map, Class) in the type Config is not applicable for the arguments (Class<IndexCellCoordinates>, Class<IndexCellCoordinatesSerializer>)
+	IndexCellCoordinatesSerializer cannot be resolved to a type
+
+	at edu.purdue.cs.tornado.SpatioTextualLocalCluster.submitTopology(SpatioTextualLocalCluster.java:67)
+	at edu.purdue.cs.tornado.experimental.TornadoClusterTest.testTornado(TornadoClusterTest.java:271)
+	at edu.purdue.cs.tornado.experimental.TornadoClusterTest.main(TornadoClusterTest.java:40)
+()
+()
+()
+()
+()
+()
+()

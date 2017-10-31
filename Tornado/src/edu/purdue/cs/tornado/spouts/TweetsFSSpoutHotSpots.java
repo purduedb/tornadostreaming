@@ -44,20 +44,10 @@ public class TweetsFSSpoutHotSpots extends FileSpout {
 		numberOfHotSpotsLocations = 5;
 		numberOfPointSofar=0;
 		this.hotSpotRatio = hotSpotRatio;
-	//	hotspotPoints = new ArrayList<Point>();
 
 	}
 
 	Long i = new Long(0);
-
-	public void ack(Object msgId) {
-	}
-
-	public void close() {
-	}
-
-	public void fail(Object msgId) {
-	}
 
 	@Override
 	public void nextTuple() {
@@ -124,26 +114,14 @@ public class TweetsFSSpoutHotSpots extends FileSpout {
 		Date date = new Date();
 
 		for (int j = 0; j < spoutReplication; j++) {
-			//			if (reliable)
-			//				this.collector.emit(new Values(id, obj), "" + selfTaskId + "_" + (i++));
-			//			else
-			countId++;//tweetParts[0];
+			countId++;
 			if (countId >= Integer.MAX_VALUE)
 				countId = 0;
-//			if(countId%hotSpotRatio==0){
-//				xy=hotspotPoints.get(hotSpotPoint);
-//				hotSpotPoint=(hotSpotPoint+1)%hotspotPoints.size();
-//				xy.X=Math.min(SpatioTextualConstants.xMaxRange-1,xy.X+r.nextDouble()*hotSpotRange);
-//				xy.Y=Math.min(SpatioTextualConstants.yMaxRange-1,xy.Y+r.nextDouble()*hotSpotRange);
-//			}
 			xy.X*=hotSpotRatio;
 			xy.Y*=hotSpotRatio;
 	
-			DataObject obj = new DataObject(new Integer(countId), xy, textContent, date.getTime(), Command.addCommand);
+			DataObject obj = getDataObject(new Integer(countId), xy, textContent, date.getTime(), Command.addCommand);
 			previousObject = obj;
-			//			if (countId % 10 == 0)
-			//				this.collector.emit(new Values(countId, obj), "" + selfTaskId + "_" + (countId));
-			//			else
 			this.collector.emit(new Values(new Integer(countId), obj));
 
 		}
@@ -152,71 +130,38 @@ public class TweetsFSSpoutHotSpots extends FileSpout {
 	private void emit_previous() {
 		if (previousObject != null)
 			for (int j = 0; j < spoutReplication; j++) {
-				//				if (reliable)
-				//					this.collector.emit(new Values(previousObject.getObjectId(), previousObject), "" + selfTaskId + "_" + (i++));
-				//				else
-				countId++;//tweetParts[0];
+				countId++;
 				if (countId >= Integer.MAX_VALUE)
 					countId = 0;
-				DataObject obj = new DataObject(countId, previousObject.getLocation(), previousObject.getOriginalText(), (new Date()).getTime(), Command.addCommand);
-				//				if (countId % 10 == 0)
-				//					this.collector.emit(new Values(countId, obj), "" + selfTaskId + "_" + (countId));
-				//				else
+				DataObject obj = getDataObject(countId, previousObject.getLocation(), previousObject.getOriginalText(), (new Date()).getTime(), Command.addCommand);
 				this.collector.emit(new Values(previousObject.getObjectId(), obj));
 			}
-	}
-
-	private void emitTweet_old(String tweet, Long msgId) {
-		StringTokenizer stringTokenizer = new StringTokenizer(tweet, ",");
-		//Integer id = stringTokenizer.hasMoreTokens() ? selfTaskId + "_" + stringTokenizer.nextToken() : "";
-		Integer id = countId++;//tweetParts[0];
-		if (countId >= Integer.MAX_VALUE)
-			countId = 0;
-		String dateString = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
-		//dateString = stringTokenizer.hasMoreTokens()?stringTokenizer.nextToken():"";
-
-		double lat = 0.0;
-		double lon = 0.0;
-
-		try {
-			lat = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
-
-			lon = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
-		latLong.setLatitude(lat);
-		latLong.setLongitude(lon);
-		String textContent = "";
-		String dummy = stringTokenizer.hasMoreTokens() ? stringTokenizer.nextToken() : "";
-		while (stringTokenizer.hasMoreTokens())
-			textContent = textContent + stringTokenizer.nextToken() + " ";
-
-		Point xy = SpatialHelper.convertFromLatLonToXYPoint(latLong);
-		Date date = new Date();
-
-		DataObject obj = new DataObject(id, xy, textContent, date.getTime(), Command.addCommand);
-		for (int j = 0; j < spoutReplication; j++) {
-			if (reliable)
-				this.collector.emit(new Values(id, obj), "" + selfTaskId + "_" + (i++));
-			else
-				this.collector.emit(new Values(id, obj));
-		}
 	}
 
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		super.open(conf, context, collector);
 		latLong = new LatLong();
-//		hotspotPoints = new ArrayList<Point>();
-//		hotspotPoints.add(new Point(100,100));
-//		hotspotPoints.add(new Point(500,500));
-//		hotspotPoints.add(new Point(800,800));
 		r = new RandomGenerator(0);
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields(SpatioTextualConstants.objectIdField, SpatioTextualConstants.dataObject));
+	}
+
+	
+	//Functions below are used to make a new data object to emit
+	@Override
+	public DataObject getDataObject() {
+		return new DataObject();
+	}
+	@Override
+	public DataObject getDataObject(DataObject other) {
+		return new DataObject(other);
+	}
+	@Override
+	public DataObject getDataObject(Integer objectId, Point location, String originalText, Long timeStamp,
+			Command command) {
+		return new DataObject(objectId, location, originalText,timeStamp,command);
 	}
 
 }

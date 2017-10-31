@@ -408,24 +408,22 @@ public class GlobalIndexBolt extends BaseRichBolt {
 		buildGlobalIndex();
 		initMetrics(context);
 
-		//		if (this.stormConf.get(SpatioTextualConstants.discoDir) != null)
-		//			disco = SemanticHelper.getDiskBasedDiscoInstance((String) this.stormConf.get(SpatioTextualConstants.discoDir));
-		//		else
-		//			disco = null;
-
 		readDataSourcesInformation();
 	}
 
+	//////////////
+	//ADD documentation
+	
 	protected void buildGlobalIndex() {
 		if (partitions != null && partitions.size() == numberOfEvaluatorTasks && (globalIndexType == GlobalIndexType.PARTITIONED)) {
 			for (Partition p : partitions) {
 				System.out.println("parition: " + p.index + " ,cost " + p.getCost() + " ,xmin: " + p.getCoords()[0] + " ,ymin: " + p.getCoords()[1] + " ,xlength: " + p.getDimensions()[0] + " ,ylength: " + p.getDimensions()[1]);
 			}
 			globalIndex = new GlobalOptimizedPartitionedIndexLowerSpace(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
-			//globalIndex = new GlobalOptimizedPartitionedIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
 			System.out.println("Starting a partition based global index ");
 
-		} else if (partitions != null && partitions.size() == numberOfEvaluatorTasks && (globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE || globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD)) {
+		} 
+		else if (partitions != null && partitions.size() == numberOfEvaluatorTasks && (globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE || globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD)) {
 			for (Partition p : partitions) {
 				System.out.println("parition: " + p.index + " ,cost " + p.getCost() + " ,xmin: " + p.getCoords()[0] + " ,ymin: " + p.getCoords()[1] + " ,xlength: " + p.getDimensions()[0] + " ,ylength: " + p.getDimensions()[1]);
 			}

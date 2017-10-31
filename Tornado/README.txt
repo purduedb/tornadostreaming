@@ -1,5 +1,5 @@
-This is the release branch from Tornado
 *******************************************************************************************************
+This is the release version
 Tornado Instuctions
 -------------------
 Localcluster depolyment instructions

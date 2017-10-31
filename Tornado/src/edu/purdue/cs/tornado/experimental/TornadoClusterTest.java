@@ -5,29 +5,23 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import org.apache.storm.Config;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.InvalidTopologyException;
-import org.apache.storm.metric.LoggingMetricsConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.endgame.storm.metrics.statsd.StatsdMetricConsumer;
 
 import edu.purdue.cs.tornado.SpatioTextualLocalCluster;
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
-import edu.purdue.cs.tornado.experimental.baseline.BaselineEvaluator;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.loadbalance.Cell;
-import edu.purdue.cs.tornado.performance.ClusterInformationExtractor;
 import edu.purdue.cs.tornado.spouts.FileSpout;
 import edu.purdue.cs.tornado.storage.POILFSDataSource;
 
@@ -84,98 +78,98 @@ public class TornadoClusterTest {
 	//		.addContinuousQuerySource("TextualRangeQueryGenerator")
 	//.addContinuousQuerySource("TextualRangeQueryGenerator")
 	//.addStaticDataSource("POI_Data", "edu.purdue.cs.tornado.test.TestPOIsStaticDataSource", staticSourceConf)
-	static void testBaseline() throws NumberFormatException, Exception{
-		final Properties properties = new Properties();
-		try {
-			LOGGER.info("******************************************************************");
-			LOGGER.info("**********************Reading toplogy config******************");
-			properties.load(new FileInputStream(SpatioTextualConstants.CONFIG_PROPERTIES_FILE));
-		} catch (final IOException ioException) {
-			//Should not occur. If it does, we cant continue. So exiting the program!
-			LOGGER.error(ioException.getMessage(), ioException);
-			System.exit(1);
-		}
-
-		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
-		String tweetsSource = "Tweets";
-		String querySource  = "querySource";
-
-
-	
-
-		//DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 0, 0,1);
-//		DataAndQueriesSources.addHotSpotLFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 0, 0,1);
-//		DataAndQueriesSources.addHotSpotRangeQueries(tweetsSource, querySource, builder, properties, 1, 100.0, 1000, 5, 0, 0, FileSpout.LFS);
-
-		builder.setBolt("BaseLineEvaluator", new BaselineEvaluator(), 15).shuffleGrouping(tweetsSource).allGrouping(querySource);//.allGrouping("BaseLineEvaluator", "sharedData");
-
-		String topologyName = "Tornado";
-		Config conf = new Config();
-		conf.setDebug(false);
-
-		conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
-		conf.put(Config.TOPOLOGY_DEBUG, false);
-
-		conf.put(SpatioTextualConstants.discoDir, properties.getProperty(SpatioTextualConstants.discoDir));
-		String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
-		Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
-		//conf.put(Config.TOPOLOGY_TESTING_ALWAYS_TRY_SERIALIZE,true);
-		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
-		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
-			conf.registerMetricsConsumer(LoggingMetricsConsumer.class, 1);
-			
-
-			SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
-			cluster.submitTopology("Tornado", conf, builder.createTopology());
-		} else {
-			conf.put(Config.JAVA_LIBRARY_PATH, "/home/tornadojars/:/usr/local/lib:/opt/local/lib:/usr/lib");
-			conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, javaArgs);//"-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -verbose:gc -Xloggc:/home/apache-storm-0.10.0/logs/gc-storm-worker-%ID%-"
-			//					+ (new Date()).getTime() + ".log -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:GCLogFileSize=10M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/apache-storm-0.10.0/logs/heapdump ");
-			//			conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS,
-			//					"-XX:+UseConcMarkSweepGC   -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -verbose:gc -Xloggc:/home/apache-storm-0.10.0/logs/gc-storm-worker-%ID%-" + (new Date())
-			//							.getTime()
-			//					+ ".log -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:GCLogFileSize=50M -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime -XX:HeapDumpPath=/home/apache-storm-0.10.0/logs/heapdump ");
-			//conf.registerMetricsConsumer(LoggingMetricsConsumer.class, 1);
-			//conf.registerMetricsConsumer(StatsdMetricConsumer.class, statsdConfig, 2);
-			conf.put(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT, 300000);
-			conf.put(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT, 300000);
-
-			conf.put(Config.NIMBUS_HOST, nimbusHost);
-			conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
-			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
-			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
-			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
-			conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS).trim()));
-			System.setProperty("storm.jar", properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
-			try {
-				SpatioTextualToplogySubmitter.submitTopology(topologyName, conf, builder.createTopology());
-			} catch (AlreadyAliveException e) {
-				LOGGER.error(e.getMessage(), e);
-				e.printStackTrace(System.err);
-			} catch (InvalidTopologyException e) {
-				LOGGER.error(e.getMessage(), e);
-				e.printStackTrace(System.err);
-
-			}
-		}
-		System.out.println("******************************************************************************************************");
-
-		String[] nimbusInfo = new String[2];
-		nimbusInfo[0] = nimbusHost;
-		nimbusInfo[1] = "" + nimbusPort;
-
-		Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
-		Thread.sleep(1000 * 60 * minutesToStats);
-		ClusterInformationExtractor.main(nimbusInfo);
-		//	KillTopology.killToplogy(topologyName, nimbusHost, nimbusPort);
-		System.out.println("******************************************************************************************************");
-
-		// Utils.sleep(10000);
-		// cluster.killTopology("test");
-		// cluster.shutdown();
-	
-
- }
+//	static void testBaseline() throws NumberFormatException, Exception{
+//		final Properties properties = new Properties();
+//		try {
+//			LOGGER.info("******************************************************************");
+//			LOGGER.info("**********************Reading toplogy config******************");
+//			properties.load(new FileInputStream(SpatioTextualConstants.CONFIG_PROPERTIES_FILE));
+//		} catch (final IOException ioException) {
+//			//Should not occur. If it does, we cant continue. So exiting the program!
+//			LOGGER.error(ioException.getMessage(), ioException);
+//			System.exit(1);
+//		}
+//
+//		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
+//		String tweetsSource = "Tweets";
+//		String querySource  = "querySource";
+//
+//
+//	
+//
+//		//DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 0, 0,1);
+////		DataAndQueriesSources.addHotSpotLFSTweetsSpout(tweetsSource, builder, properties, Integer.parseInt(properties.getProperty("SPOUT_PARALLEISM").trim()), 0, 0,1);
+////		DataAndQueriesSources.addHotSpotRangeQueries(tweetsSource, querySource, builder, properties, 1, 100.0, 1000, 5, 0, 0, FileSpout.LFS);
+//
+//		builder.setBolt("BaseLineEvaluator", new BaselineEvaluator(), 15).shuffleGrouping(tweetsSource).allGrouping(querySource);//.allGrouping("BaseLineEvaluator", "sharedData");
+//
+//		String topologyName = "Tornado";
+//		Config conf = new Config();
+//		conf.setDebug(false);
+//
+//		conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
+//		conf.put(Config.TOPOLOGY_DEBUG, false);
+//
+//		conf.put(SpatioTextualConstants.discoDir, properties.getProperty(SpatioTextualConstants.discoDir));
+//		String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
+//		Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
+//		//conf.put(Config.TOPOLOGY_TESTING_ALWAYS_TRY_SERIALIZE,true);
+//		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
+//		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
+//			conf.registerMetricsConsumer(LoggingMetricsConsumer.class, 1);
+//			
+//
+//			SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
+//			cluster.submitTopology("Tornado", conf, builder.createTopology());
+//		} else {
+//			conf.put(Config.JAVA_LIBRARY_PATH, "/home/tornadojars/:/usr/local/lib:/opt/local/lib:/usr/lib");
+//			conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, javaArgs);//"-XX:+UseConcMarkSweepGC -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -verbose:gc -Xloggc:/home/apache-storm-0.10.0/logs/gc-storm-worker-%ID%-"
+//			//					+ (new Date()).getTime() + ".log -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:GCLogFileSize=10M -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/home/apache-storm-0.10.0/logs/heapdump ");
+//			//			conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS,
+//			//					"-XX:+UseConcMarkSweepGC   -XX:+CMSIncrementalMode -XX:+CMSIncrementalPacing -XX:+PrintGCDetails -verbose:gc -Xloggc:/home/apache-storm-0.10.0/logs/gc-storm-worker-%ID%-" + (new Date())
+//			//							.getTime()
+//			//					+ ".log -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:GCLogFileSize=50M -XX:+HeapDumpOnOutOfMemoryError -XX:+PrintTenuringDistribution -XX:+PrintGCApplicationStoppedTime -XX:HeapDumpPath=/home/apache-storm-0.10.0/logs/heapdump ");
+//			//conf.registerMetricsConsumer(LoggingMetricsConsumer.class, 1);
+//			//conf.registerMetricsConsumer(StatsdMetricConsumer.class, statsdConfig, 2);
+//			conf.put(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT, 300000);
+//			conf.put(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT, 300000);
+//
+//			conf.put(Config.NIMBUS_HOST, nimbusHost);
+//			conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
+//			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
+//			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
+//			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
+//			conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS).trim()));
+//			System.setProperty("storm.jar", properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
+//			try {
+//				SpatioTextualToplogySubmitter.submitTopology(topologyName, conf, builder.createTopology());
+//			} catch (AlreadyAliveException e) {
+//				LOGGER.error(e.getMessage(), e);
+//				e.printStackTrace(System.err);
+//			} catch (InvalidTopologyException e) {
+//				LOGGER.error(e.getMessage(), e);
+//				e.printStackTrace(System.err);
+//
+//			}
+//		}
+//		System.out.println("******************************************************************************************************");
+//
+//		String[] nimbusInfo = new String[2];
+//		nimbusInfo[0] = nimbusHost;
+//		nimbusInfo[1] = "" + nimbusPort;
+//
+//		Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
+//		Thread.sleep(1000 * 60 * minutesToStats);
+//		ClusterInformationExtractor.main(nimbusInfo);
+//		//	KillTopology.killToplogy(topologyName, nimbusHost, nimbusPort);
+//		System.out.println("******************************************************************************************************");
+//
+//		// Utils.sleep(10000);
+//		// cluster.killTopology("test");
+//		// cluster.shutdown();
+//	
+//
+// }
  static void testTornado() throws NumberFormatException, Exception{
 		final Properties properties = new Properties();
 		try {
@@ -218,7 +212,7 @@ public class TornadoClusterTest {
 		
 	
 		DataAndQueriesSources.addLFSTweetsSpout(tweetsSource, builder, properties, 1, 0, 100000,1);
-		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 10, 1000.0, 1000000,4, 0, 0, FileSpout.LFS,"/media/D/datasets/tweetsForQueries.csv",TextualPredicate.BOOLEAN_EXPR);
+		DataAndQueriesSources.addRangeQueries(tweetsSource, querySource, builder, properties, 10, 1000.0, 1000000,4, 0, 0, FileSpout.LFS,"C:\\Users\\User\\Desktop\\Research\\temp.csv",TextualPredicate.BOOLEAN_EXPR);
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
 		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
 		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
@@ -308,7 +302,6 @@ public class TornadoClusterTest {
 
 		Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
 		Thread.sleep(1000 * 60 * minutesToStats);
-		ClusterInformationExtractor.main(nimbusInfo);
 		//	KillTopology.killToplogy(topologyName, nimbusHost, nimbusPort);
 		System.out.println("******************************************************************************************************");
 

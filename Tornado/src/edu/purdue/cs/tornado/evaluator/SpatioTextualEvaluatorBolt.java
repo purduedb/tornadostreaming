@@ -38,7 +38,6 @@ import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
 
-import edu.purdue.cs.tornado.cleaning.Deduplication;
 import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.DataSourceType;
 import edu.purdue.cs.tornado.helper.IndexCell;
@@ -56,7 +55,6 @@ import edu.purdue.cs.tornado.index.global.GlobalGridIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndex;
 import edu.purdue.cs.tornado.index.global.GlobalIndexIterator;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
-import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndex;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedIndexLowerSpace;
 import edu.purdue.cs.tornado.index.global.GlobalOptimizedPartitionedTextAwareIndex;
 import edu.purdue.cs.tornado.index.global.RandomTextRouting;
@@ -110,7 +108,6 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	//reevaluated for incoming data
 	public HashMap<String, HashMap<Integer, Query>> externalTopKMap; //source to query id to index cellqueyr
 	//*******************************************************************************************************
-	public HashMap<String, Deduplication> cleaningMap; //source to query id to index cellqueyr
 
 	//**************** Evaluator bolts attributes **********************
 	public List<Integer> evaluatorBoltTasks; //this keeps track of the evaluator bolts ids 
@@ -163,9 +160,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	public void addIndexesPerSource(String sourceId, DataSourceType sourceType, DataSourceInformation dataSourcesInformation) {
 		if (sourceType.equals(DataSourceType.DATA_SOURCE)) {
 			externalTopKMap.put(sourceId, new HashMap<Integer, Query>());
-			if (dataSourcesInformation.isClean()) {
-				cleaningMap.put(sourceId, new Deduplication());
-			}
+			
 		} else if (sourceType.equals(DataSourceType.QUERY_SOURCE)) {
 			queryInformationHashMap.put(sourceId, new HashMap<Integer, Query>());
 
@@ -238,11 +233,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	public void execute(Tuple input) {
 
 		try {
-			//			if(count >=100000){
-			//				count=0;
-			//				Thread.sleep(10);
-			//			}
-			//			count++;
+			
 			String sourceType = input.getSourceStreamId();
 			if (SpatioTextualConstants.isDataStreamSource(sourceType)) {
 				boolean ack = handleDataObject(input);
@@ -370,7 +361,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(ArrayList<Integer> queriesIdList, String srcId, DataObject obj, Command command) {
-		//		System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
+		//System.out.println("[Output: command: "+command+" query:" + srcId + "\n******" + obj.toString() + "]");
 		this.outputTuplesCount += queriesIdList.size();
 		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.setDataObject(obj);
@@ -412,7 +403,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(Query q, DataObject obj, Command command) {
-		//		System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
+				System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
 		this.outputTuplesCount++;
 		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.setDataObject(obj);
@@ -426,7 +417,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(Query q, DataObject obj, DataObject obj2, Command obj1Command, Command obj2Command) {
-		//			System.out.println("[Output: command  "+obj1Command+" query:"  + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
+					System.out.println("[Output: command  "+obj1Command+" query:"  + q.toString() + "\n******" + obj.toString() + "\n******" + obj2.toString() + "]");
 		this.outputTuplesCount++;
 		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.setDataObject(obj);
@@ -472,7 +463,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			//				handleSnapShotQuery(query);
 			//			}
 			//TODO CHeck if some more results are needed from neighbour evaluators
-			sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().addContinousQuery(query);
+			//sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().addContinousQuery(query);
 //			if (query.getDataSrc2() != null)
 //				sourcesInformations.get(query.getDataSrc2()).getLocalHybridIndex().addContinousQuery(query);
 		} else if (query.getCommand().equals(Command.updateCommand)) {
@@ -510,7 +501,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		} else if (Control.REQUEST_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
 			handleExternalKNNQueryRequest(controlMessage);
 		} else if (Control.DROP_CONTININOUS_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
-			handleDropُExternalKNNQueryRequest(controlMessage);
+			handleDropExternalKNNQueryRequest(controlMessage);
 		} else if (Control.UPDATE_CONTININOUS_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
 			//This is an update 
 			//TODO 
@@ -602,6 +593,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 */
 	boolean handleDataObject(Tuple input) throws Exception {
 
+		//System.out.println("Input: " + input.toString());
 		//	DataObjectList dataObjectList = (DataObjectList) input.getValueByField(SpatioTextualConstants.data);
 		DataObject dataObject = (DataObject) input.getValueByField(SpatioTextualConstants.data);
 		//Boolean ack= dataObject.getObjectId()%10==0;
@@ -625,7 +617,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		//}
 	}
 
-	public void handleDropُExternalKNNQueryRequest(Control controlMessage) {
+	public void handleDropExternalKNNQueryRequest(Control controlMessage) {
 		Query outSideQuery = controlMessage.getQueriesList().get(0);
 		this.externalTopKMap.get(outSideQuery.getDataSrc()).remove(outSideQuery.getQueryId());
 	}
@@ -988,7 +980,6 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		//localDataSpatioTextualIndex = new HashMap<String, LocalHybridIndex>();
 		queryInformationHashMap = new HashMap<String, HashMap<Integer, Query>>();
 		externalTopKMap = new HashMap<String, HashMap<Integer, Query>>();
-		cleaningMap = new HashMap<String, Deduplication>();
 
 		String sourceId = "";
 		DataSourceType sourceType;

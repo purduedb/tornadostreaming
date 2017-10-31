@@ -60,13 +60,13 @@ public class QueriesFileSystemSpout extends FileSpout {
 
 	@Override
 	public void nextTuple() {
-		//	super.nextTuple();
-		if (i >= this.totalQueryCountVal) {
+			//super.nextTuple();
+		if (i >= QueriesFileSystemSpout.totalQueryCountVal) {
 			try {
 				if (previousLocations != null || br != null) {
 					System.out.println("Used previous loc: " + prevLocCount);
 					br.close();
-					previousLocations.clear();
+					//previousLocations.clear();
 					previousLocations = null;
 					System.gc();
 					System.gc();
@@ -79,6 +79,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 			}
 			return;
 		}
+		
 		String line = "";
 		try {
 
@@ -107,31 +108,16 @@ public class QueriesFileSystemSpout extends FileSpout {
 			System.out.println("null line");
 			return;
 		}
-		//System.out.println(tweet);
+		
+		System.out.println(line);
 
 		emitQuery(line, i);
 
-		//	sleep();
-
 	}
 
-	//	private void emitQuery(String line, Integer msgId) {
-	//
-	//		Query q = buildQuery(line);
-	//		for (int j = 0; j < 4 && i < this.totalQueryCountVal; j++) {
-	//			Query qold = q;
-	//			q = new Query(qold);
-	//			q.setQueryId(i+selfTaskIndex*totalQueryCountVal);
-	//			this.collector.emit(new Values(q.getQueryId(), q
-	//			), i);
-	//			i = i + 1;
-	//			
-	//		}
-	//
-	//	}
 	private void emitQuery(String line, Integer msgId) {
 		//System.out.println("Tweet line:"+line);
-		Query q = buildQuery(line);
+		Query q = getQuery(line);
 		//for (int j = 0; j < 4 && i < this.totalQueryCountVal; j++) {
 		//	Query qold = q;
 		//	q = new Query(qold);
@@ -269,14 +255,9 @@ public class QueriesFileSystemSpout extends FileSpout {
 	}
 
 	public Query buildQuery(String line) {
-		//String[] tweetParts = line.split(",");
 		try {
 			int from = 0, to = 0;
 			to = line.indexOf(',');
-			//		if (tweetParts.length < 5) {
-			//			System.out.println("Improper tweet format <5:" + line);
-			//			return null;
-			//		}
 
 			if (from == -1 || to == -1)
 				return null;
@@ -313,7 +294,9 @@ public class QueriesFileSystemSpout extends FileSpout {
 				}
 			} else {
 				latLong = new LatLong(lat, lon);
-				previousLocations.add(latLong);
+				if(previousLocations != null) {
+					previousLocations.add(latLong);
+				}
 
 			}
 			from = to;
@@ -338,11 +321,6 @@ public class QueriesFileSystemSpout extends FileSpout {
 				queryText1.add(textList.get(r.nextInt(textList.size())));
 				//queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
 			}
-			//			for (int j = 0; j < keywordCountVal; j++) {
-			//
-			//				queryText1.add(textList.get(j));
-			//			//	queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
-			//			}
 			Integer id = i + selfTaskIndex * totalQueryCountVal;
 			Point xy = SpatialHelper.convertFromLatLonToXYPoint(latLong);
 			Date date = new Date();
@@ -412,15 +390,11 @@ public class QueriesFileSystemSpout extends FileSpout {
 		}
 	}
 
+	//TODO: Unsure if used.
 	private Query buildQueryOld(String line) {
-		//String[] tweetParts = line.split(",");
 		try {
 			int from = 0, to = 0;
 			to = line.indexOf(',');
-			//		if (tweetParts.length < 5) {
-			//			System.out.println("Improper tweet format <5:" + line);
-			//			return null;
-			//		}
 
 			if (from == -1 || to == -1)
 				return null;
@@ -479,11 +453,6 @@ public class QueriesFileSystemSpout extends FileSpout {
 				previousTextList = textList;
 			}
 
-			//			for (int j = 0; j < keywordCountVal; j++) {
-			//
-			//				queryText1.add(textList.get(r.nextInt(textList.size())));
-			//				//queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
-			//			}
 			for (int j = 0; j < keywordCountVal; j++) {
 
 				queryText1.add(textList.get(j));
@@ -528,61 +497,6 @@ public class QueriesFileSystemSpout extends FileSpout {
 		}
 	}
 
-	//	private Query buildQuery(String line) {
-	//		StringTokenizer stringTokenizer = new StringTokenizer(line, ",");
-	//
-	//		Integer id = stringTokenizer.hasMoreTokens() ? Integer.parseInt(stringTokenizer.nextToken()) : i;
-	//		Double xCoord = 0.0;
-	//		Double yCoord = 0.0;
-	//		try {
-	//			xCoord = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
-	//
-	//			yCoord = stringTokenizer.hasMoreTokens() ? Double.parseDouble(stringTokenizer.nextToken()) : 0.0;
-	//		} catch (Exception e) {
-	//			e.printStackTrace();
-	//		}
-	//		String textContent = "";
-	//		while (stringTokenizer.hasMoreTokens())
-	//			textContent = textContent + stringTokenizer.nextToken() + " ";
-	//		String[] keywordsArr = textContent.split(" ");
-	//		ArrayList<String> queryText1 = new ArrayList<String>();
-	//		ArrayList<String> queryText2 = new ArrayList<String>();
-	//
-	//		for (int i = 0; i < keywordCountVal; i++) {
-	//			queryText1.add(keywordsArr[i]);
-	//			queryText2.add(keywordsArr[keywordsArr.length - i - 1]);
-	//		}
-	//		queryText1=	 TextHelpers.sortTextArrayList(queryText1);
-	//		Date date = new Date();
-	//
-	//		Query q = new Query();
-	//		q.setQueryId(id);
-	//		q.setCommand(Command.addCommand);
-	//		q.setContinousQuery(true);
-	//		q.setDataSrc(dataSrc1);
-	//		q.setDistance(distance);
-	//		q.setQueryType(queryType);
-	//		q.setTimeStamp(date.getTime());
-	//		if (queryType.equals(QueryType.queryTextualRange)) {
-	//			q.setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + this.spatialRangeVal, yCoord + this.spatialRangeVal)));
-	//			q.setTextualPredicate(textualPredicate1);
-	//			q.setQueryText(queryText1);
-	//		} else if (queryType.equals(QueryType.queryTextualKNN)) {
-	//			q.setFocalPoint(new Point(xCoord, yCoord));
-	//			q.setTextualPredicate(textualPredicate1);
-	//			q.setQueryText(queryText1);
-	//			q.setK(k);
-	//		} else if (queryType.equals(QueryType.queryTextualSpatialJoin)) {
-	//			q.setDataSrc2(dataSrc2);
-	//			q.setSpatialRange(new Rectangle(new Point(xCoord, yCoord), new Point(xCoord + this.spatialRangeVal, yCoord + this.spatialRangeVal)));
-	//			q.setTextualPredicate(textualPredicate1);
-	//			q.setTextualPredicate2(textualPredicate2);
-	//			q.setQueryText(queryText1);
-	//			q.setQueryText(queryText2);
-	//			q.setDistance(distance);
-	//		}
-	//		return q;
-	//	}
 	@Override
 	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
 		super.open(conf, context, collector);
@@ -633,15 +547,13 @@ public class QueriesFileSystemSpout extends FileSpout {
 	}
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
-		//		declarer.declare(new Fields(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryIdField, SpatioTextualConstants.focalXCoordField, SpatioTextualConstants.focalYCoordField, SpatioTextualConstants.queryXMinField,
-		//				SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField, SpatioTextualConstants.queryYMaxField, SpatioTextualConstants.kField, SpatioTextualConstants.queryTextField,
-		//				SpatioTextualConstants.queryText2Field, SpatioTextualConstants.queryTimeStampField, SpatioTextualConstants.dataSrc, SpatioTextualConstants.dataSrc2, SpatioTextualConstants.queryCommand, SpatioTextualConstants.queryDistance,
-		//				SpatioTextualConstants.textualPredicate, SpatioTextualConstants.textualPredicate2, SpatioTextualConstants.joinTextualPredicate, SpatioTextualConstants.removeTime));
 		declarer.declare(new Fields(SpatioTextualConstants.queryTypeField, SpatioTextualConstants.queryIdField, SpatioTextualConstants.queryXMinField, SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField,
 				SpatioTextualConstants.queryYMaxField, SpatioTextualConstants.queryTextField, SpatioTextualConstants.queryTimeStampField, SpatioTextualConstants.dataSrc, SpatioTextualConstants.queryCommand,
 				SpatioTextualConstants.textualPredicate, SpatioTextualConstants.removeTime, SpatioTextualConstants.queryComplexTextField));
-
-		//declarer.declare(new Fields(SpatioTextualConstants.queryIdField, SpatioTextualConstants.query));
+	}
+	
+	public Query getQuery(String line) {
+		return buildQuery(line);
 	}
 
 }

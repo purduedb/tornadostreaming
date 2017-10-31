@@ -63,7 +63,7 @@ public class GlobalOptimizedPartitionedTextAwareIndex extends GlobalOptimizedPar
 						textSummery.put(keyword, time);
 					}
 				}
-			} else {//one keyword suffies 
+			} else {//one keyword suffices 
 				Boolean found = false;
 				for (String keyword : text) {
 					if (textSummery.containsKey(keyword)) {
