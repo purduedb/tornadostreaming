@@ -15,8 +15,6 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 
-import edu.purdue.cs.tornado.examples.BaseTornadoDataSpout;
-import edu.purdue.cs.tornado.examples.BaseTornadoQuerySpout;
 import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.messages.DataObject;

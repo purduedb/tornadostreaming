@@ -68,9 +68,9 @@
 		<dependency>
 			<groupId>jdk.tools</groupId>
 			<artifactId>jdk.tools</artifactId>
-			<version>1.8.0_121</version>
+			<version>1.8.0_144</version>
 			<scope>system</scope>
-			<systemPath>C:/Program Files/Java/jdk1.8.0_121/lib/tools.jar</systemPath>
+			<systemPath>C:/Program Files/Java/jdk1.8.0_144/lib/tools.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>com.timgroup</groupId>
@@ -78,13 +78,13 @@
 			<version>2.0.0</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.lookout</groupId>
 			<artifactId>storm-metrics-statsd</artifactId>
 			<version>1.0.0</version>
 			<scope>provided</scope>
 		</dependency>
-
+ -->
 		<dependency>
 			<groupId>org.apache.hadoop</groupId>
 			<artifactId>hadoop-hdfs</artifactId>
@@ -146,12 +146,12 @@
 			<version>2.0.0</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.lookout</groupId>
 			<artifactId>storm-metrics-statsd</artifactId>
 			<version>1.0.0</version>
 			<scope>provided</scope>
-		</dependency>
+		</dependency> -->
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.10</artifactId>
@@ -259,12 +259,6 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 			<version>2.3.1</version>
-		</dependency>
-		<dependency>
-			<groupId>d</groupId>
-			<artifactId>d</artifactId>
-			<version>1</version>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.esotericsoftware.kryo</groupId>
