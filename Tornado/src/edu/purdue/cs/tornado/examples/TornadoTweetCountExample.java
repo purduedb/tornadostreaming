@@ -49,7 +49,7 @@ public class TornadoTweetCountExample {
 
 		//Setting the static source paths 
 		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
-		staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
+		//staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
 		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
 				
 		//Initialize our topology builder
@@ -74,10 +74,10 @@ public class TornadoTweetCountExample {
 		addTweetSpout(tweetsSource, builder, properties, 1, 0, 100,1);
 		
 		//Make the query spout
-		addQuerySpout(tweetsSource, querySource, builder, properties, 10, 1000.0, 1000,4, 0, 0, FileSpout.LFS,"C:\\Users\\User\\Desktop\\Research\\temp.csv",TextualPredicate.BOOLEAN_EXPR);
+		addQuerySpout(tweetsSource, querySource, builder, properties, 10, 1000.0, 1000,3, 0, 0, FileSpout.LFS,properties.getProperty("LFS_TWEETS_FILE_PATH"),TextualPredicate.OVERlAPS);
 		
 		//Set the GlobalIndex and SpatioTextual bolts
-		addBolts(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID);
+		addTornado(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID);
 		
 		
 		/* ------------- TOPOLOGY SUBMISSION ------------- */
@@ -202,7 +202,7 @@ public class TornadoTweetCountExample {
 	 * @param globalIndexType the GlobalIndexType that we choose to run the bolts on
 	 * @param localIndexType the LocalIndexType that we choose to run the bolts on
 	 */
-	static void addBolts(SpatioTextualToplogyBuilder builder, ArrayList<Cell> partitions, GlobalIndexType globalIndexType, LocalIndexType localIndexType) {
+	static void addTornado(SpatioTextualToplogyBuilder builder, ArrayList<Cell> partitions, GlobalIndexType globalIndexType, LocalIndexType localIndexType) {
 		
 		//TODO: in addSpatioTextualProcessor there lies a few TODO statements
 		builder.addSpatioTextualProcessor("tornado", 3, 16, 

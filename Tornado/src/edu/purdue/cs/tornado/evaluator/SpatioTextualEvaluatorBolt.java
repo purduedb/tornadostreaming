@@ -361,7 +361,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(ArrayList<Integer> queriesIdList, String srcId, DataObject obj, Command command) {
-		//System.out.println("[Output: command: "+command+" query:" + srcId + "\n******" + obj.toString() + "]");
+		System.out.println("[Output: command: "+command+" query:" + srcId + "\n******" + obj.toString() + "]");
 		this.outputTuplesCount += queriesIdList.size();
 		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.setDataObject(obj);
@@ -372,7 +372,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(Query q, ArrayList<DataObject> objList, Command command) {
-		//	System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n******" + obj.toString() + "]");
+			System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n**number of objects" + objList.size() + "]");
 		this.outputTuplesCount += objList.size();
 		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.dataObjectList = objList;
@@ -463,7 +463,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			//				handleSnapShotQuery(query);
 			//			}
 			//TODO CHeck if some more results are needed from neighbour evaluators
-			//sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().addContinousQuery(query);
+			sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().addContinousQuery(query);
 //			if (query.getDataSrc2() != null)
 //				sourcesInformations.get(query.getDataSrc2()).getLocalHybridIndex().addContinousQuery(query);
 		} else if (query.getCommand().equals(Command.updateCommand)) {
