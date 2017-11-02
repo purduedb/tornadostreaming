@@ -48,8 +48,6 @@ public class TornadoTweetCountExample {
 		final Properties properties = loadProperties(SpatioTextualConstants.CONFIG_PROPERTIES_FILE);
 
 		//Setting the static source paths 
-		HashMap<String, String> staticSourceConf = new HashMap<String, String>();
-		//staticSourceConf.put(POILFSDataSource.POI_FOLDER_PATH, properties.getProperty("LFS_POI_FOLDER_PATH"));
 		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
 				
 		//Initialize our topology builder
