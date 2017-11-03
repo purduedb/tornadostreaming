@@ -398,7 +398,7 @@ public class GlobalIndexBolt extends BaseRichBolt {
 		this.stormConf = stormConf;
 		this.evaluatorBoltTasks = context.getComponentTasks(id);
 		this.indexBoltTasks = context.getComponentTasks(SpatioTextualConstants.getIndexId(id));
-		this.reliable = ((Long) stormConf.get(Config.TOPOLOGY_ACKER_EXECUTORS)) > 0;
+		//this.reliable = ((Long) stormConf.get(Config.TOPOLOGY_ACKER_EXECUTORS)) > 0;
 		this.stringBuilder = new StringBuilder();
 		entireSpace = new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.xMaxRange));
 		numberOfEvaluatorTasks = this.evaluatorBoltTasks.size();
