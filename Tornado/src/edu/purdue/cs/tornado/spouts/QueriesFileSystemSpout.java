@@ -109,7 +109,7 @@ public class QueriesFileSystemSpout extends FileSpout {
 			return;
 		}
 		
-		System.out.println(line);
+		//System.out.println(line);
 
 		emitQuery(line, i);
 
