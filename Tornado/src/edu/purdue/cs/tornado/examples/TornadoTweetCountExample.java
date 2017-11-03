@@ -10,7 +10,6 @@ import java.util.Properties;
 import org.apache.storm.Config;
 import org.apache.storm.generated.AlreadyAliveException;
 import org.apache.storm.generated.InvalidTopologyException;
-import org.apache.storm.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,9 @@ public class TornadoTweetCountExample {
 	static void testTornado() throws NumberFormatException, Exception{
 		
 		/* ------------- SETUP ------------- */
-	
+		
+		//TODO: can we make a lot of these global? We just need to set up elsewhere which would make testTornado() cleaner.
+		
 		//Load Properties from a specific file path
 		final Properties properties = loadProperties(SpatioTextualConstants.CONFIG_PROPERTIES_FILE);
 
@@ -55,12 +56,12 @@ public class TornadoTweetCountExample {
 		//Initialize and set Config properties
 		Config conf = new Config();
 		conf.setDebug(false);
-		//conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
+		conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
 		conf.put(Config.TOPOLOGY_DEBUG, false);
 		
 		//Setting the nimbus host and port paths
-		//String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
-		//Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
+		String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
+		Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
 		
 		
 		/* ------------- SPOUT AND BOLT CREATION ------------- */
@@ -68,24 +69,26 @@ public class TornadoTweetCountExample {
 		//TODO: What needs to be changed by the user? What if they want to add multiple global index types? More bolts? 
 
 		//Make the dataSpout called tweetsSource, parallelism of 1 and replication of 0.
-		addTweetSpout(tweetsSource, builder, properties, 1, 0, 50,1);
+		addTweetSpout(tweetsSource, builder, properties, 1, 0, 100,1);
 		
 		//Make the query spout
-		addQuerySpout(tweetsSource, querySource, builder, properties, 10, 1000.0, 10, 3, 0, 0, FileSpout.LFS,properties.getProperty("LFS_TWEETS_FILE_PATH"),TextualPredicate.OVERlAPS);
+		addQuerySpout(tweetsSource, querySource, builder, properties, 10, 1000.0, 1000,3, 0, 0, FileSpout.LFS,properties.getProperty("LFS_TWEETS_FILE_PATH"),TextualPredicate.OVERlAPS);
 		
 		//Set the GlobalIndex and SpatioTextual bolts
 		addTornado(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID);
 		
 		
 		/* ------------- TOPOLOGY SUBMISSION ------------- */
-	
+		
+		//TODO: What needs to be changed by the user?
+		
 		//Submitting the topology based on the proper submit type (doesn't change)
 		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
 		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
 
-			//conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
-			//ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
-			//conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
+			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
+			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
+			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
 			
 			SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
 			cluster.submitTopology("Tornado", conf, builder.createTopology());
@@ -95,8 +98,8 @@ public class TornadoTweetCountExample {
 			conf.put(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT, 300000);
 			conf.put(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT, 300000);
 
-			//conf.put(Config.NIMBUS_HOST, nimbusHost);
-			//conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
+			conf.put(Config.NIMBUS_HOST, nimbusHost);
+			conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
 			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
 			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
 			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
@@ -116,8 +119,8 @@ public class TornadoTweetCountExample {
 		System.out.println("******************************************************************************************************");
 
 		String[] nimbusInfo = new String[2];
-		//nimbusInfo[0] = nimbusHost;
-		//nimbusInfo[1] = "" + nimbusPort;
+		nimbusInfo[0] = nimbusHost;
+		nimbusInfo[1] = "" + nimbusPort;
 
 		Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
 		Thread.sleep(1000 * 60 * minutesToStats);
@@ -204,7 +207,5 @@ public class TornadoTweetCountExample {
 			partitions, globalIndexType, localIndexType,1024)
 			.addVolatileSpatioTextualInput(tweetsSource)
 			.addContinuousQuerySource(querySource);
-		
-		builder.setBolt("test", new TweetCountBolt()).shuffleGrouping("tornado",SpatioTextualConstants.Bolt_Output_STreamIDExtension);
 	}
 }

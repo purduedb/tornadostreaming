@@ -70,9 +70,8 @@ public class FileSpout extends BaseRichSpout implements BaseTornadoDataSpout, Ba
 		this.collector = collector;
 		this.selfTaskId = context.getThisTaskId();
 		this.selfTaskIndex = context.getThisTaskIndex();
-		if (conf != null) {
-			//this.reliable = ((Long) conf.get(Config.TOPOLOGY_ACKER_EXECUTORS)) > 0;
-		}
+		if (conf != null)
+			this.reliable = ((Long) conf.get(Config.TOPOLOGY_ACKER_EXECUTORS)) > 0;
 		else
 			this.reliable = false;
 		this.filePath = (String) spoutConf.get(FILE_PATH);

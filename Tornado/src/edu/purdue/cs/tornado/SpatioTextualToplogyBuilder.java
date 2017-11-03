@@ -115,7 +115,7 @@ public class SpatioTextualToplogyBuilder extends TopologyBuilder {
 
 		BoltDeclarer evaluatorBoltDeclarer = this.setBolt(id, spatioTextualBolt, evaluator_parallelism_hint).directGrouping(indexId, indexToBoltStreamId_Data).directGrouping(indexId, indexToBoltStreamId_Query)
 				.directGrouping(indexId, indexToBoltStreamId_Control).directGrouping(id, boltToBoltStreamId_Query).directGrouping(id, boltToBoltStreamId_Data).directGrouping(id, boltToBoltStreamId_Control);
-		
+
 		this._evaluatorIndexGetter.put(id, evaluatorBoltDeclarer);
 		this._IndexGetter.put(id, spatioTextualIndexGetter);
 		return spatioTextualIndexGetter;
