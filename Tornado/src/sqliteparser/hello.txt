@@ -1,0 +1,3 @@
+select * from Tweets t where t.loc inside (33.036314539999999,-80.131568360000003) and contains (Anybody,wanna,go,get,some)
+select * from Tweets t where t.loc inside (41.134344800000001,-81.368629200000001) and contains (I,wonder,when,@RachPach03,is)
+select * from Tweets t where t.loc inside (36.881551600000002,-76.305239499999999) and contains (@LOSVEGA_SBH,@DunnaVA,x,@Carnage45,sorry)

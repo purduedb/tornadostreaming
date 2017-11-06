@@ -8,6 +8,7 @@ import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextualPredicate;
+import edu.purdue.cs.tornado.spouts.AtlasParserSpout;
 import edu.purdue.cs.tornado.spouts.FileSpout;
 import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpout;
 import edu.purdue.cs.tornado.spouts.QueriesFileSystemSpoutHotSpots;
@@ -124,6 +125,32 @@ public class DataAndQueriesSources {
 		builder.setSpout(querySourceName, new QueriesFileSystemSpout(queriesSpoutConf, initialSleepDuration), parrellism);
 		return builder;
 	}
+	
+	
+	public static SpatioTextualToplogyBuilder addRangeQueries2(String dataSourceName, String querySourceName, SpatioTextualToplogyBuilder builder, Properties properties, Integer parrellism, Double spatialRange, Integer queryCount,
+			Integer queryKeywordCount, Integer emitSleepDurationInNanoSecond, Integer initialSleepDuration, String fileSystem, String queriesFilePath, TextualPredicate queryTextualPredicate) {
+		if (queriesFilePath == null)
+			return addRangeQueries(dataSourceName, querySourceName, builder, properties, parrellism, spatialRange, queryCount, queryKeywordCount, emitSleepDurationInNanoSecond, initialSleepDuration, fileSystem);
+		Map<String, Object> queriesSpoutConf = new HashMap<String, Object>();
+		queriesSpoutConf.put(FileSpout.FILE_PATH, queriesFilePath);
+		queriesSpoutConf.put(FileSpout.FILE_SYS_TYPE, fileSystem);
+		queriesSpoutConf.put(FileSpout.CORE_FILE_PATH, properties.getProperty("CORE_FILE_PATH"));
+		queriesSpoutConf.put(AtlasParserSpout.SPATIAL_RANGE, spatialRange);
+		queriesSpoutConf.put(AtlasParserSpout.TOTAL_QUERY_COUNT, queryCount);
+		queriesSpoutConf.put(AtlasParserSpout.KEYWORD_COUNT, queryKeywordCount);
+		queriesSpoutConf.put(SpatioTextualConstants.dataSrc, dataSourceName);
+		queriesSpoutConf.put(SpatioTextualConstants.queryTypeField, QueryType.queryTextualRange);
+		if (queryTextualPredicate == null)
+			queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, TextualPredicate.OVERlAPS);
+		else
+			queriesSpoutConf.put(SpatioTextualConstants.textualPredicate, queryTextualPredicate);
+		queriesSpoutConf.put(FileSpout.EMIT_SLEEP_DURATION_NANOSEC, emitSleepDurationInNanoSecond);
+		builder.setSpout(querySourceName, new AtlasParserSpout(queriesSpoutConf, initialSleepDuration), parrellism);
+		return builder;
+	}
+	
+	
+	
 	public static SpatioTextualToplogyBuilder addHotSpotRangeQueries(String dataSourceName, String querySourceName, SpatioTextualToplogyBuilder builder, Properties properties, Integer parrellism, Double spatialRange, Integer queryCount,
 			Integer queryKeywordCount, Integer emitSleepDurationInNanoSecond, Integer initialSleepDuration, String fileSystem, String queriesFilePath, TextualPredicate queryTextualPredicate,Double hotSpotRatio) {
 		if (queriesFilePath == null)
