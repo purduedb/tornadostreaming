@@ -361,7 +361,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(ArrayList<Integer> queriesIdList, String srcId, DataObject obj, Command command) {
-		System.out.println("[Output: command: "+command+" query:" + srcId + "\n******" + obj.toString() + "]");
+		//System.out.println("[Output: command: "+command+" query:" + srcId + "\n******" + obj.toString() + "]");
 		this.outputTuplesCount += queriesIdList.size();
 		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.setDataObject(obj);
@@ -375,7 +375,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	void generateOutput(Query q, ArrayList<DataObject> objList, Command command) {
-		System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n**number of objects" + objList.size() + "]");
+		//System.out.println("[Output: command: "+command+" query:" + q.toString() + "\n**number of objects" + objList.size() + "]");
 		this.outputTuplesCount += objList.size();
 		CombinedTuple outputTuple = new CombinedTuple();
 		outputTuple.dataObjectList = objList;
