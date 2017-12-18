@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Map;
 
 //import org.apache.hadoop.conf.Configuration;
@@ -19,6 +20,7 @@ import edu.purdue.cs.tornado.helper.Command;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.messages.DataObject;
 import edu.purdue.cs.tornado.messages.Query;
+import sqliteparser.Extractor;
 
 public class FileSpout extends BaseRichSpout implements BaseTornadoDataSpout, BaseTornadoQuerySpout {
 	public static final String FILE_PATH = "FILE_PATH";
@@ -46,6 +48,11 @@ public class FileSpout extends BaseRichSpout implements BaseTornadoDataSpout, Ba
 	public Integer sleepDurationMicroSec;
 	public Map spoutConf;
 
+	public ArrayList<ArrayList<Double>> listArray = new ArrayList<ArrayList<Double>>();
+	public ArrayList<ArrayList<String>> KeyArray = new ArrayList<ArrayList<String>>();
+	
+	
+	
 	public FileSpout(Map spoutConf,Integer initialSleepDuration) {
 		this.spoutConf = spoutConf;
 		this.initialSleepDuration = initialSleepDuration;
@@ -86,6 +93,22 @@ public class FileSpout extends BaseRichSpout implements BaseTornadoDataSpout, Ba
 //			hdfsconf.addResource(new Path(corePath));
 //			pt = new Path(filePath);
 		}
+		
+		
+		try {
+			listArray = Extractor.read();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		try {
+			KeyArray = Extractor.readKeys();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
 		count=0;
 		connectToFS();
 		try {

@@ -29,7 +29,7 @@ import edu.purdue.cs.tornado.storage.POILFSDataSource;
 
 public class TornadoTweetCountExample {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TornadoTweetCountExample.class);
-	static String javaArgs = "-Xmx3g -Xms3g -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
+	static String javaArgs = "-Xmx3g -Xms3g";// -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
 	//Set the variable names for later use
 	static String tweetsSource = "Tweets";
 	static String querySource  = "querySource";
@@ -43,8 +43,9 @@ public class TornadoTweetCountExample {
 		
 		/* ------------- SETUP ------------- */
 	
-		//Load Properties from a specific file path
-		final Properties properties = loadProperties(SpatioTextualConstants.CONFIG_PROPERTIES_FILE);
+		//Load Properties from a specific file path (use CONFIG_PROPERTIES_FILE for local cluster)
+		final Properties properties = loadProperties(SpatioTextualConstants.CLUSTER_CONFIG_PROPERTIES_FILE);
+		//final Properties properties = loadProperties(SpatioTextualConstants.CONFIG_PROPERTIES_FILE);
 
 		//Setting the static source paths 
 		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
@@ -55,12 +56,12 @@ public class TornadoTweetCountExample {
 		//Initialize and set Config properties
 		Config conf = new Config();
 		conf.setDebug(false);
-		//conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
+		conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
 		conf.put(Config.TOPOLOGY_DEBUG, false);
 		
 		//Setting the nimbus host and port paths
-		//String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
-		//Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
+		String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
+		Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
 		
 		
 		/* ------------- SPOUT AND BOLT CREATION ------------- */
@@ -79,13 +80,13 @@ public class TornadoTweetCountExample {
 		
 		/* ------------- TOPOLOGY SUBMISSION ------------- */
 	
-		//Submitting the topology based on the proper submit type (doesn't change)
+		//Submitting the topology based on the proper submit type (change stormSubmitType in clusterconfig or config.properties to submit to local or cluster)
 		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
 		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
 
-			//conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
-			//ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
-			//conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
+			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
+			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
+			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
 			
 			SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
 			cluster.submitTopology("Tornado", conf, builder.createTopology());
@@ -95,8 +96,9 @@ public class TornadoTweetCountExample {
 			conf.put(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT, 300000);
 			conf.put(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT, 300000);
 
-			//conf.put(Config.NIMBUS_HOST, nimbusHost);
-			//conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
+			conf.put(Config.NIMBUS_HOST, nimbusHost);
+			conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
+			
 			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
 			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
 			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
@@ -104,6 +106,7 @@ public class TornadoTweetCountExample {
 			System.setProperty("storm.jar", properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
 			try {
 				SpatioTextualToplogySubmitter.submitTopology(topologyName, conf, builder.createTopology());
+				System.out.println("TOPOLOGY SUBMITTED!");
 			} catch (AlreadyAliveException e) {
 				LOGGER.error(e.getMessage(), e);
 				e.printStackTrace(System.err);
@@ -184,8 +187,8 @@ public class TornadoTweetCountExample {
 	 */
 	static void addQuerySpout(String dataSourceName, String querySourceName, SpatioTextualToplogyBuilder builder, Properties properties, Integer parrellism, Double spatialRange, Integer queryCount,
 			Integer queryKeywordCount, Integer emitSleepDurationInNanoSecond, Integer initialSleepDuration, String fileSystem, String queriesFilePath, TextualPredicate queryTextualPredicate) {
-		
-			DataAndQueriesSources.addRangeQueries(dataSourceName, querySourceName, builder, properties, parrellism, spatialRange, queryCount,
+		//addRangeQueries is original addRangeQueries2 uses AtlasParserSpout
+			DataAndQueriesSources.addRangeQueries2(dataSourceName, querySourceName, builder, properties, parrellism, spatialRange, queryCount,
 				queryKeywordCount, emitSleepDurationInNanoSecond, initialSleepDuration, fileSystem, queriesFilePath, queryTextualPredicate);
 	}
 	
@@ -205,6 +208,6 @@ public class TornadoTweetCountExample {
 			.addVolatileSpatioTextualInput(tweetsSource)
 			.addContinuousQuerySource(querySource);
 		
-		builder.setBolt("test", new TweetCountBolt()).shuffleGrouping("tornado",SpatioTextualConstants.Bolt_Output_STreamIDExtension);
+		builder.setBolt("tweetCount", new TweetCountBolt()).shuffleGrouping("tornado",SpatioTextualConstants.Bolt_Output_STreamIDExtension);
 	}
 }

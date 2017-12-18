@@ -82,7 +82,8 @@ public class TweetCountBolt extends BaseRichBolt
 		    System.out.println("QUERY ID: " + integer + ", COUNT: " + countMap.get(integer));
 		    
 		    // emit the word and count
-		    collector.emit(new Values(integer, countMap.get(integer)));
+		    collector.emit("queryCount", new Values(integer, countMap.get(integer)));
+		    //collector.ack();
 	    }
 	} else {
 		System.out.println("Input Error: Please input CombinedTuples for processing.");
