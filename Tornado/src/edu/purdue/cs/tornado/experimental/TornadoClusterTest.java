@@ -246,20 +246,20 @@ public class TornadoClusterTest {
 		Config conf = new Config();
 		conf.setDebug(false);
 
-		conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
+		conf.setNumAckers(0);
 		conf.put(Config.TOPOLOGY_DEBUG, false);
 
 		conf.put(SpatioTextualConstants.discoDir, properties.getProperty(SpatioTextualConstants.discoDir));
 		String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
-		Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
+	
 	//	conf.put(Config.TOPOLOGY_TESTING_ALWAYS_TRY_SERIALIZE,true);
 		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
 		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
 		//	conf.registerMetricsConsumer(LoggingMetricsConsumer.class, 1);
 		//	conf.registerMetricsConsumer(StatsdMetricConsumer.class, statsdConfig, 2);
-			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
-			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
-			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
+		//	conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
+		//	ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
+		//	conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
 			
 			SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
 			cluster.submitTopology("Tornado", conf, builder.createTopology());
@@ -277,6 +277,7 @@ public class TornadoClusterTest {
 			conf.put(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT, 300000);
 
 			conf.put(Config.NIMBUS_HOST, nimbusHost);
+			Integer nimbusPort = Integer.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
 			conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
 			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
 			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
@@ -293,18 +294,19 @@ public class TornadoClusterTest {
 				e.printStackTrace(System.err);
 
 			}
+			System.out.println("******************************************************************************************************");
+
+			String[] nimbusInfo = new String[2];
+			nimbusInfo[0] = nimbusHost;
+			nimbusInfo[1] = "" + nimbusPort;
+
+			Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
+			Thread.sleep(1000 * 60 * minutesToStats);
+			//	KillTopology.killToplogy(topologyName, nimbusHost, nimbusPort);
+			System.out.println("******************************************************************************************************");
+
 		}
-		System.out.println("******************************************************************************************************");
-
-		String[] nimbusInfo = new String[2];
-		nimbusInfo[0] = nimbusHost;
-		nimbusInfo[1] = "" + nimbusPort;
-
-		Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
-		Thread.sleep(1000 * 60 * minutesToStats);
-		//	KillTopology.killToplogy(topologyName, nimbusHost, nimbusPort);
-		System.out.println("******************************************************************************************************");
-
+		
 		// Utils.sleep(10000);
 		// cluster.killTopology("test");
 		// cluster.shutdown();
