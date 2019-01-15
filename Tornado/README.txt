@@ -63,3 +63,10 @@ using the following statement
 the jar file exists in the lib folder of this project
 
 mvn install:install-file -Dfile=disco-2.0.jar -DgroupId=com.disco -DartifactId=disco -Dversion=10.2.0 -Dpackaging=jar
+
+******************************************************************************************************
+Simple Example to run from your local machine: TornadoTweetCount
+----------------------------------------------------------
+1) Import the project in your favourit IDE using Maven
+2) Run the file src/edu/purdue/cs/tornado/examples/TornadoTweetCountExample.java 
+this file should run a local instance of tornado in your local machine 
