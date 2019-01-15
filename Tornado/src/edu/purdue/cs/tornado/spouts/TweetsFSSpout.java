@@ -120,7 +120,7 @@ public class TweetsFSSpout extends FileSpout {
 //			if (countId % 10 == 0)
 //				this.collector.emit(new Values(countId, obj), "" + selfTaskId + "_" + (countId));
 //			else
-				this.collector.emit(new Values(new Integer(countId), obj));
+				this.collector.emit(new Values(new Integer(countId), getDataObject(obj)));
 
 		}
 	}
@@ -138,7 +138,7 @@ public class TweetsFSSpout extends FileSpout {
 //				if (countId % 10 == 0)
 //					this.collector.emit(new Values(countId, obj), "" + selfTaskId + "_" + (countId));
 //				else
-					this.collector.emit(new Values(previousObject.getObjectId(), obj));
+					this.collector.emit(new Values(previousObject.getObjectId(), getDataObject(obj)));
 			}
 	}
 
@@ -188,6 +188,24 @@ public class TweetsFSSpout extends FileSpout {
 
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
 		declarer.declare(new Fields(SpatioTextualConstants.objectIdField, SpatioTextualConstants.dataObject));
+	}
+	
+	//Functions below are used to make a new data object to emit
+	@Override
+	public DataObject getDataObject() {
+		return new DataObject();
+	}
+	@Override
+	public DataObject getDataObject(DataObject other) {
+		if(other != null) {
+			return new DataObject(other);
+		}
+		return null;
+	}
+	@Override
+	public DataObject getDataObject(Integer objectId, Point location, String originalText, Long timeStamp,
+			Command command) {
+		return new DataObject(objectId, location, originalText,timeStamp,command);
 	}
 
 }

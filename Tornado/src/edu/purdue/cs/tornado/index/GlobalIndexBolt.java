@@ -398,7 +398,7 @@ public class GlobalIndexBolt extends BaseRichBolt {
 		this.stormConf = stormConf;
 		this.evaluatorBoltTasks = context.getComponentTasks(id);
 		this.indexBoltTasks = context.getComponentTasks(SpatioTextualConstants.getIndexId(id));
-		this.reliable = ((Long) stormConf.get(Config.TOPOLOGY_ACKER_EXECUTORS)) > 0;
+		//this.reliable = ((Long) stormConf.get(Config.TOPOLOGY_ACKER_EXECUTORS)) > 0;
 		this.stringBuilder = new StringBuilder();
 		entireSpace = new Rectangle(new Point(0.0, 0.0), new Point(SpatioTextualConstants.xMaxRange, SpatioTextualConstants.xMaxRange));
 		numberOfEvaluatorTasks = this.evaluatorBoltTasks.size();
@@ -408,24 +408,22 @@ public class GlobalIndexBolt extends BaseRichBolt {
 		buildGlobalIndex();
 		initMetrics(context);
 
-		//		if (this.stormConf.get(SpatioTextualConstants.discoDir) != null)
-		//			disco = SemanticHelper.getDiskBasedDiscoInstance((String) this.stormConf.get(SpatioTextualConstants.discoDir));
-		//		else
-		//			disco = null;
-
 		readDataSourcesInformation();
 	}
 
+	//////////////
+	//ADD documentation
+	
 	protected void buildGlobalIndex() {
 		if (partitions != null && partitions.size() == numberOfEvaluatorTasks && (globalIndexType == GlobalIndexType.PARTITIONED)) {
 			for (Partition p : partitions) {
 				System.out.println("parition: " + p.index + " ,cost " + p.getCost() + " ,xmin: " + p.getCoords()[0] + " ,ymin: " + p.getCoords()[1] + " ,xlength: " + p.getDimensions()[0] + " ,ylength: " + p.getDimensions()[1]);
 			}
 			globalIndex = new GlobalOptimizedPartitionedIndexLowerSpace(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
-			//globalIndex = new GlobalOptimizedPartitionedIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
 			System.out.println("Starting a partition based global index ");
 
-		} else if (partitions != null && partitions.size() == numberOfEvaluatorTasks && (globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE || globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD)) {
+		} 
+		else if (partitions != null && partitions.size() == numberOfEvaluatorTasks && (globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE || globalIndexType == GlobalIndexType.PARTITIONED_TEXT_AWARE_FORWARD)) {
 			for (Partition p : partitions) {
 				System.out.println("parition: " + p.index + " ,cost " + p.getCost() + " ,xmin: " + p.getCoords()[0] + " ,ymin: " + p.getCoords()[1] + " ,xlength: " + p.getDimensions()[0] + " ,ylength: " + p.getDimensions()[1]);
 			}

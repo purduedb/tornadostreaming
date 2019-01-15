@@ -111,15 +111,9 @@ public class GlobalOptimizedPartitionedIndexLowerSpace extends GlobalIndex {
 					if ((routingIndex[i][j]) == -1) {//not assigned
 						(routingIndex[i][j]) = p.index;
 						if (i == p.getLeft()) {
-//							if (!rightRoutingSummary.containsKey(i)) {
-//								rightRoutingSummary.put(i, new HashMap<Integer, IndexCellCoordinates>());
-//							}
 							rightRoutingSummary.put(getRowMajorValue(i, j), new IndexCellCoordinates(-1, -1));
 						}
 						if (j == p.getBottom()) {
-//							if (!upperRoutingSummary.containsKey(i)) {
-//								upperRoutingSummary.put(i, new HashMap<Integer, IndexCellCoordinates>());
-//							}
 							upperRoutingSummary.put(getRowMajorValue(i, j),new IndexCellCoordinates(-1, -1));
 						}
 					} else {
@@ -148,7 +142,7 @@ public class GlobalOptimizedPartitionedIndexLowerSpace extends GlobalIndex {
 
 			}
 		}
-		//finding the top neighours
+		//finding the top neighbors
 		for (int i = 0; i < xCellsNum; i++) {
 			int currentIndex = routingIndex[i][yCellsNum - 1];
 			IndexCellCoordinates upperCell = null;

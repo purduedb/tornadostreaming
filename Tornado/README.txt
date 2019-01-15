@@ -1,4 +1,5 @@
 *******************************************************************************************************
+This is the release version
 Tornado Instuctions
 -------------------
 Localcluster depolyment instructions

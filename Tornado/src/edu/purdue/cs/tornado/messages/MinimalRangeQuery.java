@@ -8,6 +8,9 @@ import edu.purdue.cs.tornado.helper.TextualPredicate;
 public class MinimalRangeQuery {
 	public  int queryId;
 	public boolean added;
+	public boolean deleted;
+	public int expireTime;
+	
 	public ArrayList<String> queryText;
 	public Rectangle spatialRange;
 	public TextualPredicate textualPredicate;
@@ -24,6 +27,14 @@ public class MinimalRangeQuery {
 	public void setAdded(boolean added) {
 		this.added = added;
 	}
+	
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+	
 	public ArrayList<String> getQueryText() {
 		return queryText;
 	}

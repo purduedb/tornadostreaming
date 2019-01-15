@@ -17,11 +17,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ * Entry point for tornado.
+ * Demarcates the data and queries sending them into different local evaluator bolts to evaluate the query. 
+ * This will speed up the evaluation process
+ */
 package edu.purdue.cs.tornado.index.global;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -37,16 +41,25 @@ public class GlobalGridIndex extends GlobalIndex{
 	protected Double yStep;
 	protected Integer xCellsNum;
 	protected Integer yCellsNum;
+	/**
+	 * Constructor for the GlobalGridIndex class. 
+	 */
 	public GlobalGridIndex(Integer numberOfEvaluatorTasks,List<Integer> evaluatorBoltTasks){
 		super(numberOfEvaluatorTasks, evaluatorBoltTasks);
 		yCellsNum = xCellsNum = (int)Math.sqrt(numberOfEvaluatorTasks); //this is a grid index use it to build the tree 
 		xStep = xrange/xCellsNum;
 		yStep = yrange/yCellsNum;
 	}
+	/**
+	 * Given the taskId, get its taskindex and obtains its bounds(min and maxpoint rectangle)
+	 */
 	public Rectangle getBoundsForTaskId(Integer taskId){
 		Integer taskIndex = taskIdToIndex.get(taskId);
 		return getBoundsForTaskIndex(taskIndex);
 	}
+	/**
+	 * Given taskIndex get its rectangular bounds
+	 */
 	public Rectangle getBoundsForTaskIndex(Integer taskIndex){
 		IndexCellCoordinates globalIndexSelfcoordinates = new IndexCellCoordinates(taskIndex/xCellsNum,taskIndex%xCellsNum);
 		Point minPoint = new Point ();
@@ -57,9 +70,15 @@ public class GlobalGridIndex extends GlobalIndex{
 		maxPoint.setY(yStep*(globalIndexSelfcoordinates.getY()+1));
 		return new Rectangle(minPoint, maxPoint);
 	}
+	/**
+	 * Return the overlapping taskIDs(overlap with current tasks rectangle)
+	 */
 	public ArrayList<Integer> getTaskIDsOverlappingRecangle(Rectangle rectangle){
 		return mapRecangleToEvaluatorTask(rectangle);
 	}
+	/**
+	 * get the taskids containing the passed in point
+	 */
 	public Integer getTaskIDsContainingPoint(Point point){
 		return  mapDataPointToEvaluatorTask(point.getX(), point.getY());
 	}
@@ -87,6 +106,9 @@ public class GlobalGridIndex extends GlobalIndex{
 	public void setyCellsNum(Integer yCellsNum) {
 		this.yCellsNum = yCellsNum;
 	}
+	/**
+	 * Scales the point IndexCell coordinate and creates a new partition for it
+	 */
 	public ArrayList<IndexCellCoordinates> mapDataPointToIndexCellCoordinates(Point point){
 		ArrayList<IndexCellCoordinates> partitions = new ArrayList<IndexCellCoordinates>();
 		Integer xCell = (int) (point.getX() / xStep);
@@ -102,9 +124,15 @@ public class GlobalGridIndex extends GlobalIndex{
 		partitions.add(new IndexCellCoordinates(xCell, yCell));
 		return partitions;
 	}
+	/**
+	 * Gets the TaskId from evaluatorBoltTasks using the given coordinates
+	 */
 	public Integer mapIndexCellCoordinatedToTaskId(IndexCellCoordinates indexCellCoordinates){
 		return evaluatorBoltTasks.get( indexCellCoordinates.getX() * yCellsNum + indexCellCoordinates.getY() );
 	}
+	/**
+	 * Scales the point down and gets the partition number.Finds the evaluator bolt task based on the partition number
+	 */
 	private Integer mapDataPointToEvaluatorTask(Double x, Double y) {
 		
 		Integer xCell = (int) (x / xStep);
@@ -132,6 +160,9 @@ public class GlobalGridIndex extends GlobalIndex{
 		}
 		
 	}
+	/**
+	 * Given a Rectangle map it to Evaluator Bolt task
+	 */
 	private ArrayList<Integer> mapRecangleToEvaluatorTask(Rectangle rectangle) {
 		ArrayList<Integer> partitions = new ArrayList<Integer>();
 		int xMinCell = (int) (rectangle.getMin().getX() / xStep);
@@ -170,6 +201,9 @@ public class GlobalGridIndex extends GlobalIndex{
 		
 		return partitions;
 	}
+	/**
+	 * Generates an iterator starting at Point p
+	 */
 	public GlobalIndexIterator globalKNNIterator(Point p){
 		return new GlobalGridIndexIterator(this,p);
 	}

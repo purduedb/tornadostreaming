@@ -41,7 +41,7 @@ public class DataObject {
 
 	
 	public DataObject(DataObject other){
-		this.srcId=new String(other.srcId);
+		this.srcId=""+other.srcId;
 		this.objectId=other.objectId.intValue();
 		this.location=new Point(other.location);
 		this.originalText=new String(other.originalText);

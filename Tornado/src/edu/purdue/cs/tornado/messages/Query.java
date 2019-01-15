@@ -33,7 +33,9 @@ public class Query {
 	private Integer queryId;
 	public boolean added[];//converted to boolean array of size 1 to allow call by refrence for subqueries and have them share all data, 
 	public int visitied;
-
+//deleted, expireTime, 
+	public boolean deleted;
+	public int expireTime;
 	protected QueryType queryType;
 	protected ArrayList<String> queryText;
 	protected long timeStamp;
@@ -85,12 +87,13 @@ public class Query {
 		added[0]=false;
 		visitied = 0;
 		//focalPoint = new Point();
-		queryText = new ArrayList<String>();
+		//queryText = new ArrayList<String>();
 		spatialRange = new Rectangle(new Point(), new Point());
 		//this.farthestDistance = maxFarthestDistance;
 		removeTime = Long.MAX_VALUE;
 		complexQueryText = null;
 		//resetKNNStructures();
+		queryText = null;
 	}
 
 	public Query(Query q) {
@@ -108,6 +111,15 @@ public class Query {
 
 	}
 
+	public boolean isDeleted() {
+		return deleted;
+	}
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
+	}
+	
+	
+	
 	public QueryType getQueryType() {
 		return queryType;
 	}

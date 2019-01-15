@@ -1,5 +1,10 @@
 package edu.purdue.cs.tornado.helper;
 
+/**
+ * Helps in creating the Partitions
+ */
+
+
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
@@ -14,6 +19,9 @@ import edu.purdue.cs.tornado.loadbalance.Partition;
 import edu.purdue.cs.tornado.messages.Query;
 
 public class PartitionsHelper {
+	/**
+	 * Comparator comparing the costs of the given 2 partitions and returning which is greater
+	 */
 	private static class MaxParitionComp implements Comparator<Partition>, Serializable {
 		private static final long serialVersionUID = 1L;
 		@Override
@@ -27,6 +35,10 @@ public class PartitionsHelper {
 			return 0;
 		}
 	}
+	/**
+	 * start with a cell and subdivide it till the required granularity is reached. 
+	 * The number of divisions equals the number of evaluator tasks
+	 */
 	public static ArrayList<Cell> getGridBasedParitions(Integer numberOfEvaluatorTasks, Integer numRowsFineGranularity, Integer numColumnsFineGranularity) {
 		//		ArrayList<Cell> partitions = new ArrayList<>();
 		//
@@ -96,7 +108,9 @@ public class PartitionsHelper {
 			partitions.get(i).index = i;
 		return partitions;
 	}
-
+/**
+ * takes in a Cell and a boolean parameter and splits the cell in half
+ */
 	private static void halfSplit(Cell parent, boolean isHorizontal) {
 		int halfPosition;
 
@@ -122,7 +136,9 @@ public class PartitionsHelper {
 			parent.getChildren()[1].setParent(parent);
 		}
 	}
-
+/**
+ * Given a list of points generate Partitions
+ */
 	public static ArrayList<Partition> getKDBasedParitionsFromPoints(Integer numberOfEvaluatorTasks, ArrayList<Point> points, Integer fineGridGran) {
 
 		Queue<Partition> queue = new LinkedList<Partition>();
@@ -179,7 +195,9 @@ public class PartitionsHelper {
 		return partitions;
 
 	}
-
+/**
+ * Given points, queries, number of evaluator tasks and fine grid granularity generate the Partitions
+ */
 	public static ArrayList<Partition> getKDBasedParitionsFromPointsAndQueries(Integer numberOfEvaluatorTasks, ArrayList<Point> points, ArrayList<Query> queries, Integer fineGridGran) {
 
 		Queue<Partition> queue = new LinkedList<Partition>();
@@ -238,7 +256,9 @@ public class PartitionsHelper {
 		return partitions;
 
 	}
-	
+	/**
+	 * Given points and queries, generate the Partitions based on certain priority
+	 */
 	public static ArrayList<Partition> getKDBasedParitionsFromPointsAndQueriesPriority(Integer numberOfEvaluatorTasks, ArrayList<Point> points, ArrayList<Query> queries, Integer fineGridGran) {
 
 		Comparator<Partition> maxComparator = new MaxParitionComp();
@@ -314,6 +334,9 @@ public class PartitionsHelper {
 		return partitions;
 
 	}
+	/**
+	 *Given cost of current split and parent partition decide best posible split
+	 */
 	private static Partition[] chooseBestBalancedSplit(Partition parent, CostEstimator costEstimator) {
 
 		Partition[] bestSplits = null;
@@ -348,7 +371,9 @@ public class PartitionsHelper {
 		return bestSplits;
 
 	}
-
+/**
+ *Given cost of current split and parent partition decide best posible split given a set of queries and data 
+ */
 	private static Partition[] chooseBestBalancedSplitFromQueriesAndData(Partition parent, CostEstimator costEstimator) {
 
 		Partition[] bestSplits = null;
@@ -384,7 +409,9 @@ public class PartitionsHelper {
 		return bestSplits;
 
 	}
-
+/**
+ * Generate a list of partitions given a list of serialized partitions from a file
+ */
 	public static ArrayList<Cell> readSerializedPartitions(String filePath) {
 		ArrayList<Cell> partitions = new ArrayList<Cell>();
 		try {

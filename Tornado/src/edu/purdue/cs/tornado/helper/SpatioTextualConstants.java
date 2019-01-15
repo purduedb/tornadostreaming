@@ -115,6 +115,7 @@ public class SpatioTextualConstants {
 	public static final String queryTextField = "queryText";
 	public static final String queryText2Field = "queryText2";
 	public static final String queryComplexTextField = "complexText";
+	//public static final String queryTextField = "queryText";
 	// Text Timesatoamp field
 	public static final String queryTimeStampField = "queryTimeStampField";
 

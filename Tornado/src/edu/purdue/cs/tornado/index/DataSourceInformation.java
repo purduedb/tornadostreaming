@@ -32,8 +32,8 @@ import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.index.local.LocalTextIndex;
 import edu.purdue.cs.tornado.index.local.LocalTextInvertedListIndex;
 import edu.purdue.cs.tornado.index.local.NoLocalIndex;
+import edu.purdue.cs.tornado.index.local.fast.LocalFASTIndex;
 import edu.purdue.cs.tornado.index.local.hybridgrid.LocalHybridGridIndex;
-import edu.purdue.cs.tornado.index.local.hybridpyramid.LocalHybridPyramidIndex;
 import edu.purdue.cs.tornado.messages.DataObject;
 
 /**
@@ -55,9 +55,11 @@ public class DataSourceInformation {
 	public LocalTextIndex localTextIndex;//text inverted list
 	public HashMap<String, IndexCell> objectToLocalCellIndex;//source to object id to index cell	
 	public LocalHybridIndex localHybridIndex;
+	public LocalFASTIndex localFASTIndex;
 	public Map<Integer, Integer> dataLastBoltTasKInformation;
 	public Map<Integer, ArrayList<Integer>> queryLastBoltTasKInformation;
-
+	Integer maxLevel;
+	
 	public Rectangle selfBounds;
 	LocalIndexType localIndexType;
 	public Integer fineGridGran ;
@@ -70,6 +72,7 @@ public class DataSourceInformation {
 		this.selfBounds = selfBounds;
 		this.localIndexType=localIndexType;
 		this.fineGridGran = fineGridGran;
+		this.maxLevel = 8;
 
 		if (local) {
 			switch (localIndexType) {
@@ -81,7 +84,7 @@ public class DataSourceInformation {
 				break;
 				
 			case HYBRID_PYRAMID:
-				this.localHybridIndex = new LocalHybridPyramidIndex(selfBounds, this,fineGridGran);
+				this.localHybridIndex = new LocalFASTIndex(selfBounds, fineGridGran,maxLevel);//null;// new LocalHybridPyramidIndex(selfBounds, this,fineGridGran);
 				break;
 			
 			case SPATIAL_GRID:

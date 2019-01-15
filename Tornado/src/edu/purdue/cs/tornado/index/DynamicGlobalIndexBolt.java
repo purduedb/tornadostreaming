@@ -80,10 +80,7 @@ public class DynamicGlobalIndexBolt extends GlobalIndexBolt {
 		this.indexTasks = context.getComponentTasks(id + SpatioTextualConstants.IndexIDExtension);
 		this.auxiliaryExecutorTask = evaluatorBoltTasks.get(this.evaluatorBoltTasks.size() - 1);
 		this.auxiliaryExecutorTaskIndex = this.evaluatorBoltTasks.size() - 1;
-		if (this.globalIndexType.equals(GlobalIndexType.DYNAMIC_AQWA)) {
-			globalIndex = new DynamicGlobalAQWAIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
-			((DynamicGlobalAQWAIndex) globalIndex).auxilaryIndex = auxiliaryExecutorTaskIndex;
-		} else if (this.globalIndexType.equals(GlobalIndexType.DYNAMIC_OPTIMIZED)) {
+	    if (this.globalIndexType.equals(GlobalIndexType.DYNAMIC_OPTIMIZED)) {
 			globalIndex = new DynamicGlobalOptimizedIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
 			((DynamicGlobalOptimizedIndex) globalIndex).auxilaryIndex = auxiliaryExecutorTaskIndex;
 		}

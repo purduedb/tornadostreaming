@@ -147,9 +147,7 @@ public class DynamicEvalautorBolt extends SpatioTextualEvaluatorBolt {
 		selfTaskId = context.getThisTaskId();
 		selfTaskIndex = context.getThisTaskIndex();
 		indexTasks = context.getComponentTasks(id + SpatioTextualConstants.IndexIDExtension);
-		if (this.globalIndexType.equals(GlobalIndexType.DYNAMIC_AQWA)) {
-			globalIndex = new DynamicGlobalAQWAIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
-		} else if (this.globalIndexType.equals(GlobalIndexType.DYNAMIC_OPTIMIZED)) {
+		if (this.globalIndexType.equals(GlobalIndexType.DYNAMIC_OPTIMIZED)) {
 			globalIndex = new DynamicGlobalOptimizedIndex(numberOfEvaluatorTasks, evaluatorBoltTasks, partitions, fineGridGran);
 		}
 		selfBounds = globalIndex.getBoundsForTaskIndex(selfTaskIndex);
