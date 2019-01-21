@@ -1,3 +1,26 @@
+/**
+ * Copyright Jul 5, 2015
+ * Author : Ahmed Mahmood
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * 
+ * This version is meant for the fair comparison of with the state of the art
+ *  index that does not have any other cluster and tornado related attributes
+ */
 package edu.purdue.cs.tornado.index.local.fast;
 
 import java.util.ArrayList;
@@ -12,38 +35,31 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import edu.purdue.cs.tornado.helper.IndexCell;
 import edu.purdue.cs.tornado.helper.IndexCellCoordinates;
-import edu.purdue.cs.tornado.helper.KeywordFrequencyStats;
-import edu.purdue.cs.tornado.helper.KeywordTrieCell;
 import edu.purdue.cs.tornado.helper.Point;
 import edu.purdue.cs.tornado.helper.Rectangle;
-import edu.purdue.cs.tornado.helper.ReinsertEntry;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.index.local.LocalHybridIndex;
 import edu.purdue.cs.tornado.index.local.LocalIndexKNNIterator;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.DataObject;
-import edu.purdue.cs.tornado.messages.MinimalRangeQuery;
 import edu.purdue.cs.tornado.messages.Query;
 
-public class LocalFASTIndex extends LocalHybridIndex
-	{
+public class FAST  extends LocalHybridIndex {
 	public double localXstep;
 	public double localYstep;
-	public ConcurrentHashMap<Integer, FASTIndexCell> index;
+	public ConcurrentHashMap<Integer, IndexCellOptimizedExperiment> index;
 	public Rectangle selfBounds;
 	public int gridGranularity;
 	public int maxLevel;
 	public static int Trie_SPLIT_THRESHOLD = 2;
 	public static int Degredation_Ratio = 2;
 	public static int Trie_OVERLALL_MERGE_THRESHOLD = 2;
-	public static int CLEANING_INTERVAL = 1000;
-	public static int NUMBER_OF_ACTIVE_QUERIES = 1000000;
 	public static int MAX_ENTRIES_PER_CLEANING_INTERVAL = 10;
-	public FASTIndexCell cellBeingCleaned;
+	public IndexCellOptimizedExperiment cellBeingCleaned;
 	public boolean lastCellCleaningDone; //to check if an entireCellHasBeenCleaned
-
-	public static HashMap<String, KeywordFrequencyStats> overallQueryTextSummery;
+	public int splitThreshold = 5;
+	public  HashMap<String, KeywordFrequencyStats> overallQueryTextSummery;
 	public static int totalVisited = 0;
 	public static int spatialOverlappingQuries = 0;
 	public int minInsertedLevel;
@@ -51,25 +67,11 @@ public class LocalFASTIndex extends LocalHybridIndex
 	public int minInsertedLevelInterleaved;
 	public int maxInsertedLevelInterleaved;
 	public static int queryTimeStampCounter;
-	public static int objectTimeStampCounter;
-	public static int debugQueryId =-1;
-	
-	public static int queryInsertInvListNodeCounter = 0;
-	public static int queryInsertTrieNodeCounter = 0;
-	public static int totalQueryInsertionsIncludingReplications = 0;
-	public static int objectSearchInvListNodeCounter = 0;
-	public static int objectSearchTrieNodeCounter = 0;
-	public static int objectSearchInvListHashAccess = 0;
-	public static int objectSearchTrieHashAccess = 0;
-	public static int numberOfHashEntries = 0;
-	public static int numberOfTrieNodes = 0;
-	public static int totalTrieAccess = 0;
-	public static int objectSearchTrieFinalNodeCounter=0;
-	public static int splitThreshold ;
-	public Iterator<Entry<Integer, FASTIndexCell>> cleaningIterator;//iterates over cells to clean expired entries
+	public int objectTimeStampCounter;
+	public int debugQueryId =-1;
+	public Iterator<Entry<Integer, IndexCellOptimizedExperiment>> cleaningIterator;//iterates over cells to clean expired entries
 
-	public LocalFASTIndex(Rectangle selfBounds, Integer xGridGranularity, Integer maxLevel) {
-		
+	public FAST(Rectangle selfBounds, Integer xGridGranularity, Integer maxLevel) {
 		this.selfBounds = selfBounds;
 		Double globalXrange = SpatioTextualConstants.xMaxRange;
 		Double globalYrange = SpatioTextualConstants.yMaxRange;
@@ -81,20 +83,10 @@ public class LocalFASTIndex extends LocalHybridIndex
 		this.maxInsertedLevel = -1;
 		this.minInsertedLevelInterleaved = -1;
 		this.maxInsertedLevelInterleaved = -1;
-		index = new ConcurrentHashMap<Integer, FASTIndexCell>();
+		index = new ConcurrentHashMap<Integer, IndexCellOptimizedExperiment>();
 		overallQueryTextSummery = new HashMap<String, KeywordFrequencyStats>();
 
-		queryInsertInvListNodeCounter = 0;
-		queryInsertTrieNodeCounter = 0;
-		totalQueryInsertionsIncludingReplications = 0;
-		objectSearchInvListNodeCounter = 0;
-		objectSearchTrieNodeCounter = 0;
-		objectSearchTrieFinalNodeCounter=0;
-		objectSearchInvListHashAccess = 0;
-		objectSearchTrieHashAccess = 0;
-		numberOfHashEntries = 0;
-		numberOfTrieNodes = 0;
-		totalTrieAccess = 0;
+		
 		queryTimeStampCounter = 0;
 		objectTimeStampCounter = 0;
 		cleaningIterator = null;
@@ -102,8 +94,8 @@ public class LocalFASTIndex extends LocalHybridIndex
 		lastCellCleaningDone = true;
 	}
 
-	public LocalFASTIndex(Rectangle selfBounds, Integer xGridGranularity, Integer maxLevel, Integer splitThreshold) {
-		
+	public FAST(Rectangle selfBounds, Integer xGridGranularity, Integer maxLevel, Integer splitThreshold) {
+		this(selfBounds, xGridGranularity, maxLevel);
 		this.splitThreshold = splitThreshold;
 
 	}
@@ -114,10 +106,10 @@ public class LocalFASTIndex extends LocalHybridIndex
 
 	public double getAverageRankedInvListSize() {
 		Double sum = 0.0, count = 0.0;
-		ConcurrentHashMap<Integer, FASTIndexCell> levelIndex = index;
+		ConcurrentHashMap<Integer, IndexCellOptimizedExperiment> levelIndex = index;
 		Iterator itr = levelIndex.values().iterator();
 		while (itr.hasNext()) {
-			FASTIndexCell cell = (FASTIndexCell) itr.next();
+			IndexCellOptimizedExperiment cell = (IndexCellOptimizedExperiment) itr.next();
 			if (cell.ptp != null) {
 				Iterator itr2 = cell.ptp.values().iterator();
 				while (itr2.hasNext()) {
@@ -126,9 +118,9 @@ public class LocalFASTIndex extends LocalHybridIndex
 						count++;
 						sum += ((ArrayList<Query>) queries).size();
 					}
-					if (queries != null && queries instanceof KeywordTrieCell && ((KeywordTrieCell) queries).queries != null && ((KeywordTrieCell) queries).queries.size() > 0) {
+					if (queries != null && queries instanceof KeywordTrieCellMinimalExperiment && ((KeywordTrieCellMinimalExperiment) queries).queries != null && ((KeywordTrieCellMinimalExperiment) queries).queries.size() > 0) {
 						count++;
-						sum += ((KeywordTrieCell) queries).queries.size();
+						sum += ((KeywordTrieCellMinimalExperiment) queries).queries.size();
 					}
 				}
 			}
@@ -141,10 +133,10 @@ public class LocalFASTIndex extends LocalHybridIndex
 		queryTimeStampCounter++;
 
 		Boolean completed = true;
+		//Query q = new Query(q1);
 
 		int level = maxLevel;
-		if(q.getQueryId()==debugQueryId)
-			System.out.println("First insert"+q);
+
 		ArrayList<ReinsertEntry> currentLevelQueries = new ArrayList<ReinsertEntry>();
 		currentLevelQueries.add(new ReinsertEntry(q.getSpatialRange(), q));
 		while (level >= 0 && currentLevelQueries.size() > 0) {
@@ -160,8 +152,7 @@ public class LocalFASTIndex extends LocalHybridIndex
 				int span = Math.max(levelxMaxCell - levelxMinCell, levelyMaxCell - levelyMinCell);
 
 				if (entry.range != null) {
-					if(entry.query.getQueryId()==debugQueryId)
-						System.out.println("reinsert"+entry.query);
+				
 
 					levelxMinCell = (int) (entry.range.getMin().getX() / levelStep);
 					levelyMinCell = (int) (entry.range.getMin().getY() / levelStep);
@@ -207,15 +198,14 @@ public class LocalFASTIndex extends LocalHybridIndex
 					forceInsert = false;
 				for (Integer i = levelxMinCell; i <= levelxMaxCell; i++) {
 					for (Integer j = levelyMinCell; j <= levelyMaxCell; j++) {
-						totalQueryInsertionsIncludingReplications++;
 						coodinate = mapToRawMajor(level, i, j, levelGranuality);
 						if (!index.containsKey(coodinate)) {
 							Rectangle bounds = getBoundForIndexCell(i, j, levelStep);
 							if (bounds.getMin().getX() >= SpatioTextualConstants.xMaxRange || bounds.getMin().getY() >= SpatioTextualConstants.yMaxRange)
 								continue;
-							index.put(coodinate, new FASTIndexCell(bounds, coodinate, level));
+							index.put(coodinate, new IndexCellOptimizedExperiment(bounds, coodinate, level,overallQueryTextSummery));
 						}
-						FASTIndexCell indexCell = index.get(coodinate);
+						IndexCellOptimizedExperiment indexCell = index.get(coodinate);
 						if (SpatialHelper.overlapsSpatially(entry.query.getSpatialRange(), indexCell.bounds)) {
 							if (i == levelxMinCell && j == levelyMinCell) {
 								sharedQueries = (ArrayList<Query>) indexCell.addInternalQueryNoShare(minkeyword, entry.query, null, insertNextLevelQueries, forceInsert);
@@ -234,15 +224,14 @@ public class LocalFASTIndex extends LocalHybridIndex
 			currentLevelQueries = insertNextLevelQueries;
 			level--;
 		}
-//		if (queryTimeStampCounter % CLEANING_INTERVAL == 0)
-//			cleanNextSetOfEntries();
+		
 		return completed;
 	}
 
 	public void cleanNextSetOfEntries() {
 		if (cleaningIterator == null || !cleaningIterator.hasNext())
 			cleaningIterator = index.entrySet().iterator();
-		FASTIndexCell cell;
+		IndexCellOptimizedExperiment cell;
 		if (lastCellCleaningDone)
 			cell = cleaningIterator.next().getValue();
 		else
@@ -282,33 +271,28 @@ public class LocalFASTIndex extends LocalHybridIndex
 	public void setSelfBounds(Rectangle selfBounds) {
 		this.selfBounds = selfBounds;
 	}
-	//checkthisout????????
 
 	public ArrayList<List<Query>> getReleventSpatialKeywordRangeQueries(DataObject dataObject, Boolean fromNeighbour) {
 		objectTimeStampCounter++;
-		List<Query> result = new LinkedList<Query>();//new LinkedList<Query>();
-		ArrayList<List<Query>> resulted = new ArrayList<List<Query>>();
-		if (minInsertedLevel == -1){
-			resulted.add(result);
-			return resulted;
-			}
+		List<Query> result = new LinkedList<Query>();
+		ArrayList<List<Query>> results = new ArrayList<List<Query>>();
+		if (minInsertedLevel == -1)
+			return results;
 		double step = (maxInsertedLevel == 0) ? localXstep : (localXstep * (2 << (maxInsertedLevel - 1)));
 		int granualrity = this.gridGranularity >> maxInsertedLevel;
 		ArrayList<String> keywords = dataObject.getObjectText();
 		for (int level = maxInsertedLevel; level >= minInsertedLevel && keywords != null && keywords.size() > 0; level--) {
 			Integer cellCoordinates = mapDataPointToPartition(level, dataObject.getLocation(), step, granualrity);
-			FASTIndexCell indexCellOptimized = index.get(cellCoordinates);
+			IndexCellOptimizedExperiment indexCellOptimized = index.get(cellCoordinates);
 			if (indexCellOptimized != null) {
-				keywords = indexCellOptimized.getInternalSpatiotTextualOverlappingQueries(dataObject.getLocation(), keywords, result); //result.get all indices
+				keywords = indexCellOptimized.getInternalSpatiotTextualOverlappingQueries(dataObject.getLocation(), keywords, result);
 			}
 			step /= 2;
 			granualrity <<= 1;
 		}
-		resulted.add(result);
-		return resulted;
+		results.add(result);
+		return results;
 	}
-
-	
 
 	@Override
 	public IndexCell addDataObject(DataObject dataObject) {
@@ -435,6 +419,5 @@ public class LocalFASTIndex extends LocalHybridIndex
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 
 }

@@ -1,27 +1,63 @@
 *******************************************************************************************************
-This is the release version
-Tornado Instuctions
+Tornado Simple tutorial for developers
 -------------------
-Localcluster depolyment instructions
-1) install local zookeeper  http://zookeeper.apache.org/doc/r3.3.3/zookeeperStarted.html
-2) install local kakfka http://kafka.apache.org/07/quickstart.html
-3) Get tornado code 
-	https://bitbucket.org/ar8ahmed/tornado 
-please send me a request to with your bitbucket account so i can grant you access 
+Running tornado on your local machine using a simple example.
+1) Clone the source code of tornado. 
+https://github.com/purduedb/tornadostreaming
 
-4) you will need to use a tweets file 
-you can get the one from ibalyatham tweets there is a file named small.csv or any larger file
-ibnalhaytham.cs.purdue.edu
-tweet files are located in /scratch2/aaly/brian/
+2)import the project in your favorite IDE, e.g., eclipse  as a Maven project
+For more information on using Maven please following the following links
+Maven in Eclipse: http://www.vogella.com/tutorials/EclipseMaven/article.html
+Maven in IntelliJ:   https://www.jetbrains.com/help/idea/maven.html
 
-5)import the project in eclipse  as a maven project
+3) Run the src/edu/purdue/cs/tornado/examples/TornadoTweetCountExample.Java
 
-6) you will need to download the corpus for disco that is located at 
+*******************************************************************************************************
+To configure Tornado: Edit the values of the configuration file: 
+
+resources/config.properties
+
+*******************************************************************************************************
+To support textual semantic similarity you will need 
+
+(1) Download the corpus for disco that is located at 
 http://www.linguatools.de/disco/disco-wordspaces.html#enwiki13w2vslm
-and set the proper path in the configuration 
+and set the proper path in the configuration file
+discoDir=/home/ahmed/Downloads/enwiki-20130403-word2vec-lm-mwl-lc-sim/
 
-7) set the following configurations in your resources\config.properties file according to the locations of relevant files in your machine and 
-URL of zookeeper and kafka 
+(2) Then install the Disco depenecey and jar in your local 
+maven repository
+using the following statement
+the jar file exists in the lib folder of this project
+
+mvn install:install-file -Dfile=disco-2.0.jar -DgroupId=com.disco -DartifactId=disco -Dversion=10.2.0 -Dpackaging=jar
+
+*******************************************************************************************************
+Tornado  UI instructions  
+--------------------------
+
+this can run from your machine, i will access the server from kafka 
+https://github.com/qadahtm/webui/tree/tornado-ui 
+
+you will need to pull the tornado branch 
+all deployment instructions are located in the Github repository file
+
+Tornado will need to have a zookeeper and kafka to communicate with the UI (even in your local machine)
+*******************************************************************************************************
+To install kafka 
+
+https://kafka.apache.org/quickstart
+
+*******************************************************************************************************
+To install zookeeper 
+
+https://zookeeper.apache.org/doc/r3.1.2/zookeeperStarted.html
+
+
+*******************************************************************************************************
+To run Tornado on a cluster you need to properly set the following configurations in your resources\config.properties file according
+to the locations of relevant files in the cluster machine and the URLs of zookeeper and kafka 
+
 kafkaZookeeper= localhost:2181
 kafkaConsumerGroup=queryprocExample
 kafkaConsumerTopic=queries
@@ -39,34 +75,7 @@ TWEETS_FILE_PATH=/home/ahmed/Downloads/sample_usa_tweets.csv
 POIS_PATH=datasources/pois.csv
 
 
-
-
-
-
-*******************************************************************************************************
-Tornado  UI instructions  
---------------------------
-
-this can run from your machine, i will access the server from kafka 
-https://github.com/qadahtm/webui/tree/tornado-ui 
-
-you will need to pull the tornado branch 
-all depolyment instrucations are located in the git repository file
-
-
 ******************************************************************************************************
-Important notes for comilation and generate a jar file 
+To generate the generate Tornado jar file to be submitted to a cluster 
 ----------------------------------------------------------
-To compile this code properly using Maven you need to install the Disco depenecey and jar in your local 
-maven repository
-using the following statement
-the jar file exists in the lib folder of this project
-
-mvn install:install-file -Dfile=disco-2.0.jar -DgroupId=com.disco -DartifactId=disco -Dversion=10.2.0 -Dpackaging=jar
-
-******************************************************************************************************
-Simple Example to run from your local machine: TornadoTweetCount
-----------------------------------------------------------
-1) Import the project in your favourit IDE using Maven
-2) Run the file src/edu/purdue/cs/tornado/examples/TornadoTweetCountExample.java 
-this file should run a local instance of tornado in your local machine 
+Maven install the project

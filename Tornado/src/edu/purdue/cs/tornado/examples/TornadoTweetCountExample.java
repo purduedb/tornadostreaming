@@ -69,7 +69,7 @@ public class TornadoTweetCountExample {
 		addQuerySpout(tweetsSource, querySource, builder, properties, 10, 1000.0, 10, 3, 0, 0, FileSpout.LFS,properties.getProperty("LFS_TWEETS_FILE_PATH"),TextualPredicate.OVERlAPS);
 		
 		//Set the GlobalIndex and SpatioTextual bolts
-		addTornado(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.HYBRID_GRID);
+		addTornado(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 		
 		
 		/* ------------- TOPOLOGY SUBMISSION ------------- */

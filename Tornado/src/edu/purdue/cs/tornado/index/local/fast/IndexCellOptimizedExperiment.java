@@ -1,3 +1,22 @@
+/**
+ * Copyright Jul 5, 2015
+ * Author : Ahmed Mahmood
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package edu.purdue.cs.tornado.index.local.fast;
 
 import java.util.ArrayList;
@@ -9,23 +28,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 
-import edu.purdue.cs.tornado.helper.Rectangle;
-import edu.purdue.cs.tornado.messages.MinimalRangeQuery;
-import edu.purdue.cs.tornado.messages.Query;
-import edu.purdue.cs.tornado.helper.KeywordTrieCell;
-import edu.purdue.cs.tornado.helper.ReinsertEntry;
 import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.Rectangle;
 import edu.purdue.cs.tornado.helper.SpatialHelper;
 import edu.purdue.cs.tornado.helper.TextHelpers;
-import edu.purdue.cs.tornado.helper.IndexCell;
+import edu.purdue.cs.tornado.messages.Query;
 
+public class IndexCellOptimizedExperiment {
 
-
-
-public class FASTIndexCell {
-	public ConcurrentHashMap<String, Object> ptp;//queries that fall only within the cells range
+	public HashMap<String, Object> ptp;//queries that fall only within the cells range
 	Iterator<Entry<String, Object>> cleaningIterator;
 	Rectangle bounds;
 	int coordinate;
@@ -33,8 +45,10 @@ public class FASTIndexCell {
 	Query testObject ;
 	int level;
 	int debugQID=-1;
+	HashMap<String, KeywordFrequencyStats> overallQueryTextSummery;
 	
-	public FASTIndexCell(Rectangle bounds, Integer globalCoordinates, int level) {
+
+	public IndexCellOptimizedExperiment(Rectangle bounds, Integer globalCoordinates, int level,HashMap<String, KeywordFrequencyStats> overallQueryTextSummery) {
 		ptp = null;
 		this.bounds = bounds;
 		this.bounds.getMax().X-=.001;
@@ -42,24 +56,25 @@ public class FASTIndexCell {
 		this.coordinate = globalCoordinates;
 		test = false;
 		this.level=level;
+		this.overallQueryTextSummery = overallQueryTextSummery;
 	}
+
 	
 	public void addInternalQuery(String keyword, Query query, ArrayList<Query> sharedQueries, ArrayList<ReinsertEntry>insertNextLevelQueries, boolean force) {
 		if (ptp == null) {
-			ptp = new ConcurrentHashMap<String, Object>();
+			ptp = new HashMap<String, Object>();
 		}
 		if (!ptp.containsKey(keyword) && sharedQueries != null) {
-			LocalFASTIndex.numberOfHashEntries++;
+			LocalHybridPyramidGridIndexOptimized.numberOfHashEntries++;
 			ptp.put(keyword, sharedQueries);
 		} else {
 			Object keywordIndex = ptp.get(keyword);
 			if (keywordIndex instanceof Query) {
 				Query exitingQuery = (Query) keywordIndex;
-				if (exitingQuery.expireTime > LocalFASTIndex.queryTimeStampCounter) { //checking for the support of the query
+				if (exitingQuery.getRemoveTime() > FAST.queryTimeStampCounter) { //checking for the support of the query
 					if (sharedQueries.contains(exitingQuery)) {
 						ptp.put(keyword, sharedQueries);
-					} else if (sharedQueries.size() < LocalFASTIndex.Trie_SPLIT_THRESHOLD) {
-						LocalFASTIndex.queryInsertInvListNodeCounter++;
+					} else if (sharedQueries.size() < FAST.Trie_SPLIT_THRESHOLD) {
 						sharedQueries.add(exitingQuery);
 						ptp.put(keyword, sharedQueries);
 					} else
@@ -78,7 +93,7 @@ public class FASTIndexCell {
 					if (!sharedQueries.contains(q))
 						nonSharedQueries.add(q);
 				}
-				if (nonSharedQueries.size() > 0 && nonSharedQueries.size() + sharedQueries.size() <=   LocalFASTIndex.Trie_SPLIT_THRESHOLD) {
+				if (nonSharedQueries.size() > 0 && nonSharedQueries.size() + sharedQueries.size() <=   FAST.Trie_SPLIT_THRESHOLD) {
 					sharedQueries.addAll(nonSharedQueries);
 					ptp.put(keyword, sharedQueries);
 				} else {
@@ -92,25 +107,22 @@ public class FASTIndexCell {
 	}
 
 	public void deleteQueryFromStats(Query query) {
-		if (query.deleted == false) {
+		if (query.isDeleted() == false) {
 			query.deleted = true;
-//			for (String keyword : query.getQueryText()) {
-//				LocalFASTIndex.overallQueryTextSummery.get(keyword).queryCount--;
-//			}
-			//TODO
+			for (String keyword : query.getQueryText()) {
+				overallQueryTextSummery.get(keyword).queryCount--;
+			}
 		}
 	}
 
 	public Object addInternalQueryNoShare(String keyword, Query query, ArrayList<Query> sharedQueries, ArrayList<ReinsertEntry> insertNextLevelQueries, boolean force) {
 		if (ptp == null) {
-			ptp = new ConcurrentHashMap<String, Object>();
+			ptp = new HashMap<String, Object>();
 		}
 		Queue<Query> queue = new LinkedList<Query>();
 		boolean inserted = false;
 		//step 1 find the best keyword to insert in:
-		if(query.getQueryId()==debugQID ){
-			System.out.println("Inserting: "+query+coordinate);
-		}
+		
 		inserted = insertAtKeyWord(keyword, query, sharedQueries);
 		if (inserted)
 			if (ptp.get(keyword) instanceof ArrayList)
@@ -124,9 +136,7 @@ public class FASTIndexCell {
 
 		while (!queue.isEmpty()) {
 			query = queue.remove();
-			if(query.getQueryId()==debugQID ){
-				System.out.println("Inserting: "+query+coordinate);
-			}
+			
 			inserted = false;
 
 			String otherKeyword = getOtherKeywordToInser(query);
@@ -139,18 +149,14 @@ public class FASTIndexCell {
 				for (String term : query.getQueryText()) {
 					//mark all these keywords as tries
 					if (ptp.get(term) instanceof ArrayList) {
-						for(Query q:(ArrayList<Query>) ptp.get(term)){
-							if(q.getQueryId() == debugQID)
-								System.out.println("Adding query to queue for reinsert at a different list: "+query+coordinate +"keyword "+term);
-						}
+						
 						queue.addAll((ArrayList<Query>) ptp.get(term));
-						ptp.put(term, new KeywordTrieCell());
-						LocalFASTIndex.numberOfTrieNodes++;
+						ptp.put(term, new KeywordTrieCellMinimalExperiment());
 					}
 				}
 			}
-			;
-			KeywordTrieCell currentCell = (KeywordTrieCell) ptp.get(query.getQueryText().get(0));
+			if(query.getQueryText()==null || query.getQueryText().isEmpty()) return null;
+			KeywordTrieCellMinimalExperiment currentCell = (KeywordTrieCellMinimalExperiment) ptp.get(query.getQueryText().get(0));
 
 			for (int j = 1; j < query.getQueryText().size() & !inserted; j++) {
 				keyword = query.getQueryText().get(j);
@@ -162,7 +168,7 @@ public class FASTIndexCell {
 					currentCell.trieCells.put(keyword, query);
 					inserted = true;
 				} else if (cell instanceof Query) {
-					if (((Query) cell).expireTime > LocalFASTIndex.queryTimeStampCounter) {
+					if (((Query) cell).getRemoveTime() > FAST.queryTimeStampCounter) {
 						ArrayList<Query> queries = new ArrayList<Query>();
 						queries.add((Query) cell);
 						queries.add((Query) query);
@@ -173,18 +179,17 @@ public class FASTIndexCell {
 						currentCell.trieCells.put(keyword, query);
 						inserted = true;
 					}
-				} else if (cell instanceof ArrayList && ((ArrayList<Query>) cell).size() <= LocalFASTIndex.Trie_SPLIT_THRESHOLD) {
+				} else if (cell instanceof ArrayList && ((ArrayList<Query>) cell).size() <= FAST.Trie_SPLIT_THRESHOLD) {
 					((ArrayList<Query>) cell).add(query);
 					inserted = true;
-				} else if (cell instanceof ArrayList && ((ArrayList<Query>) cell).size() > LocalFASTIndex.Trie_SPLIT_THRESHOLD) {
-					KeywordTrieCell newCell = new KeywordTrieCell();
-					LocalFASTIndex.numberOfTrieNodes++;
+				} else if (cell instanceof ArrayList && ((ArrayList<Query>) cell).size() > FAST.Trie_SPLIT_THRESHOLD) {
+					KeywordTrieCellMinimalExperiment newCell = new KeywordTrieCellMinimalExperiment();
 					((ArrayList<Query>) cell).add(query);
 					newCell.trieCells = new HashMap<String, Object>();
 					newCell.queries = new ArrayList<Query>();
 					currentCell.trieCells.put(keyword, newCell);
 					for (Query otherQuery : ((ArrayList<Query>) cell)) {
-						if (otherQuery.expireTime > LocalFASTIndex.queryTimeStampCounter) {
+						if (otherQuery.getRemoveTime() > FAST.queryTimeStampCounter) {
 							if (otherQuery.getQueryText().size() > (j + 1)) {
 
 								Object otherCell = newCell.trieCells.get(otherQuery.getQueryText().get(j + 1));
@@ -203,28 +208,23 @@ public class FASTIndexCell {
 					if (newCell.queries != null && newCell.queries.size() == 0)
 						newCell.queries = null;
 					inserted = true;
-				} else if (cell instanceof KeywordTrieCell) {
+				} else if (cell instanceof KeywordTrieCellMinimalExperiment) {
 					if (j < (query.getQueryText().size() - 1)) {
-						currentCell = (KeywordTrieCell) cell;
+						currentCell = (KeywordTrieCellMinimalExperiment) cell;
 					} else {
 						if (level==0||checkSpanForForceInsertFinal(query)) {
-							if (((KeywordTrieCell) cell).finalQueries == null)
-								((KeywordTrieCell) cell).finalQueries = new ArrayList<Query>();
-							((KeywordTrieCell) cell).finalQueries.add(query);
-							if(query.getQueryId()==debugQID){
-								System.out.println("final"+query+coordinate);
-								test = true;
-								testObject = query;
-							}
+							if (((KeywordTrieCellMinimalExperiment) cell).finalQueries == null)
+								((KeywordTrieCellMinimalExperiment) cell).finalQueries = new ArrayList<Query>();
+							((KeywordTrieCellMinimalExperiment) cell).finalQueries.add(query);
+							
 						} else {
 
-							if (((KeywordTrieCell) cell).queries == null)
-								((KeywordTrieCell) cell).queries = new ArrayList<Query>();
-							((KeywordTrieCell) cell).queries.add(query);
-							if(query.getQueryId()==debugQID)
-								System.out.println("Not final"+query+coordinate);
-							if (((KeywordTrieCell) cell).queries.size() >  LocalFASTIndex.Degredation_Ratio) {
-								findQueriesToReinsert((KeywordTrieCell) cell, insertNextLevelQueries);
+							if (((KeywordTrieCellMinimalExperiment) cell).queries == null)
+								((KeywordTrieCellMinimalExperiment) cell).queries = new ArrayList<Query>();
+							((KeywordTrieCellMinimalExperiment) cell).queries.add(query);
+							
+							if (((KeywordTrieCellMinimalExperiment) cell).queries.size() >  FAST.Degredation_Ratio) {
+								findQueriesToReinsert((KeywordTrieCellMinimalExperiment) cell, insertNextLevelQueries);
 							}
 						}
 						inserted = true;
@@ -238,16 +238,14 @@ public class FASTIndexCell {
 					if (currentCell.finalQueries == null)
 						currentCell.finalQueries = new ArrayList<Query>();
 					currentCell.finalQueries.add(query);
-					if(query.getQueryId()==debugQID)
-						System.out.println("final"+query+coordinate);
+					
 
 				} else {
 					if (currentCell.queries == null)
 						currentCell.queries = new ArrayList<Query>();
 					currentCell.queries.add(query);
-					if(query.getQueryId()==debugQID)
-						System.out.println("Not final"+query+coordinate);
-					if (currentCell.queries.size() > LocalFASTIndex.Degredation_Ratio)
+				
+					if (currentCell.queries.size() > FAST.Degredation_Ratio)
 						findQueriesToReinsert(currentCell, insertNextLevelQueries);
 				}
 			}
@@ -256,9 +254,9 @@ public class FASTIndexCell {
 
 		if(test ==true &&coordinate==16777766){
 			;;
-			KeywordTrieCell index1 = ((KeywordTrieCell)ptp.get("casino"));
-			KeywordTrieCell index2 = ((KeywordTrieCell)index1.trieCells.get("hotel"));
-			KeywordTrieCell index3 =  ((KeywordTrieCell)index2.trieCells.get("las"));
+			KeywordTrieCellMinimalExperiment index1 = ((KeywordTrieCellMinimalExperiment)ptp.get("casino"));
+			KeywordTrieCellMinimalExperiment index2 = ((KeywordTrieCellMinimalExperiment)index1.trieCells.get("hotel"));
+			KeywordTrieCellMinimalExperiment index3 =  ((KeywordTrieCellMinimalExperiment)index2.trieCells.get("las"));
 			
 			if(!index3.finalQueries.contains(testObject))
 				System.out.println("There is an error here");
@@ -273,33 +271,24 @@ public class FASTIndexCell {
 		return false;
 		
 	}
-	public boolean insertAtKeyWord(String keyword, Query query, ArrayList<Query> sharedQueries) {
+	public boolean insertAtKeyWord(String keyword,Query query, ArrayList<Query> sharedQueries) {
 		boolean inserted = false;
-		//System.out.println("Line 276 here");
-		//if(keyword == null){
-			//return null;
-		//}
 		if (!ptp.containsKey(keyword)) {
-			//System.out.println("Line 278 here");
-			LocalFASTIndex.numberOfHashEntries++;
-			LocalFASTIndex.queryInsertInvListNodeCounter++;
+			LocalHybridPyramidGridIndexOptimized.numberOfHashEntries++;
 			inserted = true;
 			ptp.put(keyword, query);
 			return inserted;
 		} else { //this keyword already exists in the index
-			//System.out.println("Line 285 here");
 			Object keywordIndex = ptp.get(keyword);
 			if (keywordIndex == null) {
-				LocalFASTIndex.queryInsertInvListNodeCounter++;
 				ptp.put(keyword, query);
 				inserted = true;
 				return inserted;
 			}
 			if (keywordIndex instanceof Query) { //single query 
 				Query exitingQuery = (Query) keywordIndex;
-				if (exitingQuery.expireTime > LocalFASTIndex.queryTimeStampCounter) { //checking for the support of the query
+				if (exitingQuery.getRemoveTime() > FAST.queryTimeStampCounter) { //checking for the support of the query
 					ArrayList<Query> rareQueries = new ArrayList<Query>();
-					LocalFASTIndex.queryInsertInvListNodeCounter++;
 					rareQueries.add(exitingQuery);
 					rareQueries.add(query);
 					inserted = true;
@@ -312,15 +301,14 @@ public class FASTIndexCell {
 					return inserted;
 				}
 
-			} else if ((keywordIndex instanceof ArrayList) && ((ArrayList<Query>) keywordIndex).size() < LocalFASTIndex.Trie_SPLIT_THRESHOLD) { // this keyword is rare
+			} else if ((keywordIndex instanceof ArrayList) && ((ArrayList<Query>) keywordIndex).size() < FAST.Trie_SPLIT_THRESHOLD) { // this keyword is rare
 				if (((ArrayList<Query>) keywordIndex) != sharedQueries)
 					if (!((ArrayList<Query>) keywordIndex).contains( query)) {
 						((ArrayList<Query>) keywordIndex).add(query);
-						LocalFASTIndex.queryInsertInvListNodeCounter++;
 					}
 				inserted = true;
 				return inserted;
-			} else if ((keywordIndex instanceof ArrayList) && ((ArrayList<Query>) keywordIndex).size() >= LocalFASTIndex.Trie_SPLIT_THRESHOLD) { // this keyword is rare
+			} else if ((keywordIndex instanceof ArrayList) && ((ArrayList<Query>) keywordIndex).size() >= FAST.Trie_SPLIT_THRESHOLD) { // this keyword is rare
 				if (((ArrayList<Query>) keywordIndex) != sharedQueries) {
 					if (!((ArrayList<Query>) keywordIndex).contains( query)) {
 						inserted = false;
@@ -334,7 +322,7 @@ public class FASTIndexCell {
 					return inserted;
 				}
 				//then trie insert for all frequent keywords 
-			} else if (keywordIndex instanceof KeywordTrieCell) {
+			} else if (keywordIndex instanceof KeywordTrieCellMinimalExperiment) {
 				inserted = false;
 				return inserted;
 			} else {
@@ -374,7 +362,7 @@ public class FASTIndexCell {
 		return minKeyword;
 	}
 
-	public void findQueriesToReinsert(KeywordTrieCell cell, ArrayList<ReinsertEntry> insertNextLevelQueries) {
+	public void findQueriesToReinsert(KeywordTrieCellMinimalExperiment cell, ArrayList<ReinsertEntry> insertNextLevelQueries) {
 		SpatialOverlapCompartor spatialOverlapCompartor = new SpatialOverlapCompartor(bounds);
 		Collections.sort(cell.queries, spatialOverlapCompartor);
 		int queriesSize =  cell.queries.size() ;
@@ -382,8 +370,7 @@ public class FASTIndexCell {
 		//for (int i = queriesSize - 1; i >=0; i--) {
 			Query query = cell.queries.remove(i);
 			insertNextLevelQueries.add(new ReinsertEntry(SpatialHelper.spatialIntersect(bounds, query.getSpatialRange()), query));
-			if(query.getQueryId()==debugQID)
-				System.out.println("reinsert"+query+coordinate);
+			
 		}
 	}
 
@@ -392,19 +379,19 @@ public class FASTIndexCell {
 		if (cleaningIterator == null || !cleaningIterator.hasNext())
 			cleaningIterator = ptp.entrySet().iterator();
 		Integer numberOfVisitedEntries = 0;
-		while (cleaningIterator.hasNext() && numberOfVisitedEntries < LocalFASTIndex.MAX_ENTRIES_PER_CLEANING_INTERVAL) {
+		while (cleaningIterator.hasNext() && numberOfVisitedEntries < FAST.MAX_ENTRIES_PER_CLEANING_INTERVAL) {
 			Entry<String, Object> keywordIndexEntry = cleaningIterator.next();
 			Object keywordIndex = keywordIndexEntry.getValue();
 			String keyword = keywordIndexEntry.getKey();
 			if (keywordIndex instanceof Query) {
 				numberOfVisitedEntries++;
-				if (((Query) keywordIndex).expireTime < LocalFASTIndex.queryTimeStampCounter)
+				if (((Query) keywordIndex).getRemoveTime() < FAST.queryTimeStampCounter)
 					keywordIndex = null;
 			} else if (keywordIndex instanceof ArrayList) {
 				Iterator<Query> queriesItrator = ((ArrayList<Query>) keywordIndex).iterator();
 				while (queriesItrator.hasNext()) {
 					Query query = queriesItrator.next();
-					if (query.expireTime < LocalFASTIndex.queryTimeStampCounter)
+					if (query.getRemoveTime() < FAST.queryTimeStampCounter)
 						queriesItrator.remove();
 					numberOfVisitedEntries++;
 				}
@@ -415,15 +402,15 @@ public class FASTIndexCell {
 					ptp.put(keyword, singleQuery);
 
 				}
-			} else if (keywordIndex instanceof KeywordTrieCell) {
+			} else if (keywordIndex instanceof KeywordTrieCellMinimalExperiment) {
 
 				ArrayList<Query> combinedQueries = new ArrayList<Query>();
-				numberOfVisitedEntries += ((KeywordTrieCell) keywordIndex).clean(combinedQueries);
-				if (((KeywordTrieCell) keywordIndex).queries == null && ((KeywordTrieCell) keywordIndex).trieCells == null
-						&& LocalFASTIndex.overallQueryTextSummery.get(keyword).queryCount <= LocalFASTIndex.Trie_OVERLALL_MERGE_THRESHOLD)
+				numberOfVisitedEntries += ((KeywordTrieCellMinimalExperiment) keywordIndex).clean(combinedQueries);
+				if (((KeywordTrieCellMinimalExperiment) keywordIndex).queries == null && ((KeywordTrieCellMinimalExperiment) keywordIndex).trieCells == null
+						&& overallQueryTextSummery.get(keyword).queryCount <= FAST.Trie_OVERLALL_MERGE_THRESHOLD)
 					keywordIndex = null;
-				else if (combinedQueries.size() < LocalFASTIndex.Trie_OVERLALL_MERGE_THRESHOLD
-						&& LocalFASTIndex.overallQueryTextSummery.get(keyword).queryCount <= LocalFASTIndex.Trie_OVERLALL_MERGE_THRESHOLD)
+				else if (combinedQueries.size() < FAST.Trie_OVERLALL_MERGE_THRESHOLD
+						&& overallQueryTextSummery.get(keyword).queryCount <= FAST.Trie_OVERLALL_MERGE_THRESHOLD)
 					ptp.put(keyword, combinedQueries);
 			}
 			if (keywordIndex == null)
@@ -442,7 +429,6 @@ public class FASTIndexCell {
 		for (int i = 0; i < keywords.size(); i++) {
 			String keyword = keywords.get(i);
 			Object keyWordIndex = ptp.get(keyword);
-			LocalFASTIndex.objectSearchInvListHashAccess++;
 			if (keyWordIndex != null) {
 				if (keyWordIndex instanceof Query) {
 					Query query = ((Query) keyWordIndex);
@@ -452,12 +438,11 @@ public class FASTIndexCell {
 				} else if (keyWordIndex instanceof ArrayList) {
 					ArrayList<Query> rareQueries = (ArrayList<Query>) keyWordIndex;
 					for (Query q : rareQueries) {
-						LocalFASTIndex.objectSearchInvListNodeCounter++;
 						if (keywords.size() >= q.getQueryText().size() && SpatialHelper.overlapsSpatially(p, q.getSpatialRange()) && TextHelpers.containsTextually(keywords, q.getQueryText())) {
 							finalQueries.add(q);
 						}
 					}
-				} else if (keyWordIndex instanceof KeywordTrieCell) {
+				} else if (keyWordIndex instanceof KeywordTrieCellMinimalExperiment) {
 					remainingKewords.add(keyword);
 				}
 			}
@@ -466,8 +451,7 @@ public class FASTIndexCell {
 		for (int i = 0; i < remainingKewords.size(); i++) {
 			String keyword = remainingKewords.get(i);
 			Object keyWordIndex = ptp.get(keyword);
-			LocalFASTIndex.totalTrieAccess++;
-			((KeywordTrieCell) keyWordIndex).find(remainingKewords, i + 1, finalQueries, 0, p);
+			((KeywordTrieCellMinimalExperiment) keyWordIndex).find(remainingKewords, i + 1, finalQueries, 0, p);
 		}
 
 		return remainingKewords;
@@ -497,5 +481,4 @@ class SpatialOverlapCompartor implements Comparator<Query> {
 			return -1;
 		}
 	}
-	
 }

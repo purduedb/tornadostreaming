@@ -1,4 +1,4 @@
-package edu.purdue.cs.tornado.helper;
+package edu.purdue.cs.tornado.index.local.fast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,19 +6,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import edu.purdue.cs.tornado.index.local.fast.LocalFASTIndex;
-import edu.purdue.cs.tornado.messages.MinimalRangeQuery;
+import edu.purdue.cs.tornado.helper.Point;
+import edu.purdue.cs.tornado.helper.SpatialHelper;
+import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.Query;
 
-
-
-public class KeywordTrieCell {
+public class KeywordTrieCellMinimalExperiment {
 	public HashMap<String, Object> trieCells;
 	public ArrayList<Query> queries;
 	public ArrayList<Query> finalQueries;
 	//public boolean extended ;
 
-	public KeywordTrieCell() {
+	public KeywordTrieCellMinimalExperiment() {
 		queries = null;//
 		finalQueries = null;
 		trieCells = null;
@@ -26,17 +25,14 @@ public class KeywordTrieCell {
 	}
 
 	public void find(ArrayList<String> keywords, int start, List<Query> result, int level, Point location) {
-		LocalFASTIndex.objectSearchTrieNodeCounter++;
 		if (finalQueries != null)
 			for (Query q : finalQueries) {
-				LocalFASTIndex.objectSearchTrieFinalNodeCounter++; //added MRQ->Q and spatialRange->getSpatialRange
 				if (SpatialHelper.overlapsSpatially(location, q.getSpatialRange())) {
 					result.add(q);
 				}
 			}
 		if (queries != null)
 			for (Query q : queries) {
-				LocalFASTIndex.objectSearchTrieNodeCounter++;
 				if (SpatialHelper.overlapsSpatially(location, q.getSpatialRange())) {
 					result.add(q);
 				}
@@ -50,21 +46,18 @@ public class KeywordTrieCell {
 
 				if (cell == null)
 					continue;
-				LocalFASTIndex.objectSearchTrieHashAccess++;
 				if (cell instanceof Query) {
-					LocalFASTIndex.objectSearchTrieNodeCounter++;
 					if (SpatialHelper.overlapsSpatially(location, ((Query) cell).getSpatialRange()) && TextHelpers.containsTextually(keywords, ((Query) cell).getQueryText()))
 						result.add(((Query) cell));
 
 				} else if (cell instanceof ArrayList) {
 					for (Query q : ((ArrayList<Query>) cell)) {
-						LocalFASTIndex.objectSearchTrieNodeCounter++;
 						if (SpatialHelper.overlapsSpatially(location, q.getSpatialRange()) && TextHelpers.containsTextually(keywords, q.getQueryText()))
 							result.add(q);
 					}
 
-				} else if (cell instanceof KeywordTrieCell) {
-					((KeywordTrieCell) cell).find(keywords, i + 1, result, level + 1, location);
+				} else if (cell instanceof KeywordTrieCellMinimalExperiment) {
+					((KeywordTrieCellMinimalExperiment) cell).find(keywords, i + 1, result, level + 1, location);
 				}
 
 			}
@@ -96,8 +89,8 @@ public class KeywordTrieCell {
 						
 					}
 
-				} else if (cell instanceof KeywordTrieCell) {
-					((KeywordTrieCell) cell).findTextualOnly(keywords, i + 1, result, level + 1);
+				} else if (cell instanceof KeywordTrieCellMinimalExperiment) {
+					((KeywordTrieCellMinimalExperiment) cell).findTextualOnly(keywords, i + 1, result, level + 1);
 				}
 
 			}
@@ -110,7 +103,7 @@ public class KeywordTrieCell {
 			Iterator<Query> queriesItr = queries.iterator();
 			while (queriesItr.hasNext()) {
 				Query query = queriesItr.next();
-				if (query.expireTime < LocalFASTIndex.queryTimeStampCounter)
+				if (query.getRemoveTime() < FAST.queryTimeStampCounter)
 					queriesItr.remove();
 				else {
 					combinedQueries.add(query);
@@ -126,7 +119,7 @@ public class KeywordTrieCell {
 				Entry<String, Object> trieCellEntry = trieCellsItr.next();
 				Object cell = trieCellEntry.getValue();
 				if (cell instanceof Query) {
-					if (((Query) cell).expireTime < LocalFASTIndex.queryTimeStampCounter)
+					if (((Query) cell).getRemoveTime() < FAST.queryTimeStampCounter)
 						trieCellsItr.remove();
 					else {
 						combinedQueries.add((Query) cell);
@@ -136,7 +129,7 @@ public class KeywordTrieCell {
 					Iterator<Query> queriesInternalItr = ((ArrayList<Query>) cell).iterator();
 					while (queriesInternalItr.hasNext()) {
 						Query query = queriesInternalItr.next();
-						if (query.expireTime < LocalFASTIndex.queryTimeStampCounter)
+						if (query.getRemoveTime() < FAST.queryTimeStampCounter)
 							queriesInternalItr.remove();
 						else {
 							combinedQueries.add(query);
@@ -145,9 +138,9 @@ public class KeywordTrieCell {
 					}
 					if (((ArrayList<Query>) cell).size() == 0)
 						trieCellsItr.remove();
-				} else if (cell instanceof KeywordTrieCell) {
-					operations += ((KeywordTrieCell) cell).clean(combinedQueries);
-					if (((KeywordTrieCell) cell).queries == null && ((KeywordTrieCell) cell).trieCells == null)
+				} else if (cell instanceof KeywordTrieCellMinimalExperiment) {
+					operations += ((KeywordTrieCellMinimalExperiment) cell).clean(combinedQueries);
+					if (((KeywordTrieCellMinimalExperiment) cell).queries == null && ((KeywordTrieCellMinimalExperiment) cell).trieCells == null)
 						trieCellsItr.remove();
 				}
 			}
