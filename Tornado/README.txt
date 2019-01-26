@@ -43,6 +43,12 @@ you will need to pull the tornado branch
 all deployment instructions are located in the Github repository file
 
 Tornado will need to have a zookeeper and kafka to communicate with the UI (even in your local machine)
+*kafka is used as the communication channel between the UI and Tornado
+*Users of the UI build spatio-textual queries.  
+*The UI forwards the queries to Kafka
+*Tornado has a special spout (KafkaSpout) that read queries from kafka and converts them to the internal quey format of Tornado.
+*Tornado registers the continuous queries from the UI normally and executes them against stream data.
+*Results of queries are the communicated a special bolt 
 *******************************************************************************************************
 To install kafka 
 
