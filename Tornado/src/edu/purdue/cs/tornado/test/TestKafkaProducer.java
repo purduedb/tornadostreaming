@@ -24,7 +24,6 @@ import java.util.concurrent.ExecutionException;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
 public class TestKafkaProducer {
 	static String topic;
 	static String zookeeper;
@@ -33,16 +32,15 @@ public class TestKafkaProducer {
 		
 		Properties props = new Properties();
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
-		props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
-		props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class.getName());
-
-		KafkaProducer<String,String> producer = new KafkaProducer<String,String>(props);
+		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("value.serializer", "org.propsapache.kafka.common.serialization.StringSerializer");
+		KafkaProducer producer = new KafkaProducer(props);
 		
 		boolean sync = false;
 		String topic="output";
 		String key = "q1";
 		String value = "{\"qname\":\"q11\",\"point\":{\"lat\":41.8864494854113,\"lng\":-87.61987492165883},\"text\":\"Ahmed refaat ahmed2 \"}";
-		ProducerRecord<String,String> producerRecord = new ProducerRecord<String,String>(topic, key, value);
+		ProducerRecord producerRecord = new ProducerRecord(topic, key.getBytes(), value.getBytes());
 		if (sync) {
 			try {
 				producer.send(producerRecord).get();

@@ -190,7 +190,7 @@ public class TornadoTweetCountExample {
 	static void addQuerySpout(String dataSourceName, String querySourceName, SpatioTextualToplogyBuilder builder, Properties properties, Integer parrellism, Double spatialRange, Integer queryCount,
 			Integer queryKeywordCount, Integer emitSleepDurationInNanoSecond, Integer initialSleepDuration, String fileSystem, String queriesFilePath, TextualPredicate queryTextualPredicate) {
 		//addRangeQueries is original addRangeQueries2 uses AtlasParserSpout
-			DataAndQueriesSources.addRangeQueries2(dataSourceName, querySourceName, builder, properties, parrellism, spatialRange, queryCount,
+			DataAndQueriesSources.addRangeQueries(dataSourceName, querySourceName, builder, properties, parrellism, spatialRange, queryCount,
 				queryKeywordCount, emitSleepDurationInNanoSecond, initialSleepDuration, fileSystem, queriesFilePath, queryTextualPredicate);
 	}
 	
