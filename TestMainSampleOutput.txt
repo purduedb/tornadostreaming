@@ -1,0 +1,1121 @@
+Finished loading executor spatiotextualcomponent1_index:[87 87]
+Loading executor spatiotextualcomponent1_index:[118 118]
+Loaded executor tasks spatiotextualcomponent1_index:[118 118]
+Finished loading executor spatiotextualcomponent1_index:[118 118]
+Loading executor spatiotextualcomponent1_index:[119 119]
+Loaded executor tasks spatiotextualcomponent1_index:[119 119]
+Finished loading executor spatiotextualcomponent1_index:[119 119]
+Loading executor spatiotextualcomponent1:[24 24]
+Loaded executor tasks spatiotextualcomponent1:[24 24]
+Finished loading executor spatiotextualcomponent1:[24 24]
+Loading executor spatiotextualcomponent1:[25 25]
+Loaded executor tasks spatiotextualcomponent1:[25 25]
+Finished loading executor spatiotextualcomponent1:[25 25]
+Loading executor spatiotextualcomponent1:[56 56]
+Loaded executor tasks spatiotextualcomponent1:[56 56]
+Finished loading executor spatiotextualcomponent1:[56 56]
+Loading executor spatiotextualcomponent1:[57 57]
+Loading executor spatiotextualcomponent1_index:[88 88]
+Loaded executor tasks spatiotextualcomponent1:[57 57]
+Loaded executor tasks spatiotextualcomponent1_index:[88 88]
+Finished loading executor spatiotextualcomponent1:[57 57]
+Finished loading executor spatiotextualcomponent1_index:[88 88]
+Loading executor spatiotextualcomponent1_index:[120 120]
+Loading executor spatiotextualcomponent1_index:[89 89]
+Loaded executor tasks spatiotextualcomponent1_index:[120 120]
+Loaded executor tasks spatiotextualcomponent1_index:[89 89]
+Finished loading executor spatiotextualcomponent1_index:[120 120]
+Finished loading executor spatiotextualcomponent1_index:[89 89]
+Loading executor spatiotextualcomponent1:[26 26]
+Loaded executor tasks spatiotextualcomponent1:[26 26]
+Loading executor spatiotextualcomponent1_index:[121 121]
+Finished loading executor spatiotextualcomponent1:[26 26]
+Loaded executor tasks spatiotextualcomponent1_index:[121 121]
+Finished loading executor spatiotextualcomponent1_index:[121 121]
+Loading executor spatiotextualcomponent1:[58 58]
+Loaded executor tasks spatiotextualcomponent1:[58 58]
+Finished loading executor spatiotextualcomponent1:[58 58]
+Loading executor spatiotextualcomponent1:[27 27]
+Loaded executor tasks spatiotextualcomponent1:[27 27]
+Loading executor spatiotextualcomponent1_index:[90 90]
+Loaded executor tasks spatiotextualcomponent1_index:[90 90]
+Finished loading executor spatiotextualcomponent1:[27 27]
+Finished loading executor spatiotextualcomponent1_index:[90 90]
+Loading executor spatiotextualcomponent1:[59 59]
+Loading executor spatiotextualcomponent1_index:[122 122]
+Loaded executor tasks spatiotextualcomponent1:[59 59]
+Loaded executor tasks spatiotextualcomponent1_index:[122 122]
+Finished loading executor spatiotextualcomponent1:[59 59]
+Finished loading executor spatiotextualcomponent1_index:[122 122]
+Loading executor spatiotextualcomponent1:[28 28]
+Loaded executor tasks spatiotextualcomponent1:[28 28]
+Loading executor spatiotextualcomponent1_index:[91 91]
+Finished loading executor spatiotextualcomponent1:[28 28]
+Loaded executor tasks spatiotextualcomponent1_index:[91 91]
+Finished loading executor spatiotextualcomponent1_index:[91 91]
+Loading executor spatiotextualcomponent1:[60 60]
+Loading executor spatiotextualcomponent1_index:[123 123]
+Loaded executor tasks spatiotextualcomponent1:[60 60]
+Loaded executor tasks spatiotextualcomponent1_index:[123 123]
+Finished loading executor spatiotextualcomponent1:[60 60]
+Finished loading executor spatiotextualcomponent1_index:[123 123]
+Loading executor spatiotextualcomponent1_index:[92 92]
+Loading executor spatiotextualcomponent1:[29 29]
+Loaded executor tasks spatiotextualcomponent1_index:[92 92]
+Loaded executor tasks spatiotextualcomponent1:[29 29]
+Finished loading executor spatiotextualcomponent1_index:[92 92]
+Finished loading executor spatiotextualcomponent1:[29 29]
+Loading executor spatiotextualcomponent1_index:[124 124]
+Loaded executor tasks spatiotextualcomponent1_index:[124 124]
+Loading executor spatiotextualcomponent1:[61 61]
+Loaded executor tasks spatiotextualcomponent1:[61 61]
+Finished loading executor spatiotextualcomponent1:[61 61]
+Finished loading executor spatiotextualcomponent1_index:[124 124]
+Loading executor spatiotextualcomponent1_index:[93 93]
+Loaded executor tasks spatiotextualcomponent1_index:[93 93]
+Finished loading executor spatiotextualcomponent1_index:[93 93]
+Loading executor spatiotextualcomponent1:[30 30]
+Loaded executor tasks spatiotextualcomponent1:[30 30]
+Finished loading executor spatiotextualcomponent1:[30 30]
+Loading executor spatiotextualcomponent1_index:[125 125]
+Loaded executor tasks spatiotextualcomponent1_index:[125 125]
+Finished loading executor spatiotextualcomponent1_index:[125 125]
+Loading executor spatiotextualcomponent1:[62 62]
+Loaded executor tasks spatiotextualcomponent1:[62 62]
+Finished loading executor spatiotextualcomponent1:[62 62]
+Loading executor spatiotextualcomponent1:[31 31]
+Loaded executor tasks spatiotextualcomponent1:[31 31]
+Finished loading executor spatiotextualcomponent1:[31 31]
+Loading executor spatiotextualcomponent1_index:[94 94]
+Loaded executor tasks spatiotextualcomponent1_index:[94 94]
+Finished loading executor spatiotextualcomponent1_index:[94 94]
+Loading executor spatiotextualcomponent1:[63 63]
+Loaded executor tasks spatiotextualcomponent1:[63 63]
+Finished loading executor spatiotextualcomponent1:[63 63]
+Loading executor spatiotextualcomponent1_index:[126 126]
+Loaded executor tasks spatiotextualcomponent1_index:[126 126]
+Finished loading executor spatiotextualcomponent1_index:[126 126]
+Loading executor spatiotextualcomponent1_index:[95 95]
+Loaded executor tasks spatiotextualcomponent1_index:[95 95]
+Finished loading executor spatiotextualcomponent1_index:[95 95]
+Loading executor __system:[-1 -1]
+Loaded executor tasks __system:[-1 -1]
+Finished loading executor __system:[-1 -1]
+Loading executor spatiotextualcomponent1_index:[127 127]
+Loaded executor tasks spatiotextualcomponent1_index:[127 127]
+Finished loading executor spatiotextualcomponent1_index:[127 127]
+Loading executor spatiotextualcomponent1:[32 32]
+Loaded executor tasks spatiotextualcomponent1:[32 32]
+Finished loading executor spatiotextualcomponent1:[32 32]
+Loading executor __system:[-1 -1]
+Loaded executor tasks __system:[-1 -1]
+Finished loading executor __system:[-1 -1]
+Loading executor spatiotextualcomponent1:[64 64]
+Loaded executor tasks spatiotextualcomponent1:[64 64]
+Loading executor SentimentBolt:[1 1]
+Loaded executor tasks SentimentBolt:[1 1]
+Finished loading executor spatiotextualcomponent1:[64 64]
+Finished loading executor SentimentBolt:[1 1]
+Loading executor spatiotextualcomponent1_index:[96 96]
+Loaded executor tasks spatiotextualcomponent1_index:[96 96]
+Loading executor spatiotextualcomponent1:[33 33]
+Finished loading executor spatiotextualcomponent1_index:[96 96]
+Loaded executor tasks spatiotextualcomponent1:[33 33]
+Finished loading executor spatiotextualcomponent1:[33 33]
+Loading executor spatiotextualcomponent1_index:[128 128]
+Loaded executor tasks spatiotextualcomponent1_index:[128 128]
+Loading executor spatiotextualcomponent1:[65 65]
+Loaded executor tasks spatiotextualcomponent1:[65 65]
+Finished loading executor spatiotextualcomponent1_index:[128 128]
+Finished loading executor spatiotextualcomponent1:[65 65]
+Worker has topology config {"storm.id" "test-1-1552841381", "dev.zookeeper.path" "/tmp/dev-storm-zookeeper", "topology.tick.tuple.freq.secs" nil, "topology.builtin.metrics.bucket.size.secs" 60, "topology.fall.back.on.java.serialization" true, "topology.max.error.report.per.interval" 5, "zmq.linger.millis" 0, "topology.skip.missing.kryo.registrations" true, "storm.messaging.netty.client_worker_threads" 1, "ui.childopts" "-Xmx768m", "storm.zookeeper.session.timeout" 20000, "nimbus.reassign" true, "kafkaConsumerGroup" "queryprocExample", "topology.trident.batch.emit.interval.millis" 50, "storm.messaging.netty.flush.check.interval.ms" 10, "nimbus.monitor.freq.secs" 10, "logviewer.childopts" "-Xmx128m", "java.library.path" "/usr/local/lib:/opt/local/lib:/usr/lib", "topology.executor.send.buffer.size" 1024, "storm.local.dir" "/var/folders/67/h98cx9g15gz47sfwtwdm9s4m0000gn/T//b2266424-c893-45cf-8d7c-79d7e240f483", "storm.messaging.netty.buffer_size" 5242880, "supervisor.worker.start.timeout.secs" 120, "topology.enable.message.timeouts" true, "nimbus.cleanup.inbox.freq.secs" 600, "nimbus.inbox.jar.expiration.secs" 3600, "kafkaZookeeper" "localhost:2181", "drpc.worker.threads" 64, "storm.meta.serialization.delegate" "backtype.storm.serialization.DefaultSerializationDelegate", "topology.worker.shared.thread.pool.size" 4, "nimbus.host" "localhost", "storm.messaging.netty.min_wait_ms" 100, "storm.zookeeper.port" 2000, "transactional.zookeeper.port" nil, "topology.executor.receive.buffer.size" 1024, "transactional.zookeeper.servers" nil, "storm.zookeeper.root" "/storm", "storm.zookeeper.retry.intervalceiling.millis" 30000, "supervisor.enable" true, "storm.messaging.netty.server_worker_threads" 1, "storm.zookeeper.servers" ["localhost"], "transactional.zookeeper.root" "/transactional", "topology.acker.executors" 0, "topology.kryo.decorators" (), "topology.name" "test", "topology.transfer.buffer.size" 1024, "topology.worker.childopts" nil, "drpc.queue.size" 128, "worker.childopts" "-Xmx768m", "supervisor.heartbeat.frequency.secs" 5, "topology.error.throttle.interval.secs" 10, "kafkaBootstrapServerConfig" "localhost:9092", "zmq.hwm" 0, "drpc.port" 3772, "supervisor.monitor.frequency.secs" 3, "drpc.childopts" "-Xmx768m", "topology.receiver.buffer.size" 8, "task.heartbeat.frequency.secs" 3, "topology.tasks" nil, "storm.messaging.netty.max_retries" 300, "topology.spout.wait.strategy" "backtype.storm.spout.SleepSpoutWaitStrategy", "nimbus.thrift.max_buffer_size" 1048576, "/Users/peytonpuckett/Desktop/S8/S8/CS490/OldTornadoDemo/qadahtm-tornado-c83372f024db/Tornado/datasources/twitterdata.csv" nil, "topology.max.spout.pending" nil, "storm.zookeeper.retry.interval" 1000, "topology.sleep.spout.wait.strategy.time.ms" 1, "discoDir" "/home/ahmed/Downloads/enwiki-20130403-word2vec-lm-mwl-lc-sim/", "nimbus.topology.validator" "backtype.storm.nimbus.DefaultTopologyValidator", "kafkaConsumerTopic" "queries", "supervisor.slots.ports" (1027 1028 1029), "topology.environment" nil, "topology.debug" false, "nimbus.task.launch.secs" 120, "nimbus.supervisor.timeout.secs" 60, "topology.kryo.register" {"edu.purdue.cs.tornado.messages.ResultSetChange" "edu.purdue.cs.tornado.serializer.ResultSetChangeSerializer", "edu.purdue.cs.tornado.messages.OutputTuple" "edu.purdue.cs.tornado.serializer.OutputTupleSerializer", "edu.purdue.cs.tornado.helper.Rectangle" "edu.purdue.cs.tornado.serializer.RectangleSerializer", "edu.purdue.cs.tornado.helper.Point" "edu.purdue.cs.tornado.serializer.PointSerializer", "edu.purdue.cs.tornado.messages.Control" "edu.purdue.cs.tornado.serializer.ControlSerializer", "edu.purdue.cs.tornado.messages.DataObjectList" "edu.purdue.cs.tornado.serializer.DataObjectListSerializer", "edu.purdue.cs.tornado.messages.DataObject" "edu.purdue.cs.tornado.serializer.DataObjectSerializer", "edu.purdue.cs.tornado.messages.Query" "edu.purdue.cs.tornado.serializer.QuerySerializer"}, "topology.message.timeout.secs" 30, "task.refresh.poll.secs" 10, "topology.workers" 2, "supervisor.childopts" "-Xmx256m", "nimbus.thrift.port" 6627, "topology.stats.sample.rate" 0.05, "worker.heartbeat.frequency.secs" 1, "topology.tuple.serializer" "backtype.storm.serialization.types.ListDelegateSerializer", "kafkaProducerTopic" "output", "topology.disruptor.wait.strategy" "com.lmax.disruptor.BlockingWaitStrategy", "topology.multilang.serializer" "backtype.storm.multilang.JsonSerializer", "nimbus.task.timeout.secs" 30, "storm.zookeeper.connection.timeout" 15000, "topology.kryo.factory" "backtype.storm.serialization.DefaultKryoFactory", "drpc.invocations.port" 3773, "logviewer.port" 8000, "zmq.threads" 1, "storm.zookeeper.retry.times" 5, "topology.worker.receiver.thread.count" 1, "storm.thrift.transport" "backtype.storm.security.auth.SimpleTransportPlugin", "topology.state.synchronization.timeout.secs" 60, "supervisor.worker.timeout.secs" 30, "nimbus.file.copy.expiration.secs" 600, "storm.messaging.transport" "backtype.storm.messaging.netty.Context", "logviewer.appender.name" "A1", "storm.messaging.netty.max_wait_ms" 1000, "drpc.request.timeout.secs" 600, "storm.local.mode.zmq" false, "ui.port" 8080, "nimbus.childopts" "-Xmx1024m", "storm.cluster.mode" "local", "topology.max.task.parallelism" nil, "storm.messaging.netty.transfer.batch.size" 262144, "topology.classpath" nil}
+Worker e5655fc0-327c-45a3-9b3b-76b49b28e89d for storm test-1-1552841381 on d30d4a81-0b82-41f7-a1c6-e281cc2be2e7:1027 has finished loading
+Loading executor spatiotextualcomponent1_index:[97 97]
+Loaded executor tasks spatiotextualcomponent1_index:[97 97]
+Finished loading executor spatiotextualcomponent1_index:[97 97]
+Loading executor spatiotextualcomponent1_index:[129 129]
+Loaded executor tasks spatiotextualcomponent1_index:[129 129]
+Finished loading executor spatiotextualcomponent1_index:[129 129]
+Worker has topology config {"storm.id" "test-1-1552841381", "dev.zookeeper.path" "/tmp/dev-storm-zookeeper", "topology.tick.tuple.freq.secs" nil, "topology.builtin.metrics.bucket.size.secs" 60, "topology.fall.back.on.java.serialization" true, "topology.max.error.report.per.interval" 5, "zmq.linger.millis" 0, "topology.skip.missing.kryo.registrations" true, "storm.messaging.netty.client_worker_threads" 1, "ui.childopts" "-Xmx768m", "storm.zookeeper.session.timeout" 20000, "nimbus.reassign" true, "kafkaConsumerGroup" "queryprocExample", "topology.trident.batch.emit.interval.millis" 50, "storm.messaging.netty.flush.check.interval.ms" 10, "nimbus.monitor.freq.secs" 10, "logviewer.childopts" "-Xmx128m", "java.library.path" "/usr/local/lib:/opt/local/lib:/usr/lib", "topology.executor.send.buffer.size" 1024, "storm.local.dir" "/var/folders/67/h98cx9g15gz47sfwtwdm9s4m0000gn/T//cf34e566-2862-45fb-9058-5fcccbeedfc2", "storm.messaging.netty.buffer_size" 5242880, "supervisor.worker.start.timeout.secs" 120, "topology.enable.message.timeouts" true, "nimbus.cleanup.inbox.freq.secs" 600, "nimbus.inbox.jar.expiration.secs" 3600, "kafkaZookeeper" "localhost:2181", "drpc.worker.threads" 64, "storm.meta.serialization.delegate" "backtype.storm.serialization.DefaultSerializationDelegate", "topology.worker.shared.thread.pool.size" 4, "nimbus.host" "localhost", "storm.messaging.netty.min_wait_ms" 100, "storm.zookeeper.port" 2000, "transactional.zookeeper.port" nil, "topology.executor.receive.buffer.size" 1024, "transactional.zookeeper.servers" nil, "storm.zookeeper.root" "/storm", "storm.zookeeper.retry.intervalceiling.millis" 30000, "supervisor.enable" true, "storm.messaging.netty.server_worker_threads" 1, "storm.zookeeper.servers" ["localhost"], "transactional.zookeeper.root" "/transactional", "topology.acker.executors" 0, "topology.kryo.decorators" (), "topology.name" "test", "topology.transfer.buffer.size" 1024, "topology.worker.childopts" nil, "drpc.queue.size" 128, "worker.childopts" "-Xmx768m", "supervisor.heartbeat.frequency.secs" 5, "topology.error.throttle.interval.secs" 10, "kafkaBootstrapServerConfig" "localhost:9092", "zmq.hwm" 0, "drpc.port" 3772, "supervisor.monitor.frequency.secs" 3, "drpc.childopts" "-Xmx768m", "topology.receiver.buffer.size" 8, "task.heartbeat.frequency.secs" 3, "topology.tasks" nil, "storm.messaging.netty.max_retries" 300, "topology.spout.wait.strategy" "backtype.storm.spout.SleepSpoutWaitStrategy", "nimbus.thrift.max_buffer_size" 1048576, "/Users/peytonpuckett/Desktop/S8/S8/CS490/OldTornadoDemo/qadahtm-tornado-c83372f024db/Tornado/datasources/twitterdata.csv" nil, "topology.max.spout.pending" nil, "storm.zookeeper.retry.interval" 1000, "topology.sleep.spout.wait.strategy.time.ms" 1, "discoDir" "/home/ahmed/Downloads/enwiki-20130403-word2vec-lm-mwl-lc-sim/", "nimbus.topology.validator" "backtype.storm.nimbus.DefaultTopologyValidator", "kafkaConsumerTopic" "queries", "supervisor.slots.ports" (1024 1025 1026), "topology.environment" nil, "topology.debug" false, "nimbus.task.launch.secs" 120, "nimbus.supervisor.timeout.secs" 60, "topology.kryo.register" {"edu.purdue.cs.tornado.messages.ResultSetChange" "edu.purdue.cs.tornado.serializer.ResultSetChangeSerializer", "edu.purdue.cs.tornado.messages.OutputTuple" "edu.purdue.cs.tornado.serializer.OutputTupleSerializer", "edu.purdue.cs.tornado.helper.Rectangle" "edu.purdue.cs.tornado.serializer.RectangleSerializer", "edu.purdue.cs.tornado.helper.Point" "edu.purdue.cs.tornado.serializer.PointSerializer", "edu.purdue.cs.tornado.messages.Control" "edu.purdue.cs.tornado.serializer.ControlSerializer", "edu.purdue.cs.tornado.messages.DataObjectList" "edu.purdue.cs.tornado.serializer.DataObjectListSerializer", "edu.purdue.cs.tornado.messages.DataObject" "edu.purdue.cs.tornado.serializer.DataObjectSerializer", "edu.purdue.cs.tornado.messages.Query" "edu.purdue.cs.tornado.serializer.QuerySerializer"}, "topology.message.timeout.secs" 30, "task.refresh.poll.secs" 10, "topology.workers" 2, "supervisor.childopts" "-Xmx256m", "nimbus.thrift.port" 6627, "topology.stats.sample.rate" 0.05, "worker.heartbeat.frequency.secs" 1, "topology.tuple.serializer" "backtype.storm.serialization.types.ListDelegateSerializer", "kafkaProducerTopic" "output", "topology.disruptor.wait.strategy" "com.lmax.disruptor.BlockingWaitStrategy", "topology.multilang.serializer" "backtype.storm.multilang.JsonSerializer", "nimbus.task.timeout.secs" 30, "storm.zookeeper.connection.timeout" 15000, "topology.kryo.factory" "backtype.storm.serialization.DefaultKryoFactory", "drpc.invocations.port" 3773, "logviewer.port" 8000, "zmq.threads" 1, "storm.zookeeper.retry.times" 5, "topology.worker.receiver.thread.count" 1, "storm.thrift.transport" "backtype.storm.security.auth.SimpleTransportPlugin", "topology.state.synchronization.timeout.secs" 60, "supervisor.worker.timeout.secs" 30, "nimbus.file.copy.expiration.secs" 600, "storm.messaging.transport" "backtype.storm.messaging.netty.Context", "logviewer.appender.name" "A1", "storm.messaging.netty.max_wait_ms" 1000, "drpc.request.timeout.secs" 600, "storm.local.mode.zmq" false, "ui.port" 8080, "nimbus.childopts" "-Xmx1024m", "storm.cluster.mode" "local", "topology.max.task.parallelism" nil, "storm.messaging.netty.transfer.batch.size" 262144, "topology.classpath" nil}
+Worker ae220979-02c9-4e5a-a4c4-e1494999315a for storm test-1-1552841381 on ae6ec736-6800-454f-8704-d518d6ee954d:1024 has finished loading
+Preparing bolt spatiotextualcomponent1:(62)
+Preparing bolt spatiotextualcomponent1_index:(98)
+Preparing bolt spatiotextualcomponent1:(10)
+Preparing bolt spatiotextualcomponent1:(8)
+Preparing bolt spatiotextualcomponent1_index:(110)
+Preparing bolt spatiotextualcomponent1:(40)
+Preparing bolt spatiotextualcomponent1:(44)
+Preparing bolt spatiotextualcomponent1:(24)
+Preparing bolt spatiotextualcomponent1:(52)
+Preparing bolt spatiotextualcomponent1:(58)
+Preparing bolt spatiotextualcomponent1_index:(100)
+Preparing bolt spatiotextualcomponent1_index:(130)
+Preparing bolt spatiotextualcomponent1:(20)
+Preparing bolt spatiotextualcomponent1_index:(132)
+***************************Printing Bolt configuration*******************
+Preparing bolt spatiotextualcomponent1_index:(90)
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+torando.data.source_Tweets = volatile
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_Tweets = volatile
+torando.data.source_Tweets = volatile
+torando.data.source_OSM_Data = static
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+torando.data.source_OSM_Data = static
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+torando.data.source_OSM_Data = static
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+torando.data.source_OSM_Data = static
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(54)
+Preparing bolt spatiotextualcomponent1_index:(108)
+Preparing bolt spatiotextualcomponent1:(16)
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+torando.data.source_OSM_Data = static
+Opening spout TextualRangeQueryGenerator:(2)
+Preparing bolt spatiotextualcomponent1:(42)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(56)
+Preparing bolt spatiotextualcomponent1_index:(122)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+Preparing bolt spatiotextualcomponent1_index:(94)
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(72)
+Preparing bolt kafkaOutputProducer:(4)
+Preparing bolt spatiotextualcomponent1:(48)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(28)
+Preparing bolt spatiotextualcomponent1_index:(126)
+Preparing bolt spatiotextualcomponent1:(50)
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(74)
+Preparing bolt spatiotextualcomponent1_index:(84)
+Preparing bolt __system:(-1)
+Preparing bolt spatiotextualcomponent1:(14)
+***************************Printing Bolt configuration*******************
+Preparing bolt spatiotextualcomponent1_index:(88)
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+Preparing bolt spatiotextualcomponent1:(60)
+torando.data.source_OSM_Data = static
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(82)
+Preparing bolt spatiotextualcomponent1:(36)
+Preparing bolt spatiotextualcomponent1:(34)
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(80)
+Preparing bolt spatiotextualcomponent1:(38)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(104)
+Preparing bolt spatiotextualcomponent1_index:(120)
+Preparing bolt spatiotextualcomponent1_index:(112)
+Preparing bolt spatiotextualcomponent1:(32)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(116)
+Preparing bolt spatiotextualcomponent1_index:(92)
+Preparing bolt spatiotextualcomponent1_index:(86)
+Preparing bolt spatiotextualcomponent1_index:(70)
+Preparing bolt spatiotextualcomponent1_index:(106)
+Preparing bolt spatiotextualcomponent1:(64)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(6)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(26)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(68)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(114)
+Preparing bolt spatiotextualcomponent1_index:(102)
+Preparing bolt spatiotextualcomponent1:(18)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(12)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(124)
+Preparing bolt spatiotextualcomponent1:(66)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(96)
+torando.data.source_Tweets = volatile
+Preparing bolt spatiotextualcomponent1:(46)
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(31)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+***************************Printing Bolt configuration*******************
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_Tweets = volatile
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(65)
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(105)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(25)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(95)
+Preparing bolt spatiotextualcomponent1_index:(81)
+Preparing bolt spatiotextualcomponent1_index:(129)
+Preparing bolt spatiotextualcomponent1_index:(109)
+Preparing bolt spatiotextualcomponent1_index:(111)
+Preparing bolt spatiotextualcomponent1_index:(101)
+Preparing bolt spatiotextualcomponent1:(55)
+Preparing bolt spatiotextualcomponent1_index:(99)
+***************************Printing Bolt configuration*******************
+Preparing bolt spatiotextualcomponent1_index:(91)
+torando.data.source_Tweets = volatile
+Preparing bolt spatiotextualcomponent1:(11)
+Preparing bolt spatiotextualcomponent1_index:(69)
+tornado.query.source_TextualRangeQueryGenerator = continuous
+***************************Printing Bolt configuration*******************
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(9)
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(49)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(63)
+Preparing bolt spatiotextualcomponent1_index:(127)
+***************************Printing Bolt configuration*******************
+Preparing bolt spatiotextualcomponent1:(41)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(47)
+Preparing bolt spatiotextualcomponent1:(59)
+torando.data.source_OSM_Data = static
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+Preparing bolt spatiotextualcomponent1:(19)
+torando.data.source_OSM_Data = static
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(85)
+Preparing bolt spatiotextualcomponent1_index:(131)
+Preparing bolt spatiotextualcomponent1_index:(123)
+Preparing bolt spatiotextualcomponent1:(53)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(43)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(17)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt __system:(-1)
+Preparing bolt spatiotextualcomponent1_index:(89)
+Preparing bolt spatiotextualcomponent1:(15)
+Preparing bolt spatiotextualcomponent1:(35)
+***************************Printing Bolt configuration*******************
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+Preparing bolt spatiotextualcomponent1:(37)
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Opening spout Tweets:(3)
+java.lang.NullPointerException
+	at java.io.FileInputStream.<init>(FileInputStream.java:130)
+	at java.io.FileInputStream.<init>(FileInputStream.java:93)
+	at edu.purdue.cs.tornado.spouts.SampleUSATweetGenerator.open(SampleUSATweetGenerator.java:193)
+	at backtype.storm.daemon.executor$fn__3371$fn__3386.invoke(executor.clj:522)
+	at backtype.storm.util$async_loop$fn__460.invoke(util.clj:461)
+	at clojure.lang.AFn.run(AFn.java:24)
+	at java.lang.Thread.run(Thread.java:748)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt __system:(-1)
+Opened spout Tweets:(3)
+Preparing bolt spatiotextualcomponent1:(29)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt __system:(-1)
+Preparing bolt spatiotextualcomponent1_index:(77)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(51)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(87)
+Preparing bolt SentimentBolt:(1)
+Preparing bolt spatiotextualcomponent1_index:(97)
+Preparing bolt spatiotextualcomponent1_index:(117)
+Preparing bolt spatiotextualcomponent1_index:(75)
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(83)
+Preparing bolt spatiotextualcomponent1:(67)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(61)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(79)
+Preparing bolt spatiotextualcomponent1_index:(121)
+Preparing bolt spatiotextualcomponent1:(39)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(7)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(73)
+Preparing bolt spatiotextualcomponent1:(57)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(113)
+Activating spout Tweets:(3)
+Preparing bolt spatiotextualcomponent1:(27)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(103)
+Preparing bolt spatiotextualcomponent1:(5)
+Preparing bolt spatiotextualcomponent1_index:(107)
+***************************Printing Bolt configuration*******************
+Preparing bolt spatiotextualcomponent1_index:(119)
+torando.data.source_Tweets = volatile
+Preparing bolt spatiotextualcomponent1:(45)
+tornado.query.source_TextualRangeQueryGenerator = continuous
+Preparing bolt spatiotextualcomponent1_index:(115)
+torando.data.source_OSM_Data = static
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+Preparing bolt spatiotextualcomponent1_index:(125)
+Preparing bolt spatiotextualcomponent1:(21)
+torando.data.source_OSM_Data = static
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(128)
+Preparing bolt spatiotextualcomponent1:(13)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(23)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(71)
+Preparing bolt spatiotextualcomponent1:(30)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1:(22)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Preparing bolt spatiotextualcomponent1_index:(78)
+Preparing bolt spatiotextualcomponent1_index:(76)
+Preparing bolt spatiotextualcomponent1_index:(118)
+Preparing bolt spatiotextualcomponent1_index:(93)
+Preparing bolt spatiotextualcomponent1:(33)
+***************************Printing Bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+ProducerConfig values: 
+	acks = 1
+	batch.size = 16384
+	bootstrap.servers = [localhost:9092]
+	buffer.memory = 33554432
+	client.id = 
+	compression.type = none
+	connections.max.idle.ms = 540000
+	enable.idempotence = false
+	interceptor.classes = null
+	key.serializer = class org.apache.kafka.common.serialization.StringSerializer
+	linger.ms = 0
+	max.block.ms = 60000
+	max.in.flight.requests.per.connection = 5
+	max.request.size = 1048576
+	metadata.max.age.ms = 300000
+	metric.reporters = []
+	metrics.num.samples = 2
+	metrics.recording.level = INFO
+	metrics.sample.window.ms = 30000
+	partitioner.class = class org.apache.kafka.clients.producer.internals.DefaultPartitioner
+	receive.buffer.bytes = 32768
+	reconnect.backoff.max.ms = 1000
+	reconnect.backoff.ms = 50
+	request.timeout.ms = 30000
+	retries = 0
+	retry.backoff.ms = 100
+	sasl.jaas.config = null
+	sasl.kerberos.kinit.cmd = /usr/bin/kinit
+	sasl.kerberos.min.time.before.relogin = 60000
+	sasl.kerberos.service.name = null
+	sasl.kerberos.ticket.renew.jitter = 0.05
+	sasl.kerberos.ticket.renew.window.factor = 0.8
+	sasl.mechanism = GSSAPI
+	security.protocol = PLAINTEXT
+	send.buffer.bytes = 131072
+	ssl.cipher.suites = null
+	ssl.enabled.protocols = [TLSv1.2, TLSv1.1, TLSv1]
+	ssl.endpoint.identification.algorithm = null
+	ssl.key.password = null
+	ssl.keymanager.algorithm = SunX509
+	ssl.keystore.location = null
+	ssl.keystore.password = null
+	ssl.keystore.type = JKS
+	ssl.protocol = TLS
+	ssl.provider = null
+	ssl.secure.random.implementation = null
+	ssl.trustmanager.algorithm = PKIX
+	ssl.truststore.location = null
+	ssl.truststore.password = null
+	ssl.truststore.type = JKS
+	transaction.timeout.ms = 60000
+	transactional.id = null
+	value.serializer = class org.apache.kafka.common.serialization.StringSerializer
+
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(93)
+Prepared bolt spatiotextualcomponent1_index:(69)
+Adding annotator tokenize
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************TokenizerAnnotator: No tokenizer type provided. Defaulting to PTBTokenizer.
+Adding annotator ssplit
+Adding annotator parse
+Loading parser from serialized file edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz ... 
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+Prepared bolt spatiotextualcomponent1_index:(75)
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(78)
+Prepared bolt spatiotextualcomponent1_index:(100)
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(101)
+Prepared bolt spatiotextualcomponent1_index:(122)
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(132)
+Prepared bolt spatiotextualcomponent1_index:(76)
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(110)
+Prepared bolt spatiotextualcomponent1_index:(129)
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(80)
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(98)
+Prepared bolt spatiotextualcomponent1_index:(77)
+***************************Evaluating bolt configuration*******************
+Prepared bolt spatiotextualcomponent1_index:(120)
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(115)
+Prepared bolt spatiotextualcomponent1_index:(84)
+Prepared bolt spatiotextualcomponent1_index:(125)
+Prepared bolt spatiotextualcomponent1_index:(109)
+Prepared bolt spatiotextualcomponent1_index:(131)
+Prepared bolt spatiotextualcomponent1_index:(113)
+Prepared bolt spatiotextualcomponent1_index:(116)
+Prepared bolt spatiotextualcomponent1_index:(92)
+Prepared bolt spatiotextualcomponent1_index:(111)
+Prepared bolt spatiotextualcomponent1_index:(107)
+Prepared bolt spatiotextualcomponent1_index:(126)
+Prepared bolt spatiotextualcomponent1_index:(96)
+Prepared bolt spatiotextualcomponent1_index:(124)
+Prepared bolt spatiotextualcomponent1_index:(128)
+Prepared bolt spatiotextualcomponent1_index:(104)
+Prepared bolt spatiotextualcomponent1_index:(118)
+Prepared bolt spatiotextualcomponent1_index:(97)
+Prepared bolt spatiotextualcomponent1_index:(117)
+Prepared bolt spatiotextualcomponent1_index:(99)
+Prepared bolt spatiotextualcomponent1_index:(79)
+Prepared bolt spatiotextualcomponent1_index:(90)
+Prepared bolt spatiotextualcomponent1_index:(95)
+Prepared bolt spatiotextualcomponent1_index:(127)
+Prepared bolt spatiotextualcomponent1_index:(89)
+Prepared bolt spatiotextualcomponent1_index:(73)
+Prepared bolt spatiotextualcomponent1_index:(87)
+Prepared bolt spatiotextualcomponent1_index:(130)
+Kafka version : 1.0.1
+Prepared bolt spatiotextualcomponent1_index:(85)
+Kafka commitId : c0518aa65f25317e
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_Tweets = volatile
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(82)
+Prepared bolt spatiotextualcomponent1_index:(108)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(106)
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+Prepared bolt spatiotextualcomponent1_index:(71)
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(121)
+Prepared bolt spatiotextualcomponent1_index:(112)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+Prepared bolt spatiotextualcomponent1_index:(88)
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(70)
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(81)
+Prepared bolt spatiotextualcomponent1_index:(74)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(102)
+Prepared bolt spatiotextualcomponent1_index:(86)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(91)
+Prepared bolt spatiotextualcomponent1_index:(123)
+Prepared bolt kafkaOutputProducer:(4)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+Prepared bolt spatiotextualcomponent1_index:(119)
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(94)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(114)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(103)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(83)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(105)
+Error creating DISCO instance: java.nio.file.FileSystemException: /home/ahmed: Operation not supported
+***************************Evaluating bolt configuration*******************
+torando.data.source_Tweets = volatile
+tornado.query.source_TextualRangeQueryGenerator = continuous
+torando.data.source_OSM_Data = static
+Prepared bolt spatiotextualcomponent1_index:(72)
+Verifying properties
+Property auto.commit.interval.ms is overridden to 1000
+Property group.id is overridden to queryprocExample
+Property zookeeper.connect is overridden to localhost:2181
+Property zookeeper.session.timeout.ms is overridden to 10000
+Property zookeeper.sync.time.ms is overridden to 400
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], Connecting to zookeeper instance at localhost:2181
+Starting ZkClient event thread.
+Client environment:zookeeper.version=3.4.10-39d3a4f269333c922ed3db283be479f9deacaa0f, built on 03/23/2017 10:13 GMT
+Client environment:host.name=10.182.18.143
+Client environment:java.version=1.8.0_144
+Client environment:java.vendor=Oracle Corporation
+Client environment:java.home=/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre
+Client environment:java.class.path=/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home/lib/tools.jar:/Users/peytonpuckett/Desktop/S8/S8/CS490/OldTornadoDemo/qadahtm-tornado-c83372f024db/Tornado/target/classes:/Users/peytonpuckett/.m2/repository/org/apache/kafka/kafka_2.12/1.0.1/kafka_2.12-1.0.1.jar:/Users/peytonpuckett/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.9.1/jackson-databind-2.9.1.jar:/Users/peytonpuckett/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.9.0/jackson-annotations-2.9.0.jar:/Users/peytonpuckett/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.9.1/jackson-core-2.9.1.jar:/Users/peytonpuckett/.m2/repository/net/sf/jopt-simple/jopt-simple/5.0.4/jopt-simple-5.0.4.jar:/Users/peytonpuckett/.m2/repository/com/yammer/metrics/metrics-core/2.2.0/metrics-core-2.2.0.jar:/Users/peytonpuckett/.m2/repository/org/scala-lang/scala-library/2.12.4/scala-library-2.12.4.jar:/Users/peytonpuckett/.m2/repository/com/101tec/zkclient/0.10/zkclient-0.10.jar:/Users/peytonpuckett/.m2/repository/org/apache/zookeeper/zookeeper/3.4.10/zookeeper-3.4.10.jar:/Users/peytonpuckett/.m2/repository/edu/stanford/nlp/stanford-corenlp/3.5.2/stanford-corenlp-3.5.2.jar:/Users/peytonpuckett/.m2/repository/com/io7m/xom/xom/1.2.10/xom-1.2.10.jar:/Users/peytonpuckett/.m2/repository/xml-apis/xml-apis/1.3.03/xml-apis-1.3.03.jar:/Users/peytonpuckett/.m2/repository/xerces/xercesImpl/2.8.0/xercesImpl-2.8.0.jar:/Users/peytonpuckett/.m2/repository/xalan/xalan/2.7.0/xalan-2.7.0.jar:/Users/peytonpuckett/.m2/repository/joda-time/joda-time/2.1/joda-time-2.1.jar:/Users/peytonpuckett/.m2/repository/de/jollyday/jollyday/0.4.7/jollyday-0.4.7.jar:/Users/peytonpuckett/.m2/repository/javax/xml/bind/jaxb-api/2.2.7/jaxb-api-2.2.7.jar:/Users/peytonpuckett/.m2/repository/com/googlecode/efficient-java-matrix-library/ejml/0.23/ejml-0.23.jar:/Users/peytonpuckett/.m2/repository/javax/json/javax.json-api/1.0/javax.json-api-1.0.jar:/Users/peytonpuckett/.m2/repository/edu/stanford/nlp/stanford-corenlp/3.5.2/stanford-corenlp-3.5.2-models.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-sml/0.9.1/slib-sml-0.9.1.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-utils/0.9.1/slib-utils-0.9.1.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-runtime/2.7.3/sesame-runtime-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-model/2.7.3/sesame-model-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-repository-api/2.7.3/sesame-repository-api-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-query/2.7.3/sesame-query-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-repository-manager/2.7.3/sesame-repository-manager-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-repository-event/2.7.3/sesame-repository-event-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-repository-http/2.7.3/sesame-repository-http-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-repository-sparql/2.7.3/sesame-repository-sparql-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-repository-contextaware/2.7.3/sesame-repository-contextaware-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-repository-sail/2.7.3/sesame-repository-sail-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryalgebra-model/2.7.3/sesame-queryalgebra-model-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-sail-api/2.7.3/sesame-sail-api-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-sail-federation/2.7.3/sesame-sail-federation-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryalgebra-evaluation/2.7.3/sesame-queryalgebra-evaluation-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryparser-api/2.7.3/sesame-queryparser-api-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryparser-serql/2.7.3/sesame-queryparser-serql-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryparser-sparql/2.7.3/sesame-queryparser-sparql-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryresultio-api/2.7.3/sesame-queryresultio-api-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryresultio-binary/2.7.3/sesame-queryresultio-binary-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryresultio-sparqljson/2.7.3/sesame-queryresultio-sparqljson-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryresultio-sparqlxml/2.7.3/sesame-queryresultio-sparqlxml-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-queryresultio-text/2.7.3/sesame-queryresultio-text-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-repository-dataset/2.7.3/sesame-repository-dataset-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-http-protocol/2.7.3/sesame-http-protocol-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-http-client/2.7.3/sesame-http-client-2.7.3.jar:/Users/peytonpuckett/.m2/repository/commons-httpclient/commons-httpclient/3.1/commons-httpclient-3.1.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-api/2.7.3/sesame-rio-api-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-datatypes/2.7.3/sesame-rio-datatypes-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-languages/2.7.3/sesame-rio-languages-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-binary/2.7.3/sesame-rio-binary-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-ntriples/2.7.3/sesame-rio-ntriples-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-nquads/2.7.3/sesame-rio-nquads-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-rdfjson/2.7.3/sesame-rio-rdfjson-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-trix/2.7.3/sesame-rio-trix-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-trig/2.7.3/sesame-rio-trig-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-sail-inferencer/2.7.3/sesame-sail-inferencer-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-sail-memory/2.7.3/sesame-sail-memory-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-sail-nativerdf/2.7.3/sesame-sail-nativerdf-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-sail-rdbms/2.7.3/sesame-sail-rdbms-2.7.3.jar:/Users/peytonpuckett/.m2/repository/commons-dbcp/commons-dbcp/1.3/commons-dbcp-1.3.jar:/Users/peytonpuckett/.m2/repository/commons-pool/commons-pool/1.5.4/commons-pool-1.5.4.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-graph-model-impl/0.9.1/slib-graph-model-impl-0.9.1.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-graph-model/0.9.1/slib-graph-model-0.9.1.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-graph-algo/0.9.1/slib-graph-algo-0.9.1.jar:/Users/peytonpuckett/.m2/repository/org/slf4j/slf4j-log4j12/1.7.3/slf4j-log4j12-1.7.3.jar:/Users/peytonpuckett/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-tools-module/0.9.1/slib-tools-module-0.9.1.jar:/Users/peytonpuckett/.m2/repository/commons-cli/commons-cli/1.2/commons-cli-1.2.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-graph-io/0.9.1/slib-graph-io-0.9.1.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-rdfxml/2.7.3/sesame-rio-rdfxml-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-util/2.7.3/sesame-util-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-n3/2.7.3/sesame-rio-n3-2.7.3.jar:/Users/peytonpuckett/.m2/repository/org/openrdf/sesame/sesame-rio-turtle/2.7.3/sesame-rio-turtle-2.7.3.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-indexer/0.9.1/slib-indexer-0.9.1.jar:/Users/peytonpuckett/.m2/repository/commons-configuration/commons-configuration/1.6/commons-configuration-1.6.jar:/Users/peytonpuckett/.m2/repository/commons-collections/commons-collections/3.2.1/commons-collections-3.2.1.jar:/Users/peytonpuckett/.m2/repository/commons-digester/commons-digester/1.8/commons-digester-1.8.jar:/Users/peytonpuckett/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar:/Users/peytonpuckett/.m2/repository/commons-beanutils/commons-beanutils-core/1.8.0/commons-beanutils-core-1.8.0.jar:/Users/peytonpuckett/.m2/repository/com/github/sharispe/slib-graph-utils/0.9.1/slib-graph-utils-0.9.1.jar:/Users/peytonpuckett/.m2/repository/net/sf/opencsv/opencsv/2.3/opencsv-2.3.jar:/Users/peytonpuckett/.m2/repository/org/twitter4j/twitter4j-core/4.0.4/twitter4j-core-4.0.4.jar:/Users/peytonpuckett/.m2/repository/org/twitter4j/twitter4j-stream/4.0.4/twitter4j-stream-4.0.4.jar:/Users/peytonpuckett/.m2/repository/org/apache/kafka/kafka-clients/1.0.1/kafka-clients-1.0.1.jar:/Users/peytonpuckett/.m2/repository/org/lz4/lz4-java/1.4/lz4-java-1.4.jar:/Users/peytonpuckett/.m2/repository/org/xerial/snappy/snappy-java/1.1.4/snappy-java-1.1.4.jar:/Users/peytonpuckett/.m2/repository/com/google/code/gson/gson/2.3.1/gson-2.3.1.jar:/Users/peytonpuckett/.m2/repository/com/disco/disco/10.2.0/disco-10.2.0.jar:/Users/peytonpuckett/.m2/repository/org/apache/storm/storm-core/0.9.4/storm-core-0.9.4.jar:/Users/peytonpuckett/.m2/repository/org/clojure/clojure/1.5.1/clojure-1.5.1.jar:/Users/peytonpuckett/.m2/repository/clj-time/clj-time/0.4.1/clj-time-0.4.1.jar:/Users/peytonpuckett/.m2/repository/compojure/compojure/1.1.3/compojure-1.1.3.jar:/Users/peytonpuckett/.m2/repository/org/clojure/core.incubator/0.1.0/core.incubator-0.1.0.jar:/Users/peytonpuckett/.m2/repository/org/clojure/tools.macro/0.1.0/tools.macro-0.1.0.jar:/Users/peytonpuckett/.m2/repository/clout/clout/1.0.1/clout-1.0.1.jar:/Users/peytonpuckett/.m2/repository/ring/ring-core/1.1.5/ring-core-1.1.5.jar:/Users/peytonpuckett/.m2/repository/commons-fileupload/commons-fileupload/1.2.1/commons-fileupload-1.2.1.jar:/Users/peytonpuckett/.m2/repository/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar:/Users/peytonpuckett/.m2/repository/hiccup/hiccup/0.3.6/hiccup-0.3.6.jar:/Users/peytonpuckett/.m2/repository/ring/ring-devel/0.3.11/ring-devel-0.3.11.jar:/Users/peytonpuckett/.m2/repository/clj-stacktrace/clj-stacktrace/0.2.2/clj-stacktrace-0.2.2.jar:/Users/peytonpuckett/.m2/repository/ring/ring-jetty-adapter/0.3.11/ring-jetty-adapter-0.3.11.jar:/Users/peytonpuckett/.m2/repository/ring/ring-servlet/0.3.11/ring-servlet-0.3.11.jar:/Users/peytonpuckett/.m2/repository/org/mortbay/jetty/jetty/6.1.26/jetty-6.1.26.jar:/Users/peytonpuckett/.m2/repository/org/mortbay/jetty/jetty-util/6.1.26/jetty-util-6.1.26.jar:/Users/peytonpuckett/.m2/repository/org/clojure/tools.logging/0.2.3/tools.logging-0.2.3.jar:/Users/peytonpuckett/.m2/repository/org/clojure/math.numeric-tower/0.0.1/math.numeric-tower-0.0.1.jar:/Users/peytonpuckett/.m2/repository/org/clojure/tools.cli/0.2.4/tools.cli-0.2.4.jar:/Users/peytonpuckett/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar:/Users/peytonpuckett/.m2/repository/org/apache/commons/commons-exec/1.1/commons-exec-1.1.jar:/Users/peytonpuckett/.m2/repository/commons-lang/commons-lang/2.5/commons-lang-2.5.jar:/Users/peytonpuckett/.m2/repository/com/googlecode/json-simple/json-simple/1.1/json-simple-1.1.jar:/Users/peytonpuckett/.m2/repository/com/twitter/carbonite/1.4.0/carbonite-1.4.0.jar:/Users/peytonpuckett/.m2/repository/com/esotericsoftware/reflectasm/reflectasm/1.07/reflectasm-1.07-shaded.jar:/Users/peytonpuckett/.m2/repository/org/ow2/asm/asm/4.0/asm-4.0.jar:/Users/peytonpuckett/.m2/repository/com/esotericsoftware/minlog/minlog/1.2/minlog-1.2.jar:/Users/peytonpuckett/.m2/repository/org/objenesis/objenesis/1.2/objenesis-1.2.jar:/Users/peytonpuckett/.m2/repository/com/twitter/chill-java/0.3.5/chill-java-0.3.5.jar:/Users/peytonpuckett/.m2/repository/org/yaml/snakeyaml/1.11/snakeyaml-1.11.jar:/Users/peytonpuckett/.m2/repository/commons-logging/commons-logging/1.1.3/commons-logging-1.1.3.jar:/Users/peytonpuckett/.m2/repository/commons-codec/commons-codec/1.6/commons-codec-1.6.jar:/Users/peytonpuckett/.m2/repository/com/googlecode/disruptor/disruptor/2.10.1/disruptor-2.10.1.jar:/Users/peytonpuckett/.m2/repository/org/jgrapht/jgrapht-core/0.9.0/jgrapht-core-0.9.0.jar:/Users/peytonpuckett/.m2/repository/ch/qos/logback/logback-classic/1.0.13/logback-classic-1.0.13.jar:/Users/peytonpuckett/.m2/repository/ch/qos/logback/logback-core/1.0.13/logback-core-1.0.13.jar:/Users/peytonpuckett/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar:/Users/peytonpuckett/.m2/repository/org/slf4j/log4j-over-slf4j/1.6.6/log4j-over-slf4j-1.6.6.jar:/Users/peytonpuckett/.m2/repository/jline/jline/2.11/jline-2.11.jar:/Users/peytonpuckett/.m2/repository/net/sf/jsqlparser/jsqlparser/0.8.0/jsqlparser-0.8.0.jar:/Users/peytonpuckett/.m2/repository/args4j/args4j/2.0.16/args4j-2.0.16.jar:/Users/peytonpuckett/.m2/repository/net/sf/trove4j/trove4j/3.0.1/trove4j-3.0.1.jar:/Users/peytonpuckett/.m2/repository/com/esotericsoftware/kryo/kryo/2.21/kryo-2.21.jar:/Users/peytonpuckett/.m2/repository/com/sleepycat/je/5.0.73/je-5.0.73.jar:/Users/peytonpuckett/.m2/repository/org/apache/lucene/lucene-core/5.2.1/lucene-core-5.2.1.jar
+Client environment:java.library.path=/Users/peytonpuckett/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:.
+Client environment:java.io.tmpdir=/var/folders/67/h98cx9g15gz47sfwtwdm9s4m0000gn/T/
+Client environment:java.compiler=<NA>
+Client environment:os.name=Mac OS X
+Client environment:os.arch=x86_64
+Client environment:os.version=10.14.3
+Client environment:user.name=peytonpuckett
+Client environment:user.home=/Users/peytonpuckett
+Client environment:user.dir=/Users/peytonpuckett/Desktop/S8/S8/CS490/OldTornadoDemo/qadahtm-tornado-c83372f024db/Tornado
+Initiating client connection, connectString=localhost:2181 sessionTimeout=10000 watcher=org.I0Itec.zkclient.ZkClient@6c00929e
+Waiting for keeper state SyncConnected
+Opening socket connection to server localhost/0:0:0:0:0:0:0:1:2181. Will not attempt to authenticate using SASL (unknown error)
+Socket connection established to localhost/0:0:0:0:0:0:0:1:2181, initiating session
+Session establishment complete on server localhost/0:0:0:0:0:0:0:1:2181, sessionid = 0x100000e0fb30004, negotiated timeout = 10000
+zookeeper state changed (SyncConnected)
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], starting auto committer every 1000 ms
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], begin registering consumer queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615 in ZK
+done [17.5 sec].
+Adding annotator sentiment
+Creating /consumers/queryprocExample/ids/queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615 (is it secure? false)
+Result of znode creation is: OK
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], end registering consumer queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615 in ZK
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], starting watcher executor thread for consumer queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], begin rebalancing consumer queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615 try #0
+Prepared bolt SentimentBolt:(1)
+[ConsumerFetcherManager-1552841404945] Stopping leader finder thread
+[ConsumerFetcherManager-1552841404945] Stopping all fetchers
+[ConsumerFetcherManager-1552841404945] All connections stopped
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], Cleared all relevant queues for this fetcher
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], Cleared the data chunks in all the consumer message iterators
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], Committing all offsets after clearing the fetcher queues
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], Releasing partition ownership
+Consumer queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615 rebalancing the following partitions: Vector(0) for topic queries with consumers: List(queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615-0)
+queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615-0 attempting to claim partition 0
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615-0 successfully owned partition 0 for topic queries
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], Consumer queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615 selected partitions : queries:0: fetched offset = -1: consumed offset = -1
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615], end rebalancing consumer queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615 try #0
+[queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615-leader-finder-thread]: Starting
+Verifying properties
+Property client.id is overridden to queryprocExample
+Property metadata.broker.list is overridden to localhost:9092
+Property request.timeout.ms is overridden to 30000
+Opened spout TextualRangeQueryGenerator:(2)
+Activating spout TextualRangeQueryGenerator:(2)
+Fetching metadata from broker BrokerEndPoint(0,localhost,9092) with correlation id 0 for 1 topic(s) Set(queries)
+Connected to localhost:9092 for producing
+Disconnecting from localhost:9092
+[ConsumerFetcherThread-queryprocExample_Peytons-MacBook-Pro.local-1552841404277-45034615-0-0]: Starting
+[ConsumerFetcherManager-1552841404945] Added fetcher for partitions ArrayBuffer([queries-0, initOffset -1 to broker BrokerEndPoint(0,localhost,9092)] )
+Query Query[: testQueryHello2 , Source:  , Type: TextualRange , Text: [food] , focal: X: 0.0,Y: 0.0 , range: Min : X: 8635.901741544098,Y: 1797.557223214288, Max : X: 9594.820030925584,Y: 3969.711241071431 , distance:  , K: ]
+Prepared bolt spatiotextualcomponent1:(28)
+Prepared bolt spatiotextualcomponent1:(38)
+Prepared bolt spatiotextualcomponent1:(23)
+Prepared bolt spatiotextualcomponent1:(34)
+Prepared bolt spatiotextualcomponent1:(19)
+Prepared bolt spatiotextualcomponent1:(44)
+Prepared bolt spatiotextualcomponent1:(20)
+Prepared bolt spatiotextualcomponent1:(52)
+Prepared bolt spatiotextualcomponent1:(9)
+Prepared bolt spatiotextualcomponent1:(8)
+Prepared bolt spatiotextualcomponent1:(60)
+Prepared bolt spatiotextualcomponent1:(11)
+Prepared bolt spatiotextualcomponent1:(40)
+Prepared bolt spatiotextualcomponent1:(43)
+Prepared bolt spatiotextualcomponent1:(46)
+Prepared bolt spatiotextualcomponent1:(31)
+Prepared bolt spatiotextualcomponent1:(36)
+Prepared bolt spatiotextualcomponent1:(41)
+Prepared bolt spatiotextualcomponent1:(29)
+Prepared bolt spatiotextualcomponent1:(16)
+Prepared bolt spatiotextualcomponent1:(33)
+Prepared bolt spatiotextualcomponent1:(37)
+Prepared bolt spatiotextualcomponent1:(5)
+Prepared bolt spatiotextualcomponent1:(42)
+Prepared bolt spatiotextualcomponent1:(10)
+Prepared bolt spatiotextualcomponent1:(12)
+Prepared bolt spatiotextualcomponent1:(7)
+Prepared bolt spatiotextualcomponent1:(15)
+Prepared bolt spatiotextualcomponent1:(35)
+Prepared bolt spatiotextualcomponent1:(32)
+Prepared bolt spatiotextualcomponent1:(6)
+Prepared bolt spatiotextualcomponent1:(26)
+Prepared bolt spatiotextualcomponent1:(64)
+Prepared bolt spatiotextualcomponent1:(21)
+Prepared bolt spatiotextualcomponent1:(61)
+Prepared bolt spatiotextualcomponent1:(63)
+Prepared bolt spatiotextualcomponent1:(25)
+Prepared bolt spatiotextualcomponent1:(14)
+Prepared bolt spatiotextualcomponent1:(17)
+Prepared bolt spatiotextualcomponent1:(39)
+Prepared bolt spatiotextualcomponent1:(24)
+Prepared bolt spatiotextualcomponent1:(18)
+Prepared bolt spatiotextualcomponent1:(68)
+Prepared bolt spatiotextualcomponent1:(62)
+Prepared bolt spatiotextualcomponent1:(30)
+Prepared bolt spatiotextualcomponent1:(51)
+Prepared bolt spatiotextualcomponent1:(27)
+Prepared bolt spatiotextualcomponent1:(47)
+Prepared bolt spatiotextualcomponent1:(13)
+Prepared bolt spatiotextualcomponent1:(45)
+Prepared bolt spatiotextualcomponent1:(22)
+Prepared bolt spatiotextualcomponent1:(66)
+Prepared bolt spatiotextualcomponent1:(59)
+Prepared bolt spatiotextualcomponent1:(49)
+Prepared bolt spatiotextualcomponent1:(67)
+Prepared bolt spatiotextualcomponent1:(50)
+Prepared bolt spatiotextualcomponent1:(55)
+Prepared bolt spatiotextualcomponent1:(57)
+Prepared bolt spatiotextualcomponent1:(65)
+Prepared bolt spatiotextualcomponent1:(53)
+Prepared bolt spatiotextualcomponent1:(58)
+Prepared bolt spatiotextualcomponent1:(56)
+Prepared bolt spatiotextualcomponent1:(48)
+Prepared bolt spatiotextualcomponent1:(54)
+hello from eclipse console
+again
+again
+again
+Query Query[: testQueryHelloWorld3 , Source:  , Type: TextualRange , Text: [food] , focal: X: 0.0,Y: 0.0 , range: Min : X: 8635.901741544098,Y: 1797.557223214288, Max : X: 9594.820030925584,Y: 3969.711241071431 , distance:  , K: ]
