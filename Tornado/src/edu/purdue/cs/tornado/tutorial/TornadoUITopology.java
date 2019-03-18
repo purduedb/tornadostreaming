@@ -16,7 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
+import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.spouts.KafkaSpout;
 
 
@@ -30,8 +32,9 @@ public class TornadoUITopology {
 	private static final String TEMP_FILE_PATH = DATASOURCES_DIR + "temp.csv";
 	
 	public static String javaArgs = "-Xmx3g -Xms3g"; // -Dcom.sun.management.jmxremote  -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -javaagent:/home/staticdata/CustomAgent%ID%.jar ";
-	
-
+	public static String tweetsSource = "Tweets";
+	public static String querySource  = "querySource";
+	public static String topologyName = "TornadoUI";
 			
 	public static void main(String[] args) {
 		System.out.println("Project Directory : " + PROJECT_DIR);
@@ -49,14 +52,52 @@ public class TornadoUITopology {
 		}
 	
 		
+		/*
+		 * 
+		 * //Load Properties from a specific file path (use CONFIG_PROPERTIES_FILE for local cluster)
+		//final Properties properties = loadProperties(SpatioTextualConstants.CLUSTER_CONFIG_PROPERTIES_FILE);
+		final Properties properties = loadProperties(SpatioTextualConstants.CONFIG_PROPERTIES_FILE);
+
+		//Setting the static source paths 
+		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
+				
+		//Initialize our topology builder
+		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
+		
+		//Initialize and set Config properties
+		Config conf = new Config();
+		conf.setDebug(false);
+		 */
+		
 	}
 	
-	
+	/* FROM TORNADOTWEETCOUNTEXAMPLE.JAVA
+	 * Find and load the properties available in the given file path
+	 * 
+	 * @param filepath the location of properties to be loaded
+	 * @return Properties object with the loaded properties at the specified file path
+	 */
+	static Properties loadProperties(String filepath) {
+		//Create and load a new properties object
+		final Properties properties = new Properties();
+		try {
+			LOGGER.info("******************************************************************");
+			LOGGER.info("**********************Reading toplogy config******************");
+			properties.load(new FileInputStream(filepath));
+		} catch (final IOException ioException) {
+			//Should not occur. If it does, we can't continue. So we're exiting the program!
+			LOGGER.error(ioException.getMessage(), ioException);
+			System.exit(1);
+		}
+		
+		return properties;
+	}
+
 	
 	public static void setupKafkaSpout() {
 		
-		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
-		builder.setSpout("TextualRangeQueryGenerator", new KafkaSpout());
+		//SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
+		//builder.setSpout("TextualRangeQueryGenerator", new KafkaSpout());
 		
 	}
 	
@@ -67,6 +108,12 @@ public class TornadoUITopology {
 	public static void setupQuerySpout() {
 		
 	}
+	
+	public static void setupProducer() {
+		
+	}
+	
+	
 	
 	public static void readSampleTweetFiles(String filename) {
 		
