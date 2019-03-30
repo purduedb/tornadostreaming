@@ -1,3 +1,18 @@
+Spring 2019 Updates
+
+Versions Used:
+- Java: SE 8
+- Scala: 
+- Kafka: 2.1.0
+- Kafka-Clients: 2.1.0
+- Storm: 1.2.2
+
+Documentation Updates:
+- KafkSpout API
+
+
+
+
 *******************************************************************************************************
 Tornado Simple tutorial for developers
 -------------------

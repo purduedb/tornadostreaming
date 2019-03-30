@@ -19,36 +19,46 @@
  */
 package edu.purdue.cs.tornado.test;
 
+import java.time.Duration;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import kafka.consumer.ConsumerConfig;
-import kafka.consumer.ConsumerIterator;
-import kafka.consumer.KafkaStream;
-import kafka.javaapi.consumer.ConsumerConnector;
+import org.apache.kafka.clients.consumer.ConsumerConfig; //import kafka.consumer.ConsumerConfig;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+
+//import kafka.consumer.ConsumerIterator;
+//import kafka.consumer.KafkaStream;
+//import kafka.javaapi.consumer.ConsumerConnector;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 public class TestKafkaConsumer {
-	static ConsumerConnector consumer;  
+	static KafkaConsumer<String, String> consumer; //static ConsumerConnector consumer;  
 	static String zookeeper;
 	static String group;
 	static String topic;
-	static ConsumerIterator<byte[], byte[]> it;
+	//static ConsumerIterator<byte[], byte[]> it;
 
 	public static void main(String[] args) throws InterruptedException {
 		zookeeper = "localhost:2181";
 		group="queryprocExample";
 		topic="queries";
-		consumer = kafka.consumer.Consumer.createJavaConsumerConnector(
-                createConsumerConfig(zookeeper, group));
-		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
+		//consumer = kafka.consumer.Consumer.createJavaConsumerConnector(createConsumerConfig(zookeeper, group));
+		consumer = new KafkaConsumer<>(createConsumerConfigProps(zookeeper, topic));
+		consumer.subscribe(Arrays.asList("queries", "output"));
+	     while (true) {
+	         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
+	         for (ConsumerRecord<String, String> record : records)
+	             System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
+	     }
+		/*Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
 	    topicCountMap.put(topic, new Integer(1));
 	    Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);
 	    List<KafkaStream<byte[], byte[]>> streams = consumerMap.get(topic);
-		 
-		 it = streams.get(0).iterator();
-		 
+		 it = streams.get(0).iterator();*/
 
 	}
 	private static ConsumerConfig createConsumerConfig(String a_zookeeper, String a_groupId) {
@@ -61,4 +71,20 @@ public class TestKafkaConsumer {
 
         return new ConsumerConfig(props);
     }
+	
+	/**
+	 * 3/30/2019 - Slightly modified function similar to createConsumerConfig(String, String)
+	 * 
+	 * @param a_zookeeper
+	 * @param a_groupId
+	 * @return Properties object 
+	 */
+	private static Properties createConsumerConfigProps(String a_zookeeper, String a_groupId) {
+		Properties props = new Properties();
+		props.put("bootstrap.servers", "localhost:9092");
+		props.put("group.id", "queries");
+        props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        return props;
+	}
 }
