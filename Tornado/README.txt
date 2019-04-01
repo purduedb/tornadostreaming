@@ -8,7 +8,10 @@ Versions Used:
 - Storm: 1.2.2
 
 Documentation Updates:
-- KafkSpout API
+- KafkSpout API (commented old file)
+- TestKafkaConsumer
+- TestKafkaProducer
+- 
 
 
 

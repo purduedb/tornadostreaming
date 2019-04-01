@@ -5,12 +5,18 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
-
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Properties;
 
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.storm.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +41,13 @@ public class TornadoUITopology {
 	public static String tweetsSource = "Tweets";
 	public static String querySource  = "querySource";
 	public static String topologyName = "TornadoUI";
+	
+	
+	private static KafkaConsumer<String, String> consumer; //static ConsumerConnector consumer;  
+	private static Producer<String, String> producer;
+	private static String zookeeper;
+	private static String topic;
+	private static ArrayList<String> subscriptionTopics = new ArrayList<String>();
 			
 	public static void main(String[] args) {
 		System.out.println("Project Directory : " + PROJECT_DIR);
@@ -52,23 +65,10 @@ public class TornadoUITopology {
 		}
 	
 		
-		/*
-		 * 
-		 * //Load Properties from a specific file path (use CONFIG_PROPERTIES_FILE for local cluster)
-		//final Properties properties = loadProperties(SpatioTextualConstants.CLUSTER_CONFIG_PROPERTIES_FILE);
-		final Properties properties = loadProperties(SpatioTextualConstants.CONFIG_PROPERTIES_FILE);
-
-		//Setting the static source paths 
-		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
-				
-		//Initialize our topology builder
-		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
-		
-		//Initialize and set Config properties
-		Config conf = new Config();
-		conf.setDebug(false);
-		 */
-		
+		setupConsumer();
+		setupProducer();
+		//consumeQueriesFromUI();
+		sendQueryToProducer();
 	}
 	
 	/* FROM TORNADOTWEETCOUNTEXAMPLE.JAVA
@@ -94,23 +94,19 @@ public class TornadoUITopology {
 	}
 
 	
-	public static void setupKafkaSpout() {
-		
-		//SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
-		//builder.setSpout("TextualRangeQueryGenerator", new KafkaSpout());
-		
-	}
-	
-	public static void setupTweetSpout() {
-		
-	}
-	
-	public static void setupQuerySpout() {
-		
+	public static void setupConsumer() {
+		consumer = new KafkaConsumer<>(createConsumerConfigProps(zookeeper, topic));
+		subscriptionTopics.add("queries");
+		subscriptionTopics.add("output");
+		consumer.subscribe(subscriptionTopics);	// consume from topics: queries, output, etc
 	}
 	
 	public static void setupProducer() {
-		
+		Properties props = new Properties();
+		props.put("bootstrap.servers", "localhost:9092");
+		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		producer = new KafkaProducer<>(props);
 	}
 	
 	
@@ -119,11 +115,48 @@ public class TornadoUITopology {
 		
 	}
 	
-	public static void readQueriesFromUI() {
-		
+	public static void consumeQueriesFromUI() {
+		// Print the records that are consumed from the topics denoted above
+		int consumerCount = 0;
+	     //while (consumerCount == 0) {
+	         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
+	         for (ConsumerRecord<String, String> record : records) {
+	             System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
+	             consumerCount++;
+	         }
+	     //}
 	}
 	
 	public static void processUIQueries() {
 		
+	}
+	
+	public static void sendQueryToProducer() {
+		
+		// Test text to send to producer
+		for (int i = 0; i < 10; i++) {
+			String topic = "output";
+			String key = "key";
+			String value = "TornadoUITopology Test value = " + Integer.toString(i + 1);
+			producer.send(new ProducerRecord<String, String>(topic, key, value));
+		}
+		
+		producer.close();
+	}
+	
+	/**
+	 * 3/30/2019 - Slightly modified function similar to createConsumerConfig(String, String)
+	 * 
+	 * @param a_zookeeper
+	 * @param a_groupId
+	 * @return Properties object 
+	 */
+	public static Properties createConsumerConfigProps(String a_zookeeper, String a_groupId) {
+		Properties props = new Properties();
+		props.put("bootstrap.servers", "localhost:9092");
+		props.put("group.id", "queries");
+        props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
+        return props;
 	}
 }
