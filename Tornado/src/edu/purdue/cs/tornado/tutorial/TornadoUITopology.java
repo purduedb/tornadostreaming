@@ -1,6 +1,7 @@
 package edu.purdue.cs.tornado.tutorial;
 
 import java.io.BufferedReader;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
@@ -25,7 +26,9 @@ import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.loadbalance.Cell;
+import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.spouts.KafkaSpout;
+import edu.purdue.cs.tornado.helper.JsonHelper;
 
 
 public class TornadoUITopology {
@@ -64,11 +67,10 @@ public class TornadoUITopology {
 			System.exit(1);
 		}
 	
-		
 		setupConsumer();
 		setupProducer();
-		//consumeQueriesFromUI();
-		sendQueryToProducer();
+		consumeQueriesFromUI();
+		//sendQueryToProducer();
 	}
 	
 	/* FROM TORNADOTWEETCOUNTEXAMPLE.JAVA
@@ -110,7 +112,6 @@ public class TornadoUITopology {
 	}
 	
 	
-	
 	public static void readSampleTweetFiles(String filename) {
 		
 	}
@@ -118,13 +119,14 @@ public class TornadoUITopology {
 	public static void consumeQueriesFromUI() {
 		// Print the records that are consumed from the topics denoted above
 		int consumerCount = 0;
-	     //while (consumerCount == 0) {
+	     while (true) {
 	         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
 	         for (ConsumerRecord<String, String> record : records) {
 	             System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
 	             consumerCount++;
+	             Query inputQ = new JsonHelper().convertJsonStringToQuery(record.value());
 	         }
-	     //}
+	     }
 	}
 	
 	public static void processUIQueries() {
