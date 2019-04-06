@@ -150,7 +150,6 @@
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.12</artifactId>
 			<version>1.0.1</version>
-			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
@@ -225,8 +224,8 @@
 		<dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka-clients</artifactId>
-			<version>0.8.2.1</version>
-			<scope>provided</scope>
+			<version>1.0.1</version>
+			
 			<exclusions>
 				<exclusion>
 					<groupId>org.slf4j</groupId>
