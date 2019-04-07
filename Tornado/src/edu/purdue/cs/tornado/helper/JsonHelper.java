@@ -90,7 +90,6 @@ public class JsonHelper {
 		Map m = gson.fromJson(reader, Map.class);
 		Query q = new Query();
 		Map sourceAliasMap = new HashMap<String, String>();
-		System.out.println("Json helper name: " + m.get(JsonHelper.name));
 		//q.setQueryId((Integer) m.get(JsonHelper.name));
 		q.setQueryId(counter);
 		counter++;

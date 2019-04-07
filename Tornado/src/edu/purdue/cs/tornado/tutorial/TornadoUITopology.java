@@ -22,9 +22,16 @@ import org.apache.storm.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import org.apache.storm.kafka.bolt.KafkaBolt;
+import org.apache.storm.kafka.bolt.mapper.FieldNameBasedTupleToKafkaMapper;
+import org.apache.storm.kafka.bolt.selector.DefaultTopicSelector;
+
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
+import edu.purdue.cs.tornado.examples.TweetCountBolt;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
+import edu.purdue.cs.tornado.index.global.GlobalIndexType;
+import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.Query;
 import edu.purdue.cs.tornado.spouts.KafkaSpout;
@@ -66,11 +73,22 @@ public class TornadoUITopology {
 			LOGGER.error(ioException.getMessage(), ioException);
 			System.exit(1);
 		}
+		
+		//Setting the static source paths 
+		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
+				
+		//Initialize our topology builder
+		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
+		
+		//Initialize and set Config properties
+		Config conf = new Config();
+		conf.setDebug(false);
 	
 		setupConsumer();
 		setupProducer();
 		consumeQueriesFromUI();
-		//sendQueryToProducer();
+		processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
+		//sendToProducer();
 	}
 	
 	/* FROM TORNADOTWEETCOUNTEXAMPLE.JAVA
@@ -119,21 +137,39 @@ public class TornadoUITopology {
 	public static void consumeQueriesFromUI() {
 		// Print the records that are consumed from the topics denoted above
 		int consumerCount = 0;
-	     while (true) {
+	    while (true) {
 	         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1000));
 	         for (ConsumerRecord<String, String> record : records) {
 	             System.out.printf("offset = %d, key = %s, value = %s%n", record.offset(), record.key(), record.value());
 	             consumerCount++;
 	             Query inputQ = new JsonHelper().convertJsonStringToQuery(record.value());
+	             inputQ.toString();
 	         }
 	     }
 	}
 	
-	public static void processUIQueries() {
+	public static void processUIQueries(SpatioTextualToplogyBuilder builder, ArrayList<Cell> partitions, GlobalIndexType globalIndexType, LocalIndexType localIndexType) {
+		/*
+		 * Add a new querySpout with the parameters given
+		 * 
+		 * @param builder the SpatioTextualToplogyBuilder associated with the spout
+		 * @param partitions 
+		 * @param globalIndexType the GlobalIndexType that we choose to run the bolts on
+		 * @param localIndexType the LocalIndexType that we choose to run the bolts on
+		 */
+		builder.addSpatioTextualProcessor("tornado", 3, 16, 
+				partitions, globalIndexType, localIndexType,1024)
+				.addVolatileSpatioTextualInput(tweetsSource)
+				.addContinuousQuerySource(querySource);
+			
+		KafkaBolt<String, String> kBolt = new KafkaBolt<String, String>()
+		        .withTopicSelector(new DefaultTopicSelector("queries"))
+		        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper());
 		
+		builder.setBolt("TornadoUITopology", kBolt);
 	}
 	
-	public static void sendQueryToProducer() {
+	public static void sendToProducer() {
 		
 		// Test text to send to producer
 		for (int i = 0; i < 10; i++) {
