@@ -52,18 +52,21 @@ public class TornadoUITopology {
 	public static String querySource  = "querySource";
 	public static String topologyName = "TornadoUI";
 	
-	
 	private static KafkaConsumer<String, String> consumer; //static ConsumerConnector consumer;  
 	private static Producer<String, String> producer;
 	private static String zookeeper;
 	private static String topic;
 	private static ArrayList<String> subscriptionTopics = new ArrayList<String>();
+	
+	private static Properties properties;
+	private static SpatioTextualToplogyBuilder builder;
+	private static ArrayList<Cell> partitions;
 			
 	public static void main(String[] args) {
 		System.out.println("Project Directory : " + PROJECT_DIR);
 		System.out.println("Datasources Directory : " + DATASOURCES_DIR);
 		
-		final Properties properties = new Properties();
+		properties = new Properties();
 		try {
 			LOGGER.info("**********************Tornado UI Topology************************");
 			LOGGER.info("**********************Reading toplogy config******************");
@@ -75,10 +78,10 @@ public class TornadoUITopology {
 		}
 		
 		//Setting the static source paths 
-		ArrayList<Cell> partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
+		partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
 				
 		//Initialize our topology builder
-		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
+		builder = new SpatioTextualToplogyBuilder();
 		
 		//Initialize and set Config properties
 		Config conf = new Config();
@@ -87,7 +90,7 @@ public class TornadoUITopology {
 		setupConsumer();
 		setupProducer();
 		consumeQueriesFromUI();
-		processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
+		//processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 		//sendToProducer();
 	}
 	
@@ -144,6 +147,7 @@ public class TornadoUITopology {
 	             consumerCount++;
 	             Query inputQ = new JsonHelper().convertJsonStringToQuery(record.value());
 	             inputQ.toString();
+	             processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 	         }
 	     }
 	}
@@ -157,7 +161,7 @@ public class TornadoUITopology {
 		 * @param globalIndexType the GlobalIndexType that we choose to run the bolts on
 		 * @param localIndexType the LocalIndexType that we choose to run the bolts on
 		 */
-		builder.addSpatioTextualProcessor("tornado", 3, 16, 
+		builder.addSpatioTextualProcessor("tornadouitopology", 3, 16, 
 				partitions, globalIndexType, localIndexType,1024)
 				.addVolatileSpatioTextualInput(tweetsSource)
 				.addContinuousQuerySource(querySource);
