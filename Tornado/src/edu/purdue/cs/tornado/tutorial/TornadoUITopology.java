@@ -90,6 +90,7 @@ public class TornadoUITopology {
 		setupConsumer();
 		setupProducer();
 		consumeQueriesFromUI();
+		closeProducer();
 		//processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 		//sendToProducer();
 	}
@@ -120,7 +121,7 @@ public class TornadoUITopology {
 	public static void setupConsumer() {
 		consumer = new KafkaConsumer<>(createConsumerConfigProps(zookeeper, topic));
 		subscriptionTopics.add("queries");
-		subscriptionTopics.add("output");
+		//subscriptionTopics.add("output");
 		consumer.subscribe(subscriptionTopics);	// consume from topics: queries, output, etc
 	}
 	
@@ -147,6 +148,7 @@ public class TornadoUITopology {
 	             consumerCount++;
 	             Query inputQ = new JsonHelper().convertJsonStringToQuery(record.value());
 	             inputQ.toString();
+	             sendToProducer("output", record.key(), record.value());
 	             processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 	         }
 	     }
@@ -184,6 +186,21 @@ public class TornadoUITopology {
 			producer.send(new ProducerRecord<String, String>(topic, key, value));
 		}
 		
+		//producer.close();
+	}
+	
+	/**
+	 * 
+	 * @param topic
+	 * @param key
+	 * @param value
+	 */
+	public static void sendToProducer(String topic, String key, String value) {
+		// Test text to send to producer
+		producer.send(new ProducerRecord<String, String>(topic, key, value));
+	}
+	
+	public static void closeProducer() {
 		producer.close();
 	}
 	
