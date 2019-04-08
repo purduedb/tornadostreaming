@@ -171,6 +171,7 @@ public class TornadoUITopology {
 		        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper());
 		
 		builder.setBolt("TornadoUITopology", kBolt);
+		//builder.setBolt("TornadoUITopology", new TweetCountBolt()).shuffleGrouping("tornado",SpatioTextualConstants.Bolt_Output_STreamIDExtension);
 	}
 	
 	public static void sendToProducer() {
