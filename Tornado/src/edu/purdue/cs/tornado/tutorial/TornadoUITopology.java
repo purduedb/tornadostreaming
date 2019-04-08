@@ -148,7 +148,8 @@ public class TornadoUITopology {
 	             consumerCount++;
 	             Query inputQ = new JsonHelper().convertJsonStringToQuery(record.value());
 	             inputQ.toString();
-	             sendToProducer("output", record.key(), record.value());
+	             sendToProducer("output", record.key(), "Testing.... returned query: " + record.key());
+	             // to retuen the result
 	             processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 	         }
 	     }
@@ -172,6 +173,7 @@ public class TornadoUITopology {
 		        .withTopicSelector(new DefaultTopicSelector("queries"))
 		        .withTupleToKafkaMapper(new FieldNameBasedTupleToKafkaMapper());
 		
+		// seems like whenever submitting more than one query gives error using kBolt: Bolt has already been declared for id tornadouitopology_index
 		builder.setBolt("TornadoUITopology", kBolt);
 		//builder.setBolt("TornadoUITopology", new TweetCountBolt()).shuffleGrouping("tornado",SpatioTextualConstants.Bolt_Output_STreamIDExtension);
 	}
