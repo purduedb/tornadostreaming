@@ -69,16 +69,21 @@ public class TornadoUITopology {
 
 		//Make the dataSpout called tweetsSource, parallelism of 1 and replication of 0.
 		addTweetSpout(tweetsSource, builder, properties, 1, 0, 50,1);
+		
+		builder.setSpout("TextualRangeQueryGenerator", new KafkaSpout());
+
 
 		//Make the query spout
-		//addQuerySpout(tweetsSource, querySource, builder, properties, 10, 1000.0, 10, 3, 0, 0, FileSpout.LFS,properties.getProperty("LFS_TWEETS_FILE_PATH"),TextualPredicate.OVERlAPS);
 		builder.setSpout(querySource, new KafkaSpout());
 
 		//Set the GlobalIndex and SpatioTextual bolts
 		addTornado(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 		
-		//builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("spatiotextualcomponent1",
-		//		SpatioTextualConstants.Bolt_Output_STreamIDExtension);
+		
+		builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("tornado", 
+				SpatioTextualConstants.Bolt_Output_STreamIDExtension);
+		
+
 		/* ------------- TOPOLOGY SUBMISSION ------------- */
 		
 		//Submitting the topology based on the proper submit type (change stormSubmitType in clusterconfig or config.properties to submit to local or cluster)
@@ -101,12 +106,11 @@ public class TornadoUITopology {
 			conf.put(SpatioTextualConstants.kafkaProducerTopic, properties.getProperty(SpatioTextualConstants.kafkaProducerTopic));
 			conf.put(SpatioTextualConstants.kafkaBootstrapServerConfig, properties.getProperty(SpatioTextualConstants.kafkaBootstrapServerConfig));
 			conf.put(SpatioTextualConstants.discoDir, properties.getProperty(SpatioTextualConstants.discoDir));
-			//conf.put(SampleUSATweetGenerator.TWEETS_FILE_PATH, properties.getProperty(SampleUSATweetGenerator.TWEETS_FILE_PATH));
 			
 			submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
 			if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
 				SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
-				cluster.submitTopology("test", conf, builder.createTopology());
+				cluster.submitTopology(topologyName, conf, builder.createTopology());
 			}else{
 			    conf.put(Config.NIMBUS_HOST, properties.getProperty(SpatioTextualConstants.NIMBUS_HOST));
 			    conf.put(Config.NIMBUS_THRIFT_PORT,properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT));
@@ -114,7 +118,7 @@ public class TornadoUITopology {
 			    conf.put(Config.STORM_ZOOKEEPER_SERVERS,properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS));
 			    conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS)));
 			    try {
-					SpatioTextualToplogySubmitter.submitTopology("test", conf, builder.createTopology());
+					SpatioTextualToplogySubmitter.submitTopology(topologyName, conf, builder.createTopology());
 				} catch (AlreadyAliveException e) {
 					LOGGER.error(e.getMessage(), e);
 					e.printStackTrace(System.err);
@@ -200,7 +204,7 @@ public class TornadoUITopology {
 			.addContinuousQuerySource(querySource);
 		
 		//builder.setBolt("tweetCount", new TweetCountBolt()).shuffleGrouping("tornado",SpatioTextualConstants.Bolt_Output_STreamIDExtension);
-		builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt());
+		//builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt());
 	}
 	
 }
