@@ -22,7 +22,9 @@ import org.apache.storm.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import org.apache.storm.kafka.bolt.KafkaBolt;
+import org.apache.storm.kafka.KafkaSpout;
 import org.apache.storm.kafka.bolt.mapper.FieldNameBasedTupleToKafkaMapper;
 import org.apache.storm.kafka.bolt.selector.DefaultTopicSelector;
 
@@ -34,7 +36,7 @@ import edu.purdue.cs.tornado.index.global.GlobalIndexType;
 import edu.purdue.cs.tornado.index.local.LocalIndexType;
 import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.Query;
-import edu.purdue.cs.tornado.spouts.KafkaSpout;
+//import edu.purdue.cs.tornado.spouts.KafkaSpout;
 import edu.purdue.cs.tornado.helper.JsonHelper;
 
 
