@@ -60,12 +60,12 @@ public class KafkaSpout extends BaseRichSpout {
 		this.context = context;
 		this.collector = collector;
 
-		this.zookeeper = (String) conf.get(SpatioTextualConstants.kafkaZookeeper);
+		this.zookeeper = "localhost:2181";
 
-		this.group = (String) conf.get(SpatioTextualConstants.kafkaConsumerGroup);
-		this.topic = (String) conf.get(SpatioTextualConstants.kafkaConsumerTopic);
+		this.group = "queries";
+		this.topic = "queries";
 
-		consumer = kafka.consumer.Consumer.createJavaConsumerConnector(createConsumerConfig(zookeeper, group));
+		consumer = kafka.consumer.Consumer.createJavaConsumerConnector(createConsumerConfig("localhost:2181", "queries"));
 		Map<String, Integer> topicCountMap = new HashMap<String, Integer>();
 		topicCountMap.put(topic, new Integer(1));
 		Map<String, List<KafkaStream<byte[], byte[]>>> consumerMap = consumer.createMessageStreams(topicCountMap);

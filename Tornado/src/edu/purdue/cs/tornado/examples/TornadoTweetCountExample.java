@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import edu.purdue.cs.tornado.SpatioTextualLocalCluster;
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
 import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
+import edu.purdue.cs.tornado.bolts.KafakaProducerBolt;
 import edu.purdue.cs.tornado.experimental.DataAndQueriesSources;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
@@ -68,9 +69,11 @@ public class TornadoTweetCountExample {
 		//Make the query spout
 		addQuerySpout(tweetsSource, querySource, builder, properties, 10, 1000.0, 10, 3, 0, 0, FileSpout.LFS,properties.getProperty("LFS_TWEETS_FILE_PATH"),TextualPredicate.OVERlAPS);
 		
+		
 		//Set the GlobalIndex and SpatioTextual bolts
 		addTornado(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
-		
+		builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("tornado", 
+				SpatioTextualConstants.Bolt_Output_STreamIDExtension);
 		
 		/* ------------- TOPOLOGY SUBMISSION ------------- */
 	

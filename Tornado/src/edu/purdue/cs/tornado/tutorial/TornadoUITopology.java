@@ -85,15 +85,9 @@ public class TornadoUITopology {
 		
 
 		/* ------------- TOPOLOGY SUBMISSION ------------- */
-		
-		//Submitting the topology based on the proper submit type (change stormSubmitType in clusterconfig or config.properties to submit to local or cluster)
 		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
-		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
 
-//			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
-//			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
-//			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
-//			
+		//Submitting the topology based on the proper submit type (change stormSubmitType in clusterconfig or config.properties to submit to local or cluster)
 		conf = new Config();
 		conf.setDebug(true);
 		conf.setNumWorkers(2);
@@ -144,7 +138,7 @@ public class TornadoUITopology {
 		System.out.println("******************************************************************************************************");
 		
 		}
-	}
+	
 	
 	
 	/*

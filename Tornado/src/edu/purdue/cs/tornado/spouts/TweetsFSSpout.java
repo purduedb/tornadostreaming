@@ -51,7 +51,7 @@ public class TweetsFSSpout extends FileSpout {
 		String tweet = "";
 		try {
 			if ((tweet = br.readLine()) == null) {
-				System.out.println("Done file and reopen emitteed"+i);
+				//System.out.println("Done file and reopen emitteed"+i);
 				i = (long)1;
 				br.close();
 				connectToFS();

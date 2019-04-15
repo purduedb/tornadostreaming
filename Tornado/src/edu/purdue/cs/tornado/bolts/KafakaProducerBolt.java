@@ -57,10 +57,10 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		this.collector = collector;
 		this.stormConf = stormConf;
 		topic = "output";
-		//topic = (String) stormConf.get(SpatioTextualConstants.kafkaProducerTopic);
+		topic = (String) stormConf.get(SpatioTextualConstants.kafkaProducerTopic);
 		props = new Properties();
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
-
+		System.out.println("BRUH");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		
@@ -75,6 +75,7 @@ public class KafakaProducerBolt extends BaseRichBolt {
 
 	@Override
 	public synchronized void  execute(Tuple input) {
+
 		try {
 			CombinedTuple outputTuple = (CombinedTuple) input.getValueByField(SpatioTextualConstants.output);
 			System.out.println(outputTuple.toString());
@@ -102,7 +103,6 @@ public class KafakaProducerBolt extends BaseRichBolt {
 				
 			}
 			else{
-
 				String json2 = convertOutputToJsonForSingleQuery(outputTuple);
 				ProducerRecord producerRecord = new ProducerRecord  (topic, (outputTuple.getQuery().getQueryId()+"").getBytes(), json2.getBytes());
 				producer.send(producerRecord);

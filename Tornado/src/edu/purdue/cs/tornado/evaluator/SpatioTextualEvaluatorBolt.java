@@ -143,6 +143,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public IndexCell addAndIndexADataObject(DataObject dataObject) {
+
 		String sourceId = dataObject.getSrcId();
 		IndexCell indexCell = sourcesInformations.get(sourceId).getLocalHybridIndex().addDataObject(dataObject);
 		//	sourcesInformations.get(sourceId).getLocalTextIndex().addDataObject(dataObject);
@@ -151,6 +152,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void addAndIndexPersistentWindowDataObject(DataObject dataObject) {
+
 		String sourceId = dataObject.getSrcId();
 
 		sourcesInformations.get(sourceId).addDataObject(dataObject);
@@ -158,6 +160,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void addIndexesPerSource(String sourceId, DataSourceType sourceType, DataSourceInformation dataSourcesInformation) {
+
 		if (sourceType.equals(DataSourceType.DATA_SOURCE)) {
 			externalTopKMap.put(sourceId, new HashMap<Integer, Query>());
 			
@@ -168,6 +171,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public Boolean checkExternalKNNqueryReusltDone(KNNQuery query) {
+
 		Double farthestDistance = query.getFarthestDistance();
 		Integer knnSizelist = query.getKNNlistSize();
 		if (knnSizelist >= query.getK()) {
@@ -181,6 +185,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public ArrayList<ResultSetChange> checkIfKNNQueryRequiresExtensionsOrShriniking(ArrayList<Query> affectedQueries) {
+
 		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
 		for (Query query : affectedQueries) {
 			if (!SpatialHelper.checkKNNQueryDoneWithinLocalBounds(((KNNQuery)query), selfBounds) && ((KNNQuery)query).getGlobalKNNIterator() == null) {
@@ -195,6 +200,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 
 	@Override
 	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+
 		try {
 			//These are the streams for interaction with other bolts 
 			declarer.declareStream(id + SpatioTextualConstants.Bolt_Bolt_STreamIDExtension_Query, new Fields(SpatioTextualConstants.query));
@@ -218,6 +224,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @param input
 	 */
 	DataObject dropCurrnetDataObject(DataObject dataObject) {
+
 		ArrayList<ResultSetChange> changes = null;
 		if (sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().containsKey(dataObject.getObjectId())) {
 			IndexCell indexCell = sourcesInformations.get(dataObject.getSrcId()).getObjectToLocalCellIndex().get(dataObject.getObjectId());
@@ -294,6 +301,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @return
 	 */
 	public ArrayList<ResultSetChange> expandKNNQueryToAdjustResultLocally(KNNQuery query) {
+
 		LocalIndexKNNIterator it = query.getLocalKnnIterator();
 		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
 		while (it.hasNext()) {
@@ -320,6 +328,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void expandSnapShotKNNPredicateToSurroundingEvaluators(KNNQuery query) {
+
 		GlobalIndexIterator it = query.getGlobalKNNIterator();
 		ArrayList<Integer> surroundingEvaluators = new ArrayList<Integer>();
 		if (it.hasNext()) {
@@ -385,6 +394,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		miniQuery.setDataSrc(q.getDataSrc());
 		outputTuple.setQuery(miniQuery);
 		outputTuple.setDataObjectCommand(command);
+
 		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
 	}
 
@@ -402,6 +412,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		outputTuple.setQuery(miniQuery);
 		outputTuple.setDataObjectCommand(obj1Command);
 		outputTuple.setDataObject2Command(obj2Command);
+
 		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
 	}
 
@@ -416,6 +427,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		miniQuery.setDataSrc(q.getDataSrc());
 		outputTuple.setQuery(miniQuery);
 		outputTuple.setDataObjectCommand(command);
+
 		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
 	}
 
@@ -433,10 +445,12 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 		outputTuple.setQuery(miniQuery);
 		outputTuple.setDataObjectCommand(obj1Command);
 		outputTuple.setDataObject2Command(obj2Command);
+
 		collector.emit(SpatioTextualConstants.Bolt_Output_STreamIDExtension, new Values(outputTuple));
 	}
 
 	public void generateOutputForResultChange(ArrayList<ResultSetChange> changes) {
+
 		for (ResultSetChange change : changes) {
 			generateOutput(change.getQuery(), change.getDataObject(), change.getChangeType());
 		}
@@ -498,6 +512,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @throws Exception
 	 */
 	void handleControlMessage(Tuple input) throws Exception {
+
 		Control controlMessage = (Control) input.getValueByField(SpatioTextualConstants.control);
 		if (Control.ANSWER_SNAPSHOT_KNN_PREDICATE.equals(controlMessage.getControlMessageType())) {
 			handleExternalSnapshotKNNQueryAnswer(controlMessage, input.getSourceTask());
@@ -621,11 +636,13 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void handleDropExternalKNNQueryRequest(Control controlMessage) {
+
 		Query outSideQuery = controlMessage.getQueriesList().get(0);
 		this.externalTopKMap.get(outSideQuery.getDataSrc()).remove(outSideQuery.getQueryId());
 	}
 
 	public void handleExternalKNNPredicateResultSetChange(Control controlMessage) {
+
 		//this object is assumed to qualify for the textual predicate of the KNN query 
 		ArrayList<ResultSetChange> resultSetChanges = controlMessage.getResultSetChanges();
 		ArrayList<ResultSetChange> internalResultSetChanges = new ArrayList<ResultSetChange>();
@@ -650,6 +667,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void handleExternalKNNQueryRequest(Control controlMessage) throws Exception {
+
 		ArrayList<Query> queriesList = controlMessage.getQueriesList();
 		for (Query q : queriesList) {
 			//initilize an iterator for this 
@@ -658,6 +676,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void handleExternalSnapshotKNNQueryAnswer(Control controlMessage, Integer taskId) {
+
 		Query outSideQuery = controlMessage.getQueriesList().get(0);
 
 		Query internalQuery = queryInformationHashMap.get(outSideQuery.getSrcId()).get(outSideQuery.getQueryId());
@@ -685,6 +704,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @throws Exception
 	 */
 	public void handleExternalSnapShotTextualKNNQuery(KNNQuery query) throws Exception {
+
 		Boolean continousQuery = ((KNNQuery)query).getContinousQuery();
 		((KNNQuery)query).resetKNNStructures();
 		//TODO consider generating a class for the localIndex and have the query 
@@ -736,6 +756,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @param input
 	 */
 	public void handleQuery(Tuple input) {
+
 		//	endQueryTime = System.currentTimeMillis();
 		if (beginQueryTime == null)
 			beginQueryTime = System.currentTimeMillis();
@@ -759,6 +780,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @param input
 	 */
 	public void handleSnapShotQuery(Query query) {
+
 		if (query.getQueryType().equals(QueryType.queryTextualRange)) {
 			handleSnapShotTextualRangeQuery(query);
 		} else if (query.getQueryType().equals(QueryType.queryTextualKNN)) {
@@ -816,6 +838,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @param query
 	 */
 	public void handleSnapShotTextualKNNQuery(KNNQuery query) {
+
 		query.resetKNNStructures();
 		//TODO consider generating a class for the localIndex and have the query 
 		//initiate an iterator on the index 
@@ -845,6 +868,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void handleSnapShotTextualRangeQuery(Query query) {
+
 		ArrayList<DataObject> outputObjects = new ArrayList<DataObject>();
 		ArrayList<IndexCell> relevantIndexCells = sourcesInformations.get(query.getDataSrc()).getLocalHybridIndex().getOverlappingIndexCellWithData(query.getSpatialRange(), query.getQueryText());
 		if (relevantIndexCells != null)
@@ -887,6 +911,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 			return;
 		//for every source 
 		for (List<Query> srcQueryList : queries) {
+
 			ArrayList<Integer> qualifiedQueriesIds = new ArrayList<Integer>();
 			String queryScrId = null;
 			if (srcQueryList.size() > 0) {
@@ -903,6 +928,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void handleVolatileDataObjectOld(DataObject dataObject) {
+
 		boolean fromNeighbour = false;
 		if (!SpatialHelper.overlapsSpatially(dataObject.getLocation(), selfBounds)) {
 			fromNeighbour = true;
@@ -950,6 +976,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 
 	@Override
 	public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+
 		try {
 			this.count = 0;
 			this.context = context;
@@ -975,6 +1002,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void prepareDataAndQuerySourceInfo() {
+
 		System.out.println("***************************Printing Bolt configuration*******************");
 		Iterator it = stormConf.entrySet().iterator();
 		sourcesInformations = new HashMap<String, DataSourceInformation>();
@@ -1029,6 +1057,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * This function initialized the global and local indexes information
 	 */
 	public void prepareLocalAndGlobalIndexes() {
+
 		numberOfEvaluatorTasks = this.evaluatorBoltTasks.size();
 		selfComponentId = context.getThisComponentId();
 		selfTaskId = context.getThisTaskId();
@@ -1078,6 +1107,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public void processDataObjectForExternalKNNPredicates(DataObject obj) throws Exception {
+
 		String source = obj.getSrcId();
 		Map<Integer, Query> externalPredicates = externalTopKMap.get(source);
 		if (externalPredicates != null) {
@@ -1097,6 +1127,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	}
 
 	public ArrayList<ResultSetChange> processDataObjectUpdateForContinousQueries(DataObject dataObject, List<Query> queries) {
+
 		ArrayList<ResultSetChange> changes = new ArrayList<ResultSetChange>();
 		//To avoid concurrent modification problem processing a query list and then maybe remove a query from it while iteratoing 
 		//create a copy of the arrya list 
@@ -1156,6 +1187,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * @param q
 	 */
 	void processVolatileDataObjectForTextualSpatialJoinQuery(DataObject dataObject, JoinQuery q, Boolean fromNeighbour) {
+
 		if (!SpatialHelper.overlapsSpatially(dataObject.getLocation(), q.getSpatialRange()))
 			return;
 		String otherDataSource = "";
@@ -1208,6 +1240,7 @@ public class SpatioTextualEvaluatorBolt extends BaseRichBolt {
 	 * This function reads data based on self bounds
 	 */
 	public void readStaticData(String sourceId) {
+
 		String sourceClassName = (String) this.stormConf.get(SpatioTextualConstants.Static_Source_Class_Name + "_" + sourceId);
 		Map<String, String> staticSourceConfig = (Map<String, String>) this.stormConf.get(SpatioTextualConstants.Static_Source_Class_Config + "_" + sourceId);
 		try {
