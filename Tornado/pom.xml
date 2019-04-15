@@ -150,7 +150,12 @@
 		<!-- <version>1.0.0</version> -->
 		<!-- <scope>provided</scope> -->
 		<!-- </dependency> -->
-		<dependency>
+	<dependency>
+       <groupId>org.apache.kafka</groupId>
+       <artifactId>kafka_2.9.2</artifactId>
+       <version>0.8.1.1</version>
+     </dependency>
+     <dependency>
 			<groupId>org.apache.kafka</groupId>
 			<artifactId>kafka_2.12</artifactId>
 			<version>2.1.0</version>

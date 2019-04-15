@@ -77,6 +77,8 @@ public class SpatioTextualConstants {
 	public static final Double defaultFineGridGranularityXstep = xMaxRange/defaultFineGridGranularityX;
 	public static final Double defaultFineGridGranularityYstep = yMaxRange/defaultFineGridGranularityX;
 	
+	// bolt constants
+	public static final Integer globalGridGranularity = 8;
 
 	//Data constants 
 //	public static final Double minLat = -90.0;

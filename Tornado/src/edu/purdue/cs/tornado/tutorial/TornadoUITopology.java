@@ -19,17 +19,25 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.storm.Config;
+import org.apache.storm.generated.AlreadyAliveException;
+import org.apache.storm.generated.InvalidTopologyException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
 import org.apache.storm.kafka.bolt.KafkaBolt;
 import org.apache.storm.kafka.KafkaSpout;
+import org.apache.storm.kafka.SpoutConfig;
+import org.apache.storm.kafka.ZkHosts;
 import org.apache.storm.kafka.bolt.mapper.FieldNameBasedTupleToKafkaMapper;
 import org.apache.storm.kafka.bolt.selector.DefaultTopicSelector;
 
+import edu.purdue.cs.tornado.SpatioTextualLocalCluster;
 import edu.purdue.cs.tornado.SpatioTextualToplogyBuilder;
+import edu.purdue.cs.tornado.SpatioTextualToplogySubmitter;
+import edu.purdue.cs.tornado.bolts.KafakaProducerBolt;
 import edu.purdue.cs.tornado.examples.TweetCountBolt;
+import edu.purdue.cs.tornado.experimental.DataAndQueriesSources;
 import edu.purdue.cs.tornado.helper.PartitionsHelper;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.index.global.GlobalIndexType;
@@ -38,6 +46,8 @@ import edu.purdue.cs.tornado.loadbalance.Cell;
 import edu.purdue.cs.tornado.messages.Query;
 //import edu.purdue.cs.tornado.spouts.KafkaSpout;
 import edu.purdue.cs.tornado.helper.JsonHelper;
+import edu.purdue.cs.tornado.index.global.GlobalIndexType;
+import edu.purdue.cs.tornado.index.local.LocalIndexType;
 
 
 public class TornadoUITopology {
@@ -64,7 +74,7 @@ public class TornadoUITopology {
 	private static SpatioTextualToplogyBuilder builder;
 	private static ArrayList<Cell> partitions;
 			
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		System.out.println("Project Directory : " + PROJECT_DIR);
 		System.out.println("Datasources Directory : " + DATASOURCES_DIR);
 		
@@ -79,25 +89,120 @@ public class TornadoUITopology {
 			System.exit(1);
 		}
 		
-		//Setting the static source paths 
+		// Setting the static source paths 
 		partitions = PartitionsHelper.readSerializedPartitions("resources/partitions16_1024_prio.ser");
 				
-		//Initialize our topology builder
+		// Initialize our topology builder
 		builder = new SpatioTextualToplogyBuilder();
 		
-		//Initialize and set Config properties
+		// Initialize and set configuration properties
 		Config conf = new Config();
 		conf.setDebug(false);
-	
+		
+		/* Need if using consumers and producers
 		setupConsumer();
 		setupProducer();
-		consumeQueriesFromUI();
-		closeProducer();
-		//processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
-		//sendToProducer();
+		closeProducer();*/
+		
+		
+		ZkHosts zkHosts = new ZkHosts("127.0.0.1:2181");
+		SpoutConfig kafkaConfig = new SpoutConfig(zkHosts, "queries", "", "storm");
+		//KafkaConfig kafkaConfig = new KafkaConfig(zkHosts, "queries");
+		// KafkaSpout kafkaSpout = new KafkaSpout(kafkaConfig);
+		addTweetSpout("Tweets", builder, properties, 1, 0, 50,1);
+		builder.setSpout("TweetSource", new KafkaSpout(kafkaConfig));
+		builder.setSpout("TornadoUITopology", new KafkaSpout(kafkaConfig));
+		
+		builder.addSpatioTextualProcessor("tornadouitopologydemo", 3, 16, 
+				partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST, 1024)
+				.addVolatileSpatioTextualInput(tweetsSource)
+				.addContinuousQuerySource(querySource);
+	
+		//builder.setBolt("kafkaOutputProducer", new KafkaBolt()).shuffleGrouping("tornadouitopologydemo");
+		builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("tornadouitopologydemo");
+		//KafakaProducerBolt
+		
+		//System.out.println("End");
+		
+		/* ------------- TOPOLOGY SUBMISSION: FROM TORNADOTWEETCOUNTEXAMPLE.JAVA ------------- */
+		
+		//Submitting the topology based on the proper submit type (change stormSubmitType in clusterconfig or config.properties to submit to local or cluster)
+		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
+		if (submitType == null || "".equals(submitType) || SpatioTextualConstants.localCluster.equals(submitType)) {
+
+//			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
+//			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
+//			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
+//			
+			SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
+			cluster.submitTopology("TornadoUITopology", conf, builder.createTopology());
+			// TODO: declareOuputFields https://stackoverflow.com/questions/49470109/apache-storm-topology-submission-exception-x-subscribes-from-non-existent-st
+		} else {
+			conf.setNumAckers(Integer.parseInt(properties.getProperty("STORM_NUMBER_OF_ACKERS").trim()));
+			conf.put(Config.TOPOLOGY_DEBUG, false);
+
+			// Setting the nimbus host and port paths
+			String nimbusHost = properties.getProperty(SpatioTextualConstants.NIMBUS_HOST);
+			Integer nimbusPort = Integer
+					.parseInt(properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT).trim());
+
+			conf.put(Config.JAVA_LIBRARY_PATH, "/home/tornadojars/:/usr/local/lib:/opt/local/lib:/usr/lib");
+			conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, javaArgs);
+			conf.put(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT, 300000);
+			conf.put(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT, 300000);
+
+			conf.put(Config.NIMBUS_HOST, nimbusHost);
+			conf.put(Config.NIMBUS_THRIFT_PORT, nimbusPort);
+			
+			conf.put(Config.STORM_ZOOKEEPER_PORT, Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT)));
+			ArrayList<String> zookeeperServers = new ArrayList(Arrays.asList(properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS).split(",")));
+			conf.put(Config.STORM_ZOOKEEPER_SERVERS, zookeeperServers);
+			conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS).trim()));
+			System.setProperty("storm.jar", properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
+			try {
+				SpatioTextualToplogySubmitter.submitTopology(topologyName, conf, builder.createTopology());
+				System.out.println("TOPOLOGY SUBMITTED!");
+			} catch (AlreadyAliveException e) {
+				LOGGER.error(e.getMessage(), e);
+				e.printStackTrace(System.err);
+			} catch (InvalidTopologyException e) {
+				LOGGER.error(e.getMessage(), e);
+				e.printStackTrace(System.err);
+
+			}
+		}
+		System.out.println("******************************************************************************************************");
+
+		String[] nimbusInfo = new String[2];
+		//nimbusInfo[0] = nimbusHost;
+		//nimbusInfo[1] = "" + nimbusPort;
+
+		Integer minutesToStats = Integer.parseInt(properties.getProperty("MINUTS_TO_STATS"));
+		Thread.sleep(1000 * 60 * minutesToStats);
+		//KillTopology.killToplogy(topologyName, nimbusHost, nimbusPort);
+		System.out.println("******************************************************************************************************");
+		
 	}
 	
-	/* FROM TORNADOTWEETCOUNTEXAMPLE.JAVA
+	/* FROM: TORNADOTWEETCOUNTEXAMPLE.JAVA
+	 * Add a new tweetSpout with the parameters given
+	 * 
+	 * @param dataSourceName the data source name associated with the spout
+	 * @param builder the SpatioTextualToplogyBuilder associated with the spout
+	 * @param properties the Properties object that the spout will refer to
+	 * @param parrellism the number of tasks that should be assigned to execute this spout
+	 * @param emitSleepDurationInNanoSecond the amount of time in which the emit will sleep (in nanoseconds)
+	 * @param initialSleepDuration the amount of time the spout will sleep before starting to emit
+	 * @param spoutReplication the amount of replicates of this spout to be made
+	 */
+	static void addTweetSpout(String dataSourceName, SpatioTextualToplogyBuilder builder, Properties properties, Integer parrellism, 
+			Integer emitSleepDurationInNanoSecond, Integer initialSleepDurantion, Integer spoutReplication) {
+		
+			DataAndQueriesSources.addLFSTweetsSpout(dataSourceName, builder, properties, parrellism, 
+				emitSleepDurationInNanoSecond, initialSleepDurantion, spoutReplication);
+	}
+	
+	/* FROM: TORNADOTWEETCOUNTEXAMPLE.JAVA
 	 * Find and load the properties available in the given file path
 	 * 
 	 * @param filepath the location of properties to be loaded
@@ -119,7 +224,9 @@ public class TornadoUITopology {
 		return properties;
 	}
 
-	
+	/**
+	 * 
+	 */
 	public static void setupConsumer() {
 		consumer = new KafkaConsumer<>(createConsumerConfigProps(zookeeper, topic));
 		subscriptionTopics.add("queries");
@@ -127,6 +234,9 @@ public class TornadoUITopology {
 		consumer.subscribe(subscriptionTopics);	// consume from topics: queries, output, etc
 	}
 	
+	/**
+	 * 
+	 */
 	public static void setupProducer() {
 		Properties props = new Properties();
 		props.put("bootstrap.servers", "localhost:9092");
@@ -135,11 +245,17 @@ public class TornadoUITopology {
 		producer = new KafkaProducer<>(props);
 	}
 	
-	
+	/**
+	 * 
+	 * @param filename
+	 */
 	public static void readSampleTweetFiles(String filename) {
 		
 	}
 	
+	/**
+	 * Using consumers/producers to consume records from topics: specified in setupConsumer
+	 */
 	public static void consumeQueriesFromUI() {
 		// Print the records that are consumed from the topics denoted above
 		int consumerCount = 0;
@@ -151,8 +267,6 @@ public class TornadoUITopology {
 	             Query inputQ = new JsonHelper().convertJsonStringToQuery(record.value());
 	             inputQ.toString();
 	             sendToProducer("output", record.key(), "Testing.... returned query: " + record.key());
-	             // to retuen the result
-	             processUIQueries(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 	         }
 	     }
 	}
@@ -166,6 +280,7 @@ public class TornadoUITopology {
 		 * @param globalIndexType the GlobalIndexType that we choose to run the bolts on
 		 * @param localIndexType the LocalIndexType that we choose to run the bolts on
 		 */
+		
 		builder.addSpatioTextualProcessor("tornadouitopology", 3, 16, 
 				partitions, globalIndexType, localIndexType,1024)
 				.addVolatileSpatioTextualInput(tweetsSource)
@@ -204,6 +319,9 @@ public class TornadoUITopology {
 		producer.send(new ProducerRecord<String, String>(topic, key, value));
 	}
 	
+	/**
+	 * 
+	 */
 	public static void closeProducer() {
 		producer.close();
 	}
