@@ -72,6 +72,7 @@ public class TornadoTweetCountExample {
 		
 		//Set the GlobalIndex and SpatioTextual bolts
 		addTornado(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
+		
 		builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("tornado", 
 				SpatioTextualConstants.Bolt_Output_STreamIDExtension);
 		

@@ -59,10 +59,6 @@ public class TornadoUITopology {
 		//Initialize our topology builder
 		SpatioTextualToplogyBuilder builder = new SpatioTextualToplogyBuilder();
 		
-		//Initialize and set Config properties
-		Config conf = new Config();
-		conf.setDebug(true);
-		
 /* ------------- SPOUT AND BOLT CREATION ------------- */
 		
 		//TODO: What needs to be changed by the user? What if they want to add multiple global index types? More bolts? 
@@ -70,30 +66,31 @@ public class TornadoUITopology {
 		//Make the dataSpout called tweetsSource, parallelism of 1 and replication of 0.
 		addTweetSpout(tweetsSource, builder, properties, 1, 0, 50,1);
 		
-		builder.setSpout("TextualRangeQueryGenerator", new KafkaSpout());
-
 
 		//Make the query spout
 		builder.setSpout(querySource, new KafkaSpout());
+		
+		builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("tornado", 
+				SpatioTextualConstants.Bolt_Output_STreamIDExtension);
 
 		//Set the GlobalIndex and SpatioTextual bolts
 		addTornado(builder, partitions, GlobalIndexType.PARTITIONED, LocalIndexType.FAST);
 		
 		
-		builder.setBolt("kafkaOutputProducer", new KafakaProducerBolt()).shuffleGrouping("tornado", 
-				SpatioTextualConstants.Bolt_Output_STreamIDExtension);
+		
 		
 
 		/* ------------- TOPOLOGY SUBMISSION ------------- */
 		String submitType = properties.getProperty(SpatioTextualConstants.stormSubmitType);
 
 		//Submitting the topology based on the proper submit type (change stormSubmitType in clusterconfig or config.properties to submit to local or cluster)
-		conf = new Config();
+		Config conf = new Config();
 		conf.setDebug(true);
+		conf.put(Config.TOPOLOGY_DEBUG, true);
+
 		conf.setNumWorkers(2);
 		conf.setNumAckers(0);
 		conf.put(Config.TOPOLOGY_DEBUG, false);
-
 			conf.put(SpatioTextualConstants.kafkaZookeeper, properties.getProperty(SpatioTextualConstants.kafkaZookeeper));
 			conf.put(SpatioTextualConstants.kafkaConsumerGroup, properties.getProperty(SpatioTextualConstants.kafkaConsumerGroup));
 			conf.put(SpatioTextualConstants.kafkaConsumerTopic, properties.getProperty(SpatioTextualConstants.kafkaConsumerTopic));
@@ -106,13 +103,22 @@ public class TornadoUITopology {
 				SpatioTextualLocalCluster cluster = new SpatioTextualLocalCluster();
 				cluster.submitTopology(topologyName, conf, builder.createTopology());
 			}else{
+				conf.put(Config.JAVA_LIBRARY_PATH, "/home/tornadojars/:/usr/local/lib:/opt/local/lib:/usr/lib");
+				conf.put(Config.TOPOLOGY_WORKER_CHILDOPTS, javaArgs);
+				conf.put(Config.STORM_ZOOKEEPER_SESSION_TIMEOUT, 300000);
+				conf.put(Config.STORM_ZOOKEEPER_CONNECTION_TIMEOUT, 300000);
+				
 			    conf.put(Config.NIMBUS_HOST, properties.getProperty(SpatioTextualConstants.NIMBUS_HOST));
 			    conf.put(Config.NIMBUS_THRIFT_PORT,properties.getProperty(SpatioTextualConstants.NIMBUS_THRIFT_PORT));
 			    conf.put(Config.STORM_ZOOKEEPER_PORT,properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_PORT));
 			    conf.put(Config.STORM_ZOOKEEPER_SERVERS,properties.getProperty(SpatioTextualConstants.STORM_ZOOKEEPER_SERVERS));
 			    conf.setNumWorkers(Integer.parseInt(properties.getProperty(SpatioTextualConstants.STORM_NUMBER_OF_WORKERS)));
+				System.setProperty("storm.jar", properties.getProperty(SpatioTextualConstants.STORM_JAR_PATH));
+
 			    try {
 					SpatioTextualToplogySubmitter.submitTopology(topologyName, conf, builder.createTopology());
+					System.out.println("TOPOLOGY SUBMITTED!");
+					
 				} catch (AlreadyAliveException e) {
 					LOGGER.error(e.getMessage(), e);
 					e.printStackTrace(System.err);

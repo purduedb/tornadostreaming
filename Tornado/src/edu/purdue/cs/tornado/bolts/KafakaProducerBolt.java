@@ -75,10 +75,9 @@ public class KafakaProducerBolt extends BaseRichBolt {
 
 	@Override
 	public synchronized void  execute(Tuple input) {
-
+		System.out.println("SHOULD BE HERE");
 		try {
 			CombinedTuple outputTuple = (CombinedTuple) input.getValueByField(SpatioTextualConstants.output);
-			System.out.println(outputTuple.toString());
 			LatLong latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation());
 			Double lat = latLong.getLatitude();
 			Double lon = latLong.getLongitude();
