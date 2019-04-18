@@ -78,7 +78,8 @@ public class JsonHelper {
 	public static final String kval = "kval";
 	public static final String focal = "focal";
 	private static Gson gson = new Gson();
-
+	private static int ID=0;
+	
 	public static DataObject convertJsonStringToDataObject(String dataObjectJson) {
 		return null;
 	}
@@ -89,7 +90,21 @@ public class JsonHelper {
 		Map m = gson.fromJson(reader, Map.class);
 		Query q = new Query();
 		Map sourceAliasMap = new HashMap<String, String>();
-		q.setQueryId((Integer) m.get(JsonHelper.name));
+		boolean isInt = true;
+		try {
+			Integer.parseInt((String)m.get(JsonHelper.name));
+			
+		}
+		catch(NumberFormatException e) {
+			isInt = false;
+		}
+		if(isInt) {
+			q.setQueryId((Integer) m.get(JsonHelper.name));
+		}
+		else {
+			q.setQueryId(ID);
+			ID++;
+		}
 		String queryTag = (String) m.get(JsonHelper.tag);
 		if (JsonHelper.dropTag.equals(queryTag)) {
 			q.setCommand(Command.dropCommand);

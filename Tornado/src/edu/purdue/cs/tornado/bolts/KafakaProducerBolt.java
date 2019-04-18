@@ -56,11 +56,14 @@ public class KafakaProducerBolt extends BaseRichBolt {
 		this.context = context;
 		this.collector = collector;
 		this.stormConf = stormConf;
+		topic = "output";
 		topic = (String) stormConf.get(SpatioTextualConstants.kafkaProducerTopic);
 		props = new Properties();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, (String) stormConf.get(SpatioTextualConstants.kafkaBootstrapServerConfig));
-		//props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-		//props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
+		System.out.println("BRUH");
+		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+		
 		producer = new KafkaProducer(props);
 		try {
 			fw = new FileWriter("datasources/jsonTrace.txt");
@@ -72,9 +75,9 @@ public class KafakaProducerBolt extends BaseRichBolt {
 
 	@Override
 	public synchronized void  execute(Tuple input) {
+		System.out.println("SHOULD BE HERE");
 		try {
 			CombinedTuple outputTuple = (CombinedTuple) input.getValueByField(SpatioTextualConstants.output);
-			//		System.out.println(outputTuple.toString());
 			LatLong latLong = SpatialHelper.convertFromXYToLatLonTo(outputTuple.getDataObject().getLocation());
 			Double lat = latLong.getLatitude();
 			Double lon = latLong.getLongitude();
@@ -99,7 +102,6 @@ public class KafakaProducerBolt extends BaseRichBolt {
 				
 			}
 			else{
-
 				String json2 = convertOutputToJsonForSingleQuery(outputTuple);
 				ProducerRecord producerRecord = new ProducerRecord  (topic, (outputTuple.getQuery().getQueryId()+"").getBytes(), json2.getBytes());
 				producer.send(producerRecord);

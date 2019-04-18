@@ -33,7 +33,7 @@ public class TestKafkaProducer {
 		Properties props = new Properties();
 		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		props.put("value.serializer", "org.propsapache.kafka.common.serialization.StringSerializer");
+		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		KafkaProducer producer = new KafkaProducer(props);
 		
 		boolean sync = false;

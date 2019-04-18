@@ -514,7 +514,7 @@ public class GlobalIndexBolt extends BaseRichBolt {
 		query.setTimeStamp(input.getLongByField(SpatioTextualConstants.queryTimeStampField));
 		query.setDataSrc(input.getStringByField(SpatioTextualConstants.dataSrc));
 		query.setCommand((Command) input.getValueByField(SpatioTextualConstants.queryCommand));
-		query.setComplexQueryText((ArrayList<ArrayList<String>>) input.getValueByField(SpatioTextualConstants.queryComplexTextField));
+	//	query.setComplexQueryText((ArrayList<ArrayList<String>>) input.getValueByField(SpatioTextualConstants.queryComplexTextField));
 		String text = "", text2 = "";
 		if (input.contains(SpatioTextualConstants.textualPredicate)) {
 			query.setTextualPredicate((TextualPredicate) input.getValueByField(SpatioTextualConstants.textualPredicate));
