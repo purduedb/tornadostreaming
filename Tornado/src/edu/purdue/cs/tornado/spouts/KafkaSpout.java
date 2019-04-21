@@ -38,13 +38,31 @@ import edu.purdue.cs.tornado.helper.QueryType;
 import edu.purdue.cs.tornado.helper.SpatioTextualConstants;
 import edu.purdue.cs.tornado.helper.TextHelpers;
 import edu.purdue.cs.tornado.messages.Query;
-import kafka.consumer.ConsumerConfig;
+/*import kafka.consumer.ConsumerConfig;
 import kafka.consumer.ConsumerIterator;
 import kafka.consumer.KafkaStream;
-import kafka.javaapi.consumer.ConsumerConnector;
+import kafka.javaapi.consumer.ConsumerConnector;*/
 
 public class KafkaSpout extends BaseRichSpout {
-	Map conf;
+
+	@Override
+	public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void nextTuple() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void declareOutputFields(OutputFieldsDeclarer declarer) {
+		// TODO Auto-generated method stub
+		
+	}
+	/*Map conf;
 	TopologyContext context;
 	SpoutOutputCollector collector;
 	ConsumerConnector consumer;
@@ -119,6 +137,6 @@ public class KafkaSpout extends BaseRichSpout {
 				SpatioTextualConstants.queryYMinField, SpatioTextualConstants.queryXMaxField, SpatioTextualConstants.queryYMaxField, SpatioTextualConstants.kField, SpatioTextualConstants.queryTextField,
 				SpatioTextualConstants.queryText2Field, SpatioTextualConstants.queryTimeStampField, SpatioTextualConstants.dataSrc, SpatioTextualConstants.dataSrc2, SpatioTextualConstants.queryCommand, SpatioTextualConstants.queryDistance,
 				SpatioTextualConstants.textualPredicate, SpatioTextualConstants.textualPredicate2, SpatioTextualConstants.joinTextualPredicate));
-	}
+	}*/
 
 }

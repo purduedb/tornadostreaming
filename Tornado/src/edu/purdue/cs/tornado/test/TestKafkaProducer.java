@@ -19,55 +19,32 @@
  */
 package edu.purdue.cs.tornado.test;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.clients.producer.Producer;
+
 public class TestKafkaProducer {
-	static String topic;
-	static String zookeeper;
+	//static String topic;
+	//static String zookeeper;
 
 	public static void main(String[] args) throws InterruptedException {
 		
 		Properties props = new Properties();
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
+		props.put("bootstrap.servers", "localhost:9092");
+		//props.put("acks", "all");
 		props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-		props.put("value.serializer", "org.propsapache.kafka.common.serialization.StringSerializer");
-		KafkaProducer producer = new KafkaProducer(props);
+		props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 		
-		boolean sync = false;
-		String topic="output";
-		String key = "q1";
-		String value = "{\"qname\":\"q11\",\"point\":{\"lat\":41.8864494854113,\"lng\":-87.61987492165883},\"text\":\"Ahmed refaat ahmed2 \"}";
-		ProducerRecord producerRecord = new ProducerRecord(topic, key.getBytes(), value.getBytes());
-		if (sync) {
-			try {
-				producer.send(producerRecord).get();
-			} catch (ExecutionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} else {
-			producer.send(producerRecord);
+		Producer<String, String> producer = new KafkaProducer<>(props);
+		for (int i = 0; i < 10; i++) {
+			String topic = "output";
+			String key = "key";
+			String value = "value = " + Integer.toString(i + 1);
+			producer.send(new ProducerRecord<String, String>(topic, key, value));
 		}
+		
 		producer.close();
-		/*
-		zookeeper = "localhost:2181";
-		topic="output";
-		Properties props = new Properties();
-        props.put("metadata.broker.list", "localhost:9092");
-
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-       // props.put("request.required.acks", "1");
- 
-        ProducerConfig config = new ProducerConfig(props);
- 
-        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(props);
-        String msg = "{\"qname\":\"q1\",\"point\":{\"lat\":41.8864494854113,\"lng\":-87.61987492165883},\"text\":\"Ahmed refaat ahmed \"}";
-        ProducerRecord<String, String> data = new ProducerRecord<String, String>(topic, "q1", msg);
-        producer.send(data);*/
+		
 	}
 }
